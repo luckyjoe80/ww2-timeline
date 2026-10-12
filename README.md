@@ -1,0 +1,55 @@
+# WW2 Day by Day
+
+The Second World War day by day on a zoomable world map. Pick a timeline, step or play through its events, and the map flies to each one with a panel of detail, links to Wikipedia and related events in other timelines. Atlases present subjects that are about places rather than dates, such as where the B-17 was built.
+
+Plain HTML, CSS and JavaScript with [Leaflet](https://leafletjs.com/). No build step and no dependencies to install.
+
+## Running it
+
+Serve the folder with any static web server and open it in a browser, for example:
+
+```bash
+python -m http.server 8417
+```
+
+Then visit <http://localhost:8417>. Deep links work: `#battle-of-midway/1942-06-04/<event-id>` for a timeline event, `#b17-production/overview` for an atlas.
+
+## Contents
+
+| Group | Timeline / atlas | File |
+| --- | --- | --- |
+| War in the Pacific | The Road to Pearl Harbor | `data/timelines/road-to-pearl-harbor.js` |
+| | The Attack on Hawaii | `data/timelines/attack-on-hawaii.js` |
+| | The Battle of Midway | `data/timelines/battle-of-midway.js` |
+| | Submarine Operations | `data/timelines/pacific-submarines.js` |
+| Production | B-17 Production (atlas) | `data/atlases/b17-production.js` |
+| People | Isoroku Yamamoto | `data/timelines/yamamoto.js` |
+| Ships | Battleship Yamato | `data/timelines/yamato.js` |
+
+## Project layout
+
+```
+index.html              page shell and script order
+app.js                  map, timeline bar, panel, overview, atlases, camera
+styles.css              all styling
+data/catalog.js         the picker's groups and per-timeline settings
+data/wiki.js            phrase → Wikipedia article glossary for automatic links
+data/places.js          period place labels shown on the map
+data/timelines/*.js     one file per timeline (fills WW2.events[id])
+data/atlases/*.js       one file per atlas (fills WW2.atlases[id])
+```
+
+## Adding a timeline
+
+1. Create `data/timelines/<id>.js` filling `WW2.events['<id>']`. The event schema is documented at the top of `data/timelines/attack-on-hawaii.js`.
+2. Add an entry to `data/catalog.js` (options are documented at the top of that file).
+3. Add a `<script>` tag for it in `index.html`, before `app.js`.
+4. Add any new names to `data/wiki.js` so they link to Wikipedia.
+
+Optionally, direct the camera with a shot list (`scene`, `frame`, `shot`, `transition`); see "Shots" in `app.js` and the end of `data/timelines/battle-of-midway.js` for an example.
+
+## Sources and credits
+
+- Event text is written for this project and checked against the English Wikipedia articles named at the top of each data file. Times, dates and positions marked approximate are shown as such in the app.
+- Map tiles: Esri World Physical Map and World Imagery (source: US National Park Service; Esri, Maxar, Earthstar Geographics), loaded from Esri's servers under their terms of use.
+- Mapping library: Leaflet 1.9.4, loaded from cdnjs.

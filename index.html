@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WW2 Day by Day</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <button id="menu-toggle" class="menu-toggle" aria-label="Choose a timeline" aria-controls="picker" aria-haspopup="dialog" title="Choose a timeline">☰</button>
+      <div>
+        <h1>WW2 <span>Day by Day</span></h1>
+        <button id="timeline-title" class="timeline-title" aria-haspopup="dialog" title="Choose a timeline"></button>
+      </div>
+    </div>
+    <div class="date-readout">
+      <div id="weekday" class="weekday"></div>
+      <div id="current-date" class="current-date"></div>
+      <div id="war-day" class="war-day"></div>
+    </div>
+  </header>
+
+  <main class="stage">
+    <div id="map" aria-label="World map"></div>
+    <div id="minimap" class="minimap" title="Overview: click to move the map here"></div>
+    <nav id="map-crumbs" class="map-crumbs" aria-label="Where you are"></nav>
+
+    <aside id="panel" class="panel" hidden>
+      <button id="panel-close" class="panel-close" aria-label="Close">×</button>
+      <div id="panel-body"></div>
+    </aside>
+  </main>
+
+  <!-- Timeline picker: groups on the left, that group's timelines and atlases on the right. -->
+  <div id="picker" class="picker" hidden>
+    <div class="picker-backdrop" data-picker-close></div>
+    <div class="picker-dialog" role="dialog" aria-modal="true" aria-labelledby="picker-title">
+      <div class="picker-head">
+        <h2 id="picker-title">Choose a timeline</h2>
+        <input id="picker-search" type="search" placeholder="Search timelines and atlases…" aria-label="Search" autocomplete="off" />
+        <button class="picker-close" data-picker-close aria-label="Close">×</button>
+      </div>
+      <div class="picker-body">
+        <nav id="picker-groups" class="picker-groups" aria-label="Groups"></nav>
+        <div id="picker-items" class="picker-items"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="timeline" id="timeline">
+    <div class="controls">
+      <div class="transport">
+        <button id="btn-overview" class="step-btn overview-btn" aria-pressed="false" title="Show every event in this timeline on one map (O)">Overview</button>
+        <button id="btn-prev" class="step-btn">‹ Previous event</button>
+        <button id="btn-play" class="play" title="Play / pause (Space)">▶</button>
+        <button id="btn-next" class="step-btn">Next event ›</button>
+      </div>
+    </div>
+    <div id="day-strip" class="day-strip" hidden>
+      <span id="day-strip-label" class="day-strip-label"></span>
+      <div id="day-strip-chips" class="day-strip-chips"></div>
+    </div>
+    <div class="track-wrap">
+      <nav id="track-crumbs" class="track-crumbs" aria-label="Timeline zoom"></nav>
+      <div id="track-labels" class="track-labels"></div>
+      <div class="track">
+        <div id="event-ticks" class="event-ticks"></div>
+        <input id="slider" type="range" min="0" step="1" aria-hidden="true" tabindex="-1" />
+      </div>
+    </div>
+    <div id="atlas-bar" class="atlas-bar"></div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="data/catalog.js"></script>
+  <script src="data/wiki.js"></script>
+  <script src="data/places.js"></script>
+  <script src="data/timelines/road-to-pearl-harbor.js"></script>
+  <script src="data/timelines/attack-on-hawaii.js"></script>
+  <script src="data/timelines/battle-of-midway.js"></script>
+  <script src="data/timelines/pacific-submarines.js"></script>
+  <script src="data/timelines/yamamoto.js"></script>
+  <script src="data/timelines/yamato.js"></script>
+  <script src="data/atlases/b17-production.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

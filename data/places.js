@@ -1,0 +1,122 @@
+// Reference places shown as map labels, using names as they were in the 1940s.
+// The base map has no labels, so these give a sense of where an event is — and when
+// an event is out at sea, the camera also frames the nearest of these places.
+//
+// [name, lat, lng, minZoom]  — the label appears from minZoom upward (hidden above z11,
+// where satellite imagery takes over and event markers carry the detail).
+
+WW2.places = [
+  // ---- Japan and its empire ----
+  ['Tokyo', 35.68, 139.76, 3],
+  ['Kure', 34.24, 132.56, 6],
+  ['Hiroshima', 34.39, 132.46, 5],
+  ['Nagasaki', 32.75, 129.88, 5],
+  ['Kyushu', 32.6, 131.0, 4],
+  ['Hokkaido', 43.3, 142.9, 4],
+  ['Karafuto', 47.5, 142.7, 4],
+  ['Etorofu', 44.9, 147.6, 5],
+  ['Kurile Islands', 47.6, 152.0, 3],
+  ['Keijo (Seoul)', 37.57, 126.98, 4],
+  ['Formosa', 23.7, 121.0, 3],
+  ['Okinawa', 26.5, 127.9, 4],
+  ['Iwo Jima', 24.78, 141.32, 5],
+  ['Saipan', 15.18, 145.75, 4],
+  ['Guam', 13.44, 144.79, 4],
+  ['Truk', 7.42, 151.78, 4],
+  ['Palau', 7.5, 134.6, 4],
+  ['Ulithi', 10.0, 139.7, 5],
+  ['Kwajalein', 9.19, 167.42, 4],
+  ['Wake Island', 19.28, 166.65, 4],
+
+  // ---- China and Southeast Asia ----
+  ['Shanghai', 31.23, 121.47, 3],
+  ['Nanking', 32.06, 118.8, 4],
+  ['Chungking', 29.56, 106.55, 4],
+  ['Hong Kong', 22.3, 114.17, 4],
+  ['Vladivostok', 43.12, 131.9, 4],
+  ['Saigon', 10.78, 106.7, 4],
+  ['Bangkok', 13.75, 100.5, 4],
+  ['Singapore', 1.29, 103.85, 3],
+  ['Penang', 5.41, 100.33, 5],
+  ['Kota Bharu', 6.13, 102.24, 6],
+  ['Manila', 14.59, 120.98, 3],
+  ['Luzon', 16.5, 121.3, 4],
+  ['Leyte', 11.0, 124.9, 5],
+  ['Samar', 12.0, 125.0, 5],
+  ['Mindanao', 7.9, 125.0, 4],
+  ['Palawan', 9.8, 118.7, 5],
+  ['Borneo', 0.8, 114.0, 3],
+  ['Kuching', 1.55, 110.35, 5],
+  ['Balikpapan', -1.27, 116.83, 5],
+  ['Celebes', -2.0, 121.0, 4],
+  ['Sumatra', 0.0, 101.5, 3],
+  ['Batavia', -6.2, 106.8, 4],
+  ['Surabaya', -7.25, 112.75, 5],
+  ['Java', -7.4, 110.0, 4],
+
+  // ---- South and Southwest Pacific ----
+  ['New Guinea', -5.5, 143.0, 3],
+  ['Port Moresby', -9.44, 147.18, 5],
+  ['Madang', -5.22, 145.8, 6],
+  ['Rabaul', -4.2, 152.17, 4],
+  ['Kavieng', -2.57, 150.8, 6],
+  ['Bougainville', -6.2, 155.2, 5],
+  ['Guadalcanal', -9.6, 160.15, 4],
+  ['Espiritu Santo', -15.4, 167.0, 5],
+  ['Nouméa', -22.27, 166.45, 5],
+  ['Fiji', -17.7, 178.0, 4],
+  ['Samoa', -13.8, -172.0, 4],
+  ['Tarawa', 1.42, 172.98, 5],
+  ['Makin', 3.07, 172.79, 6],
+
+  // ---- Australia and New Zealand ----
+  ['Darwin', -12.46, 130.84, 4],
+  ['Fremantle', -32.06, 115.74, 4],
+  ['Brisbane', -27.47, 153.03, 4],
+  ['Sydney', -33.87, 151.21, 3],
+  ['Melbourne', -37.81, 144.96, 4],
+  ['Hobart', -42.88, 147.33, 5],
+  ['Auckland', -36.85, 174.76, 4],
+  ['Napier', -39.49, 176.91, 5],
+
+  // ---- Indian Ocean ----
+  ['Colombo', 6.93, 79.85, 4],
+  ['Trincomalee', 8.57, 81.23, 5],
+  ['Madras', 13.08, 80.27, 4],
+  ['Calcutta', 22.57, 88.36, 4],
+  ['Bombay', 18.96, 72.82, 4],
+  ['Diego Suarez', -12.27, 49.29, 5],
+  ['Madagascar', -19.0, 46.7, 4],
+
+  // ---- Central and North Pacific ----
+  ['Midway', 28.21, -177.37, 4],
+  ['Oahu', 21.47, -157.98, 4],
+  ['Honolulu', 21.31, -157.86, 9],
+  ['Kauai', 22.05, -159.5, 6],
+  ['Maui', 20.8, -156.33, 6],
+  ['Hawaii', 19.6, -155.5, 5],
+  ['Johnston Island', 16.73, -169.53, 5],
+  ['Dutch Harbor', 53.89, -166.54, 5],
+  ['Kiska', 51.98, 177.5, 5],
+  ['Attu', 52.9, 173.2, 5],
+  ['Aleutian Islands', 52.5, -175.0, 3],
+
+  // ---- The Americas ----
+  ['Seattle', 47.61, -122.33, 4],
+  ['Astoria', 46.19, -123.83, 6],
+  ['San Francisco', 37.77, -122.42, 3],
+  ['Santa Barbara', 34.42, -119.7, 6],
+  ['Los Angeles', 34.05, -118.24, 4],
+  ['San Diego', 32.72, -117.16, 4],
+  ['Panama Canal', 9.08, -79.68, 4],
+  ['Washington', 38.9, -77.04, 3],
+  ['New York', 40.71, -74.0, 4],
+  ['Boston', 42.36, -71.06, 5],
+  ['Norfolk', 36.85, -76.29, 5],
+
+  // ---- Europe ----
+  ['London', 51.5, -0.12, 3],
+  ['Berlin', 52.52, 13.4, 3],
+  ['Rome', 41.9, 12.5, 3],
+  ['Brest', 48.39, -4.49, 5],
+];

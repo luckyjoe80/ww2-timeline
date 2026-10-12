@@ -1,0 +1,13 @@
+# OS clutter
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Local tooling
+.claude/settings.local.json
+*.zip
