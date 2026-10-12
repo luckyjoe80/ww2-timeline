@@ -861,12 +861,12 @@
         visible ? lyr.marker.addTo(map) : lyr.marker.remove();
         lyr.shown = visible;
       }
-      const showPaths = visible && age === 0 && lyr.paths.length > 0;
+      // Courses and strike lines belong to the moment: only the current event shows them.
+      const showPaths = visible && ev === now && lyr.paths.length > 0;
       if (showPaths !== lyr.pathsShown) {
         showPaths ? lyr.pathGroup.addTo(map) : lyr.pathGroup.remove();
         lyr.pathsShown = showPaths;
       }
-      if (showPaths) lyr.paths.forEach((p) => p.setStyle({ opacity: ev === selected ? 0.9 : 0.3 }));
       if (visible) {
         const el = lyr.marker.getElement();
         const n = String(numbers.get(ev));
