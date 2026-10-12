@@ -6,7 +6,6 @@
   const EPOCH = Date.UTC(1900, 0, 1);      // day 0 for internal day numbers
   const WAR_START = Date.UTC(1939, 8, 1);  // 1 Sep 1939 – invasion of Poland
   const WAR_END = Date.UTC(1945, 8, 2);    // 2 Sep 1945 – Japanese surrender
-  const DEFAULT_PAST_WINDOW = 45; // days a past event stays visible (dimmed)
   // Playback pause on each event: time for the map to fly there plus time to read the panel.
   // Moving between events: pull back to show where we're going, hold, then fly in.
   const OUT_MS = 1200;
@@ -26,7 +25,6 @@
   const NEIGHBOR_M = 900000;       // ...and this far away
   const AT_SEA_MAX_ZOOM = 5;       // at sea with nothing around, frame no closer than this
   const AT_SEA_CONTEXT_MAX_ZOOM = 8; // at sea with neighbours or land framed
-  const PLACE_LABEL_MAX_ZOOM = 11;
   const READING_MS_PER_WORD = 300; // ~200 words per minute, an unhurried reading pace
   const MIN_DWELL_MS = 4000;
   const MAX_DWELL_MS = 30000;
@@ -200,7 +198,7 @@
     center: [25, 10],
     zoom: 2,
     minZoom: 1.5, // raised to one world's width once the map has a size (see setWorld)
-    maxZoom: 17,
+    maxZoom: 13, // as far as the shaded relief goes: no satellite views
     maxBoundsViscosity: 1, // the edges of the world are hard stops
     bounceAtZoomLimits: false, // a pinch can't overshoot the minimum zoom and reveal another copy
     zoomSnap: 0.5,
@@ -220,23 +218,40 @@
   });
   const worldTiles = [];
 
-  // Physical base map: no modern borders or place names to clash with a 1940s view.
-  // Tiles only exist to z8, so beyond that the imagery layer below takes over
-  // (this layer stays underneath as a placeholder while imagery tiles load).
+  // Physical base map: no modern borders or place names to clash with a 1940s view. Its data
+  // is only ~1.2 km per pixel, so it gets soft from about z7 and tiles stop at z8; from
+  // RELIEF_FROM_ZOOM the shaded relief below takes over (this layer stays underneath as a
+  // placeholder while relief tiles load).
+  const RELIEF_FROM_ZOOM = 7;
   worldTiles.push(new WorldTiles('https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}', {
     maxNativeZoom: 8,
     attribution: 'Tiles &copy; Esri &mdash; Source: US National Park Service',
   }).addTo(map));
 
-  // Satellite imagery from just above z8, so no view ever shows upscaled relief tiles.
-  // 8.5 rather than 9 because zoomSnap allows half-steps.
-  worldTiles.push(new WorldTiles('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    minZoom: 8.5,
-    maxNativeZoom: 18,
-    attribution: 'Imagery &copy; Esri, Maxar, Earthstar Geographics',
+  // Shaded relief from RELIEF_FROM_ZOOM to the map's maximum, z13: worldwide, and like the
+  // physical map free of modern roads and names.
+  worldTiles.push(new WorldTiles('https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {
+    minZoom: RELIEF_FROM_ZOOM,
+    maxNativeZoom: 13,
+    attribution: 'Relief &copy; Esri',
   }).addTo(map));
 
   window.ww2Map = map; // handy for debugging in the console
+
+  // Leaflet keeps the view inside maxBounds on every moveend, including the one fired when the
+  // map is resized (e.g. the bar below it changes height on a timeline switch). Mid-flight that
+  // snaps the view and kills the flight, so skip the check while flying; it runs when the flight
+  // lands, as the flight's own moveend goes through _moveEnd.
+  const leafletFlyTo = map.flyTo;
+  map.flyTo = function (...args) { this._ww2Flying = true; return leafletFlyTo.apply(this, args); };
+  const leafletMoveEnd = map._moveEnd;
+  map._moveEnd = function (...args) { this._ww2Flying = false; return leafletMoveEnd.apply(this, args); };
+  // And keep it inside without animating: an animated nudge can still be running when the app
+  // frames a view (e.g. at startup) and carry on sliding the map off the framed event.
+  map._panInsideMaxBounds = function () {
+    if (this._ww2Flying || this._enforcingBounds || !this.options.maxBounds) return;
+    this.panInsideBounds(this.options.maxBounds, { animate: false });
+  };
 
   // ---------- One finite world ----------
   // The map shows a single copy of the world, 360° wide, centered on a longitude chosen per
@@ -249,7 +264,12 @@
     const changed = c !== worldCenter;
     worldCenter = c;
     if (changed) worldTiles.forEach((t) => t.redraw());
-    map.setMaxBounds([[-85, worldCenter - 180], [85, worldCenter + 180]]);
+    const bounds = L.latLngBounds([[-85, worldCenter - 180], [85, worldCenter + 180]]);
+    // Not setMaxBounds: it starts an animated pan inside the new bounds, which cancels the fly
+    // (or undoes the fit) that always follows a switch of world. Set the bounds and keep the
+    // usual moveend check instead; the view lands inside them anyway.
+    if (!map.options.maxBounds) map.on('moveend', map._panInsideMaxBounds);
+    map.options.maxBounds = bounds;
     updateMinZoom();
     fitMini();
   }
@@ -257,7 +277,13 @@
   function updateMinZoom() {
     const { x, y } = map.getSize();
     if (!x || !y) return;
-    map.setMinZoom(Math.max(Math.log2(x / 256), Math.log2(y / 256)));
+    const min = Math.max(Math.log2(x / 256), Math.log2(y / 256));
+    // Not setMinZoom: it animates up to a raised minimum, and that animation can land after a
+    // fit made in the meantime (e.g. at startup) and undo it. Jump there instead.
+    if (min === map.options.minZoom) return;
+    map.options.minZoom = min;
+    if (map.getZoom() < min) map.setView(map.getCenter(), min, { animate: false });
+    map.fire('zoomlevelschange');
   }
 
   // ---------- Overview inset ----------
@@ -403,9 +429,10 @@
   // ---------- Place labels ----------
   // Period place names from data/places.js. Each label exists in three world copies so it
   // shows up beside events whose views cross the antimeridian.
-  const PLACES = ((window.WW2 && WW2.places) || []).map(([name, lat, lng, minZoom]) => ({ name, lat, lng, minZoom }));
+  const PLACES = ((window.WW2 && WW2.places) || []).map(([name, lat, lng, minZoom, maxZoom = Infinity]) => ({ name, lat, lng, minZoom, maxZoom }));
   const placeLabels = PLACES.flatMap((p) => [-360, 0, 360].map((shift) => ({
     minZoom: p.minZoom,
+    maxZoom: p.maxZoom,
     marker: L.marker([p.lat, p.lng + shift], {
       icon: L.divIcon({ className: 'place-label', html: `<i></i><span>${esc(p.name)}</span>`, iconSize: null }),
       interactive: false,
@@ -415,9 +442,8 @@
   })));
   function updatePlaceLabels() {
     const z = map.getZoom();
-    map.getContainer().classList.toggle('imagery', z >= 8.5); // matches the imagery layer's minZoom
     for (const l of placeLabels) {
-      const show = z >= l.minZoom && z <= PLACE_LABEL_MAX_ZOOM;
+      const show = z >= l.minZoom && z <= l.maxZoom;
       if (show !== map.hasLayer(l.marker)) show ? l.marker.addTo(map) : l.marker.remove();
     }
   }
@@ -512,10 +538,12 @@
   // ---------- Timelines ----------
   function setTimeline(id, { dateISO, eventId, fly = true } = {}) {
     if (atlases.has(id)) {
-      enterAtlas(id);
+      enterAtlas(id, 0, { overview: true });
       return;
     }
-    const wasOverview = overview || atlasOverview; // stay in overview when switching timelines
+    // Opening a timeline shows its overview; a deep link or cross-timeline link to a
+    // particular day or event goes straight there instead.
+    const startInOverview = !eventId && !dateISO;
     exitAtlas();
     pause();
     if (tl) tl.events.forEach(hideLayers);
@@ -534,13 +562,13 @@
     renderLegend();
     renderPicker();
 
-    const ev = tl.byId.get(eventId || (dateISO ? '' : tl.meta.defaultEvent || ''));
+    const ev = eventId ? tl.byId.get(eventId) : null;
     const day = dateISO ? msToDay(parseISO(dateISO)) : ev ? ev.day : tl.start;
     currentDay = clampDay(day);
     setTrackZoom({ kind: 'all' }, currentDay);
     goToDay(currentDay, { fly: false });
     if (ev && ev.day === currentDay) selectEvent(ev, { fly: false });
-    if (wasOverview) enterOverview();
+    if (startInOverview) enterOverview({ animate: fly && mapReady });
     else if (fly && mapReady && selected) flyToEvent(selected);
   }
 
@@ -638,6 +666,7 @@
   // Frame the event (see shotFor), leaving room for the panel.
   function flyToEvent(ev, animate = true) {
     if (!map.getSize().x) return; // no size yet (e.g. hidden tab): the initial fit runs once it has one
+    appFramed = true;
     const shot = shotFor(ev);
     const { pts } = shot;
     const size = map.getSize();
@@ -715,8 +744,14 @@
   let lastShotKey = null;
   // After the camera moves for any other reason, the next event gets a fresh shot.
   function forgetShot() { lastShotKey = null; lastFlyEvent = null; }
-  map.on('dragstart', forgetShot);
-  map.getContainer().addEventListener('wheel', forgetShot, { passive: true });
+  // Whether the view is still the one the app framed (so a resize should reframe it), or the
+  // user has since moved the map themselves.
+  let appFramed = false;
+  const userMoved = () => { appFramed = false; forgetShot(); };
+  map.on('dragstart dblclick', userMoved);
+  map.getContainer().addEventListener('wheel', userMoved, { passive: true });
+  map.getContainer().querySelector('.leaflet-control-zoom')?.addEventListener('click', userMoved);
+  miniEl.addEventListener('click', userMoved);
 
   // ---------- Rendering ----------
   function render() {
@@ -725,7 +760,8 @@
     $('current-date').textContent = formatLong(ms);
     $('weekday').textContent = WEEKDAYS[new Date(ms).getUTCDay()];
     $('war-day').textContent = warDayLabel(currentDay);
-    history.replaceState(null, '', `#${tl.meta.id}/${toISO(ms)}${selected ? '/' + selected.id : ''}`);
+    // In the overview the link is just the timeline, so reloading or sharing it opens the overview.
+    history.replaceState(null, '', overview ? `#${tl.meta.id}` : `#${tl.meta.id}/${toISO(ms)}${selected ? '/' + selected.id : ''}`);
 
     renderMarkers();
     renderPanel();
@@ -751,11 +787,15 @@
       tl.events.forEach(hideLayers); // the overview draws its own dots
       return;
     }
-    const window_ = tl.meta.pastWindow ?? DEFAULT_PAST_WINDOW;
+    // The story so far: every event up to the current one (or, on a day with no event
+    // selected, up to the end of that day). Later events appear as you reach them.
+    const now = selected && selected.day === currentDay ? selected : null;
+    const reached = (e) => (now ? e.index <= now.index : e.day <= currentDay);
+    const numbers = new Map(shown.map((e, i) => [e, i + 1])); // as in the panel's "x of N"
     for (const ev of tl.events) {
       const lyr = layers.get(ev);
       const age = currentDay - ev.day;
-      const visible = isShown(ev) && age >= 0 && age <= window_;
+      const visible = isShown(ev) && reached(ev);
       if (visible !== lyr.shown) {
         visible ? lyr.marker.addTo(map) : lyr.marker.remove();
         lyr.shown = visible;
@@ -768,7 +808,10 @@
       if (showPaths) lyr.paths.forEach((p) => p.setStyle({ opacity: ev === selected ? 0.9 : 0.3 }));
       if (visible) {
         const el = lyr.marker.getElement();
-        el.classList.toggle('past', age > 0);
+        const n = String(numbers.get(ev));
+        const dot = el.querySelector('.dot');
+        if (dot.textContent !== n) dot.textContent = n;
+        el.classList.toggle('past', now ? ev !== now : age > 0);
         el.classList.toggle('selected', ev === selected);
         lyr.marker.setZIndexOffset(ev === selected ? 1000 : age === 0 ? 500 : 0);
       }
@@ -796,9 +839,11 @@
     panelBody.innerHTML = `
       <div class="countdown" hidden><div class="countdown-bar"><i></i></div><span></span></div>
       <div class="panel-nav">
+        <button data-jump="first" aria-label="First event" title="First event" ${pos === 0 ? 'disabled' : ''}>«</button>
         <button data-step="-1" aria-label="Previous event" ${pos === 0 ? 'disabled' : ''}>‹</button>
         <span>${pos + 1} of ${shown.length} · ${formatMed(dayToMs(currentDay))}</span>
         <button data-step="1" aria-label="Next event" ${pos === shown.length - 1 ? 'disabled' : ''}>›</button>
+        <button data-jump="last" aria-label="Last event" title="Last event" ${pos === shown.length - 1 ? 'disabled' : ''}>»</button>
       </div>
       <span class="tag">${esc((TYPES[ev.type] || TYPES.attack).label)} · ${esc(ev.theater)}</span>
       <h2>${esc(ev.title)}</h2>
@@ -835,6 +880,9 @@
   function renderStepButtons() {
     const prev = $('btn-prev');
     const next = $('btn-next');
+    const inOverview = overview || (atlas && atlasOverview);
+    document.body.classList.toggle('in-overview', !!inOverview);
+    $('btn-start').textContent = atlas ? 'Start the tour ›' : 'Start timeline ›';
     if (atlas && atlasOverview) {
       prev.textContent = '‹ Previous chapter';
       next.textContent = 'Start the tour ›';
@@ -1067,7 +1115,7 @@
   // Event position inside the map's single world window.
   const ovLatLng = (e) => wrapLatLng(e.location.lat, e.location.lng);
 
-  function enterOverview() {
+  function enterOverview({ animate = true } = {}) {
     pause();
     overview = true;
     flySeq++; // cancel any camera move in progress
@@ -1077,24 +1125,23 @@
     renderLegend();
     overviewLayer.addTo(map);
     buildOverview();
-    fitOverview();
+    fitOverview(animate);
   }
 
   // Frame the events in the period shown on the bar (the whole timeline unless zoomed in).
-  function fitOverview() {
+  function fitOverview(animate = true) {
     forgetShot();
+    appFramed = true;
     const evs = tl.events.filter(inPeriod);
     const target = evs.length ? evs : tl.events;
     if (!map.getSize().x) return; // no size yet (e.g. hidden tab)
     const wide = window.innerWidth > 640;
     // Pixel padding only (no percentage pad): whole-war timelines span nearly the globe.
     const left = 50;
-    map.flyToBounds(L.latLngBounds(target.map(ovLatLng)), {
-      paddingTopLeft: [left, 50],
-      paddingBottomRight: [50, 50],
-      maxZoom: 6,
-      duration: 1.2,
-    });
+    const bounds = L.latLngBounds(target.map(ovLatLng));
+    const opts = { paddingTopLeft: [left, 50], paddingBottomRight: [50, 50], maxZoom: 6 };
+    if (animate) map.flyToBounds(bounds, { ...opts, duration: 1.2 });
+    else map.fitBounds(bounds, { ...opts, animate: false });
   }
 
   function exitOverview() {
@@ -1108,6 +1155,14 @@
     overviewLayer.remove();
     renderLegend();
     renderMapCrumbs();
+  }
+
+  // Leave an overview for the beginning: the first event (of the period on the bar, if it's
+  // zoomed in), or an atlas's first chapter.
+  function startFromOverview() {
+    if (atlas) return showChapter(0);
+    const first = shown.find(inPeriod) || shown[0];
+    if (first) selectEvent(first);
   }
 
   function toggleOverview() {
@@ -1414,6 +1469,7 @@
 
   function flyAtlas(animate = true) {
     forgetShot();
+    appFramed = true;
     if (!map.getSize().x) return;
     const ids = atlasSite ? [atlasSite]
       : atlasOverview ? atlas.data.sites.filter((s) => atlasRoleShown(s.role)).map((s) => s.id)
@@ -1601,6 +1657,7 @@
     }
   }
   $('btn-prev').addEventListener('click', () => step(-1));
+  $('btn-start').addEventListener('click', startFromOverview);
   $('btn-next').addEventListener('click', () => step(1));
   overviewBtn.addEventListener('click', toggleOverview);
   $('panel-close').addEventListener('click', () => {
@@ -1621,6 +1678,13 @@
     }
     const stepBtn = e.target.closest('[data-step]'); // (not "step": that would shadow step() above)
     if (stepBtn) { pause(); stepEvent(Number(stepBtn.dataset.step)); return; }
+    const jumpBtn = e.target.closest('[data-jump]');
+    if (jumpBtn && shown.length) {
+      pause();
+      const target = jumpBtn.dataset.jump === 'first' ? shown[0] : shown[shown.length - 1];
+      selectEvent(target);
+      return;
+    }
     const link = e.target.closest('[data-link-timeline]');
     if (link) setTimeline(link.dataset.linkTimeline, { eventId: link.dataset.linkEvent });
   });
@@ -1739,6 +1803,7 @@
     else if (e.key === 'ArrowRight') { e.preventDefault(); step(1); }
     else if (e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
     else if (e.key === 'o' || e.key === 'O') toggleOverview();
+    else if (e.key === 'Enter' && (overview || atlasOverview) && !e.target.closest?.('button, a')) startFromOverview();
     else if (e.key === 'Escape') {
       if (atlas && atlasOverview) showChapter(atlasChapter);
       else if (atlas) panel.hidden = true;
@@ -1762,14 +1827,25 @@
 
   // The map can't fit bounds until it has real dimensions (e.g. page opened in a
   // background tab), and Leaflet only watches window resizes, so watch the container.
+  // Whenever it resizes (the layout settling at startup, the bar below changing height, the
+  // window resizing), reframe the current view unless the user has moved the map since, or a
+  // camera flight is under way (it lands close enough).
+  function reframe() {
+    if (atlas) flyAtlas(false);
+    else if (overview) fitOverview(false);
+    else if (selected) flyToEvent(selected, false);
+  }
+  let resizeFrame = 0;
   new ResizeObserver(() => {
     map.invalidateSize();
     updateMinZoom();
     const { x, y } = map.getSize();
-    if (!mapReady && x > 0 && y > 0) {
-      mapReady = true;
-      if (atlas) flyAtlas(false);
-      else if (selected) flyToEvent(selected, false);
+    if (!x || !y) return;
+    const first = !mapReady;
+    mapReady = true;
+    if (first || (appFramed && !map._ww2Flying)) {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(reframe); // once per frame, after layout settles
     }
   }).observe($('map'));
 })();

@@ -209,28 +209,35 @@ body {
 
 /* Event markers. States: today (default), .selected, .past */
 /* (Leaflet positions .event-marker absolutely; don't override position here.) */
+/* The dot carries the event's number in the timeline (a pill for 3+ digits). */
 .event-marker .dot {
-  position: absolute; inset: 0;
-  margin: auto;
-  width: 11px; height: 11px;
-  border-radius: 50%;
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  box-sizing: border-box;
+  min-width: 20px; height: 20px; padding: 0 3px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 10px;
   background: var(--marker-color, var(--accent));
   border: 2px solid #fff6e4;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-  transition: width 0.2s, height 0.2s;
+  color: #fff6e4;
+  font: 700 10px/1 var(--font-body);
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.7);
+  font-variant-numeric: tabular-nums;
+  transition: min-width 0.2s, height 0.2s, font-size 0.2s;
 }
 .event-marker .ring {
   display: none;
   position: absolute; inset: 0;
   margin: auto;
-  width: 16px; height: 16px;
+  width: 24px; height: 24px;
   border-radius: 50%;
   border: 2px solid var(--marker-color, var(--accent));
   animation: pulse 1.8s ease-out infinite;
 }
-.event-marker.selected .dot { width: 18px; height: 18px; border-width: 3px; }
+.event-marker.selected .dot { min-width: 26px; height: 26px; border-radius: 13px; border-width: 3px; font-size: 12px; }
 .event-marker.selected .ring { display: block; }
-.event-marker.past .dot { opacity: 0.5; width: 8px; height: 8px; border-width: 1px; }
+.event-marker.past .dot { opacity: 0.55; min-width: 16px; height: 16px; border-radius: 8px; border-width: 1px; font-size: 8px; padding: 0 2px; }
 @keyframes pulse {
   from { transform: scale(1); opacity: 1; }
   to   { transform: scale(3.5); opacity: 0; }
@@ -253,9 +260,6 @@ body {
   text-shadow: 0 0 3px #f4ecd8, 0 0 3px #f4ecd8, 0 0 6px #f4ecd8;
   pointer-events: none;
 }
-/* Over satellite imagery (z8.5+), switch to light text. */
-.leaflet-container.imagery .place-label span { color: #f4ecd8; text-shadow: 0 0 3px #000, 0 0 3px #000, 0 0 6px #000; }
-.leaflet-container.imagery .place-label i { background: #f4ecd8; box-shadow: 0 0 0 1.5px #000; }
 
 /* ---------- Overview mode ---------- */
 /* Overview stands apart from the step buttons: amber outline, filled when active. */
@@ -486,6 +490,11 @@ body.overview-mode .day-strip { visibility: hidden; }
 body.atlas-mode .atlas-bar { display: block; }
 body.atlas-mode .track-wrap, body.atlas-mode .day-strip { display: none; }
 body.atlas-mode #btn-play { display: none; }
+/* In an overview the only way forward is Start; stepping and play return with the first event. */
+body.in-overview #btn-prev, body.in-overview #btn-play, body.in-overview #btn-next { display: none; }
+body:not(.in-overview) #btn-start { display: none; }
+.controls button.start-btn { width: auto; padding: 0 16px; background: var(--accent); border-color: var(--accent); color: #fff6e4; font-weight: 600; }
+.controls button.start-btn:hover { filter: brightness(1.12); }
 .atlas-chart-title { font-family: var(--font-head); font-size: 13px; margin-bottom: 6px; }
 .atlas-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
 .atlas-row-label { width: 76px; flex: none; font-size: 11px; color: var(--muted); line-height: 1.2; }

@@ -88,7 +88,7 @@
       { approx: true, facts: [['U.S. carriers', 'Enterprise, Hornet (TF 16); Yorktown (TF 17)'], ['Midway’s aircraft', '122, including 31 PBYs, 17 B-17s and four torpedo-armed B-26s']] }),
 
     // ---------- 3 June ----------
-    ev('1942-06-03', 'Japanese carrier planes strike Dutch Harbor', 'attack', P.dutch, 8,
+    ev('1942-06-03', 'Japanese carrier planes strike Dutch Harbor', 'attack', P.dutch, 10,
       'Operation AL opens in the Aleutians a day before the Midway strike. In fog and darkness only half of the B5N strike force from the carriers Jun’yō and Ryūjō finds the U.S. naval base, the first arriving at 05:45 local time. Met by heavy anti-aircraft fire and fighters, they do little damage.',
       { theater: 'Aleutians', ...ord('05:45') }),
     ev('1942-06-03', 'A PBY finds the invasion force', 'intelligence',
@@ -166,7 +166,7 @@
     ev('1942-06-04', 'Kaga is scuttled', 'loss', P.kaga, 9,
       'Her survivors taken off in the afternoon, Kaga is finished by two torpedoes from the destroyer Hagikaze and sinks stern first. 811 of her crew are killed, including Captain Jisaku Okada, who died when a bomb hit her bridge.',
       at('19:25')),
-    ev('1942-06-04', 'Dutch Harbor is bombed again', 'attack', P.dutch, 8,
+    ev('1942-06-04', 'Dutch Harbor is bombed again', 'attack', P.dutch, 10,
       'The Japanese carrier planes return to Dutch Harbor, better organized this time. By the afternoon its oil storage tanks are burning, the hospital is partly demolished and a beached barracks ship is damaged.',
       { theater: 'Aleutians', ...ord('15:00') }),
     ev('1942-06-04', 'Spruance turns east for the night', 'movement', P.tf16, 7,
@@ -199,13 +199,13 @@
     ev('1942-06-06', 'I-168 torpedoes Yorktown and Hammann', 'loss', P.yorktown, 9,
       'Yorktown is under tow by the fleet tug Vireo and salvage looks hopeful when I-168 slips through the destroyer screen. Two torpedoes hit Yorktown; a third breaks the destroyer Hammann, lying alongside to supply power, in two. Her own depth charges explode as she sinks and 80 men are killed.',
       { ...ord('15:30'), link: { timeline: 'pacific-submarines', event: '1942-06-06-i-168-finishes-off-uss-yorktown', label: 'See I-168 in Submarine Operations' } }),
-    ev('1942-06-06', 'Japan occupies Kiska', 'invasion', P.kiska, 8,
+    ev('1942-06-06', 'Japan occupies Kiska', 'invasion', P.kiska, 9,
       'Japanese troops land on Kiska in the Aleutians, the first invasion of U.S. territory in North America since the War of 1812. Attu follows the next day.',
       { theater: 'Aleutians' }),
     ev('1942-06-07', 'Yorktown sinks', 'loss', P.yorktown, 9,
       'Yorktown stays afloat through the night, but by 05:30 her list is rapidly increasing. She rolls onto her port side and capsizes and sinks at 07:01. Robert Ballard will find her wreck in 1998. The battle is over.',
       at('07:01', { facts: [['Total dead', 'Japan 3,057; United States 307'], ['Ships lost', 'Japan: 4 carriers, 1 heavy cruiser. U.S.: 1 carrier, 1 destroyer']] })),
-    ev('1942-06-07', 'Japan occupies Attu', 'invasion', P.attu, 8,
+    ev('1942-06-07', 'Japan occupies Attu', 'invasion', P.attu, 9,
       'Japanese forces occupy Attu, the westernmost of the Aleutians, meeting little resistance from its Unangax (Aleut) inhabitants.',
       { theater: 'Aleutians' }),
     ev('1942-06-07', 'General Tinker is lost', 'loss', P.midway, 8,
@@ -227,8 +227,6 @@
   // automatic framing.
   const pt = (place) => [place.lat, place.lng];
   const SHOTS = {
-    // 3 June: the Aleutians are a separate storyline, so cut to them and back.
-    'Japanese carrier planes strike Dutch Harbor': { transition: 'cut' },
     'A PBY finds the invasion force': { frame: [pt(P.midway)] }, // how far out it is
 
     // 4 June, dawn: the reveal. Nagumo launches, with the American carriers already waiting
@@ -255,7 +253,6 @@
     'Hiryū strikes back': { scene: 'counterstrike' },
     'Three bombs hit Yorktown': { scene: 'counterstrike' },
     'Two torpedoes cripple Yorktown': { scene: 'counterstrike' },
-    'Dutch Harbor is bombed again': { transition: 'cut' },
     'Dive bombers set Hiryū ablaze': { shot: 'tight' },
     'Sōryū is scuttled': { scene: 'scuttled' },
     'Kaga is scuttled': { scene: 'scuttled' },
@@ -266,9 +263,7 @@
     'Yamamoto orders Akagi scuttled': { scene: 'carriers-sink' },
     'Hiryū sinks with Yamaguchi aboard': { scene: 'carriers-sink' },
     'I-168 torpedoes Yorktown and Hammann': { shot: 'tight' },
-    'Japan occupies Kiska': { transition: 'cut' },
     'Yorktown sinks': { shot: 'tight' },
-    'Japan occupies Attu': { transition: 'cut' },
   };
   const events = WW2.events['battle-of-midway'];
   for (const [title, shot] of Object.entries(SHOTS)) {

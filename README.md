@@ -51,5 +51,5 @@ Optionally, direct the camera with a shot list (`scene`, `frame`, `shot`, `trans
 ## Sources and credits
 
 - Event text is written for this project and checked against the English Wikipedia articles named at the top of each data file. Times, dates and positions marked approximate are shown as such in the app.
-- Map tiles: Esri World Physical Map and World Imagery (source: US National Park Service; Esri, Maxar, Earthstar Geographics), loaded from Esri's servers under their terms of use.
+- Map tiles: Esri World Physical Map (source: US National Park Service) and World Shaded Relief, loaded from Esri's servers under their terms of use.
 - Mapping library: Leaflet 1.9.4, loaded from cdnjs.
