@@ -122,7 +122,9 @@ body {
 
 /* ---------- Stage: map with floating panel ---------- */
 .stage { position: relative; min-height: 0; overflow: hidden; }
-#map { position: absolute; inset: 0; background: #a9c3d6; }
+/* The ocean colour as the tiles look through the sepia filter below, so gaps while tiles
+   load blend into the sea instead of flashing bright blue. */
+#map { position: absolute; inset: 0; background: #bac1c1; }
 
 /* ---------- Breadcrumbs (top-left of the map, beside the zoom buttons) ---------- */
 .map-crumbs {
@@ -615,6 +617,9 @@ body:not(.in-overview) #btn-start { display: none; }
   .day-strip-label { min-width: 0; }
   .day-strip-chips { flex-basis: 100%; }
 }
+
+/* The relief layer's crossfade with the terrain map below (opacity set per zoom in app.js). */
+.leaflet-tile-pane > .leaflet-layer { transition: opacity 0.25s linear; }
 
 /* A "cut" between storylines: the map jumps behind a quick fade in. */
 .leaflet-container.cut-in .leaflet-map-pane { animation: cut-in 0.5s ease-out; }

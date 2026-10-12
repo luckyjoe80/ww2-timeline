@@ -8,9 +8,9 @@
   const WAR_END = Date.UTC(1945, 8, 2);    // 2 Sep 1945 – Japanese surrender
   // Playback pause on each event: time for the map to fly there plus time to read the panel.
   // Moving between events: pull back to show where we're going, hold, then fly in.
-  const OUT_MS = 1200;
+  const OUT_MS = 3600;
   const HOLD_MS = 800;
-  const IN_MS = 1500;
+  const IN_MS = 4500;
   const FLY_MS = OUT_MS + HOLD_MS + IN_MS;
   const PULL_MARGIN_ZOOM = 0.75;  // pull back this much beyond the view that frames both places
   const DIRECT_ZOOM_GAP = 1.5;    // if that view is within this of the destination, fly straight there
@@ -217,6 +217,9 @@
     },
   });
   const worldTiles = [];
+  // Shared by both tile layers: keep more off-screen tiles so panning back is instant. (They
+  // still load at each zoom level a flight passes through; prefetchView warms those levels.)
+  const TILE_OPTIONS = { keepBuffer: 6 };
 
   // Physical base map: no modern borders or place names to clash with a 1940s view. Its data
   // is only ~1.2 km per pixel, so it gets soft from about z7 and tiles stop at z8; from
@@ -224,19 +227,70 @@
   // placeholder while relief tiles load).
   const RELIEF_FROM_ZOOM = 7;
   worldTiles.push(new WorldTiles('https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}', {
+    ...TILE_OPTIONS,
     maxNativeZoom: 8,
     attribution: 'Tiles &copy; Esri &mdash; Source: US National Park Service',
   }).addTo(map));
 
   // Shaded relief from RELIEF_FROM_ZOOM to the map's maximum, z13: worldwide, and like the
   // physical map free of modern roads and names.
-  worldTiles.push(new WorldTiles('https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {
-    minZoom: RELIEF_FROM_ZOOM,
+  // It crossfades in over the zoom level below RELIEF_FROM_ZOOM rather than switching at once:
+  // a hard switch swaps every tile in a single frame, which flashes as camera moves pass it.
+  const RELIEF_FADE = 1; // zoom levels to fade across, ending fully opaque at RELIEF_FROM_ZOOM
+  const relief = new WorldTiles('https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {
+    ...TILE_OPTIONS,
+    minZoom: RELIEF_FROM_ZOOM - RELIEF_FADE - 0.5, // loaded a little before it starts to show
     maxNativeZoom: 13,
     attribution: 'Relief &copy; Esri',
-  }).addTo(map));
+  }).addTo(map);
+  worldTiles.push(relief);
+  const reliefOpacity = (z) => Math.min(1, Math.max(0, (z - (RELIEF_FROM_ZOOM - RELIEF_FADE)) / RELIEF_FADE));
+  map.on('zoom', () => relief.setOpacity(reliefOpacity(map.getZoom())));          // each frame of a flight
+  map.on('zoomanim', (e) => relief.setOpacity(reliefOpacity(e.zoom)));           // wheel/button zooms (CSS-animated)
+  relief.setOpacity(reliefOpacity(map.getZoom()));
 
   window.ww2Map = map; // handy for debugging in the console
+
+  // Warm the browser cache with the tiles a camera move will show, so they're there when it
+  // arrives instead of loading in patches. `bounds` and `opts` are as for fitBounds. With
+  // `fromZoom`, also warm each whole zoom level between it and the landing zoom, around the
+  // landing point: a flight passes through those levels on its way in (or out).
+  let prefetched = [];
+  function prefetchView(bounds, opts = {}, fromZoom = null) {
+    const size = map.getSize();
+    if (!size.x || !bounds.isValid()) return;
+    const { center, zoom: landing } = map._getBoundsCenterZoom(bounds, opts);
+    const zooms = [landing];
+    if (fromZoom !== null) {
+      const lo = Math.min(fromZoom, landing);
+      const hi = Math.max(fromZoom, landing);
+      for (let z = Math.ceil(lo); z < hi; z++) if (Math.abs(z - landing) <= 4) zooms.push(z); // the last few levels matter most
+    }
+    const imgs = [];
+    for (const zoom of zooms) imgs.push(...tilesFor(center, zoom, size));
+    prefetched = imgs; // hold references until the next move
+  }
+  function tilesFor(center, zoom, size) {
+    const half = size.divideBy(2);
+    const mid = map.project(center, zoom);
+    const imgs = [];
+    for (const layer of worldTiles) {
+      if (zoom < (layer.options.minZoom ?? 0)) continue;
+      const z = Math.min(Math.round(zoom), layer.options.maxNativeZoom ?? zoom);
+      const scale = 2 ** (z - zoom);
+      const n = 2 ** z;
+      const min = mid.subtract(half).multiplyBy(scale).divideBy(256).floor();
+      const max = mid.add(half).multiplyBy(scale).divideBy(256).floor();
+      for (let y = Math.max(0, min.y); y <= Math.min(n - 1, max.y); y++) {
+        for (let x = min.x; x <= max.x; x++) {
+          const img = new Image();
+          img.src = L.Util.template(layer._url, { z, y, x: ((x % n) + n) % n });
+          imgs.push(img);
+        }
+      }
+    }
+    return imgs;
+  }
 
   // Leaflet keeps the view inside maxBounds on every moveend, including the one fired when the
   // map is resized (e.g. the bar below it changes height on a timeline switch). Mid-flight that
@@ -695,6 +749,8 @@
       return;
     }
     if (sameScene) return; // hold the scene's frame
+    cameraBusy(OUT_MS + HOLD_MS + IN_MS);
+    prefetchView(bounds, opts, map.getZoom()); // where this move lands, and the levels on the way
 
     // A cut: jump straight there behind a quick fade (into or out of a parallel storyline).
     if (ev.transition === 'cut' || (prev && prev.transition === 'cut' && prev !== ev)) {
@@ -723,12 +779,13 @@
     }
 
     // Pull back to frame both places, hold, then fly in.
-    map.flyToBounds(both, {
-      paddingTopLeft: opts.paddingTopLeft,
-      paddingBottomRight: opts.paddingBottomRight,
-      maxZoom: pullZoom,
-      duration: OUT_MS / 1000,
-    });
+    const pullOpts = { paddingTopLeft: opts.paddingTopLeft, paddingBottomRight: opts.paddingBottomRight, maxZoom: pullZoom };
+    const kept = prefetched;
+    prefetchView(both, pullOpts, map.getZoom()); // the zoom-out
+    kept.push(...prefetched);
+    prefetchView(bounds, opts, pullZoom);        // the zoom back in from the pulled-back view
+    prefetched = kept.concat(prefetched);
+    map.flyToBounds(both, { ...pullOpts, duration: OUT_MS / 1000 });
     let held = false;
     const hold = () => {
       if (held || seq !== flySeq) return;
@@ -747,6 +804,10 @@
   // Whether the view is still the one the app framed (so a resize should reframe it), or the
   // user has since moved the map themselves.
   let appFramed = false;
+  // Until when an animated camera move (including its pauses) is under way; resizes in that
+  // time don't reframe, or they'd snap the view to the destination mid-move.
+  let cameraBusyUntil = 0;
+  const cameraBusy = (ms) => { cameraBusyUntil = performance.now() + ms + 300; };
   const userMoved = () => { appFramed = false; forgetShot(); };
   map.on('dragstart dblclick', userMoved);
   map.getContainer().addEventListener('wheel', userMoved, { passive: true });
@@ -1140,7 +1201,7 @@
     const left = 50;
     const bounds = L.latLngBounds(target.map(ovLatLng));
     const opts = { paddingTopLeft: [left, 50], paddingBottomRight: [50, 50], maxZoom: 6 };
-    if (animate) map.flyToBounds(bounds, { ...opts, duration: 1.2 });
+    if (animate) { cameraBusy(1200); prefetchView(bounds, opts, map.getZoom()); map.flyToBounds(bounds, { ...opts, duration: 1.2 }); }
     else map.fitBounds(bounds, { ...opts, animate: false });
   }
 
@@ -1482,7 +1543,7 @@
       maxZoom: atlasSite ? 8 : 6,
     };
     flySeq++;
-    if (animate) map.flyToBounds(bounds, { ...opts, duration: 1.4 });
+    if (animate) { cameraBusy(1400); prefetchView(bounds, opts, map.getZoom()); map.flyToBounds(bounds, { ...opts, duration: 1.4 }); }
     else map.fitBounds(bounds, { ...opts, animate: false });
   }
 
@@ -1836,6 +1897,7 @@
     else if (selected) flyToEvent(selected, false);
   }
   let resizeFrame = 0;
+  let lateReframe = 0;
   new ResizeObserver(() => {
     map.invalidateSize();
     updateMinZoom();
@@ -1843,9 +1905,16 @@
     if (!x || !y) return;
     const first = !mapReady;
     mapReady = true;
-    if (first || (appFramed && !map._ww2Flying)) {
+    const busyFor = cameraBusyUntil - performance.now();
+    if (first || (appFramed && !map._ww2Flying && busyFor <= 0)) {
       cancelAnimationFrame(resizeFrame);
       resizeFrame = requestAnimationFrame(reframe); // once per frame, after layout settles
+    } else if (appFramed && busyFor > 0) {
+      // Mid-move: catch up once the move has finished.
+      clearTimeout(lateReframe);
+      lateReframe = setTimeout(() => {
+        if (appFramed && !map._ww2Flying && performance.now() > cameraBusyUntil) reframe();
+      }, busyFor + 50);
     }
   }).observe($('map'));
 })();
