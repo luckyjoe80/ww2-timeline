@@ -61,6 +61,23 @@ window.WW2 = {
       ],
     },
     {
+      title: 'Medals',
+      children: [
+        {
+          id: 'medal-of-honor',
+          title: 'Medal of Honor',
+          description: 'Every Medal of Honor action of the war, 1941–1945, with the official citations.',
+          colors: {
+            'Army': '#5a8a4e',
+            'Army Air Forces': '#4f9bd6',
+            'Navy': '#2c4f8a',
+            'Marine Corps': '#c8402f',
+            'Coast Guard': '#d98a2b',
+          },
+        },
+      ],
+    },
+    {
       title: 'People',
       children: [
         {

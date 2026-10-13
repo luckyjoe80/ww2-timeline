@@ -23,6 +23,7 @@ Then visit <http://localhost:8417>. Deep links work: `#battle-of-midway/1942-06-
 | | The Battle of Midway | `data/timelines/battle-of-midway.js` |
 | | Submarine Operations | `data/timelines/pacific-submarines.js` |
 | Production | B-17 Production (atlas) | `data/atlases/b17-production.js` |
+| Medals | Medal of Honor (every World War II award) | `data/timelines/medal-of-honor.js` |
 | People | Isoroku Yamamoto | `data/timelines/yamamoto.js` |
 | Ships | Battleship Yamato | `data/timelines/yamato.js` |
 
@@ -51,5 +52,6 @@ Optionally, direct the camera with a shot list (`scene`, `frame`, `shot`, `trans
 ## Sources and credits
 
 - Event text is written for this project and checked against the English Wikipedia articles named at the top of each data file. Times, dates and positions marked approximate are shown as such in the app.
+- The Medal of Honor timeline is generated from Wikipedia by a build script; its event text is each recipient's official citation (a U.S. government work, in the public domain), as quoted in their article.
 - Map tiles: Esri World Physical Map (source: US National Park Service) and World Shaded Relief, loaded from Esri's servers under their terms of use.
 - Mapping library: Leaflet 1.9.4, loaded from cdnjs.
