@@ -34,6 +34,7 @@ Then visit <http://localhost:8417>. Deep links work: `#battle-of-midway/1942-06-
 |  | Imphal and Kohima | `data/timelines/imphal-kohima.js` |
 |  | Saipan and the Philippine Sea | `data/timelines/saipan-philippine-sea.js` |
 |  | The Battle of Leyte Gulf | `data/timelines/leyte-gulf.js` |
+|  | The Kamikaze | `data/timelines/kamikaze.js` |
 |  | Iwo Jima | `data/timelines/iwo-jima.js` |
 |  | The Firebombing of Japan | `data/timelines/firebombing-of-japan.js` |
 |  | Okinawa | `data/timelines/okinawa.js` |
