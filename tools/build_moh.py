@@ -97,7 +97,9 @@ for t in tables:
         name_c = next((c for c in C if re.search('Sortname', c, re.I)), '')
         sn = re.search(r'\{\{Sortname\|([^|}]*)\|([^|}]*)(?:\|([^|}]*))?', name_c, re.I)
         svc_c = next((c for c in C if re.search(r'United States (Army|Navy|Marine Corps|Coast Guard)|Army Air Forces', c)), '')
-        rank_c = next((c for c in C if '{{Sort|' in c), '')
+        rank_c = next((c for c in C if '{{Sort|' in c), '') or next(
+            (c for c in C if re.search(r'\b(Private|Sergeant|Corporal|Lieutenant|Captain|Major|Colonel|General|Commander|Ensign|Seaman|Mate|Technician|Boatswain|Machinist|Admiral)\b', c)
+             and 'Sortname' not in c and '{{dts' not in c), '')
         date_i = next((i for i, c in enumerate(C) if re.search(r'\{\{dts', c, re.I)), -1)
         dts = re.search(r'\{\{dts\|(\d{4})\|?([A-Za-z]*)\|?(\d*)', C[date_i] if date_i >= 0 else '', re.I)
         rank_i = C.index(rank_c) if rank_c in C else -1
@@ -183,49 +185,63 @@ def looks_like_citation(t, marked=False):
     return len(COMBAT.findall(t)) >= (3 if marked else 4) and (marked or bool(re.search(r'19(4[1-5])', t)))
 
 
+OTHER_MEDAL = re.compile(r'presenting the (Navy Cross|Silver Star|Distinguished Service Cross|Distinguished Flying Cross|Bronze Star|Legion of Merit|Distinguished Service Medal|Air Medal|Navy and Marine Corps Medal|Soldier.s Medal|Purple Heart)|^The (Navy Cross|Silver Star|Distinguished Service Cross) is presented', re.I)
+MOH_HALLMARK = re.compile(r'above and beyond the call of duty|Medal of Honor', re.I)
+
+
 def citation(w):
-    # 1) a quote under a "citation" heading or after "citation reads" / "Citation:"
-    # Citation-specific markers first, then "Medal of Honor" sections (which may quote other things).
+    """The recipient's Medal of Honor citation, from wherever the article quotes it. Articles often
+    quote several citations (Silver Star, Navy Cross...), so gather every candidate, drop those for
+    other medals, and prefer one with the Medal of Honor's own wording."""
+    found = []  # in priority order
+    # 1) quotes or paragraphs under a "citation" heading, or after "citation reads" / "Citation:";
+    #    then "Medal of Honor" sections (which may quote other things).
     starts = [m.start() for m in re.finditer(r"==[^=\n]*[Cc]itation[^=\n]*==|citation reads|'''Citation|Citation:", w)]
     starts += [m.start() for m in re.finditer(r"==[^=\n]*Medal of Honor[^=\n]*==", w)]
     for ci in starts:
         after = w[ci:ci + 20000]
-        # Plain paragraphs under the heading, up to the next heading.
+        after_body = None
         if after.startswith('=='):
             body = re.split(r'\n==', after.split('\n', 1)[1] if '\n' in after else '', maxsplit=1)[0]
             if not re.search(r'<blockquote|\{\{\s*(?:block ?quote|quote|cquote|quotation)', body, re.I):
                 after_body = body
-            else:
-                after_body = None
-        else:
-            after_body = None
-        cands = [m.group(1) for m in re.finditer(r'<blockquote[^>]*>([\s\S]*?)</blockquote>', after, re.I)][:2]
-        cands += template_bodies(after, r'block ?quote|quote box|quotation|quote|cquote')[:2]
+        cands = [m.group(1) for m in re.finditer(r'<blockquote[^>]*>([\s\S]*?)</blockquote>', after, re.I)][:3]
+        cands += template_bodies(after, r'block ?quote|quote box|quotation|quote|cquote')[:3]
         ind = re.search(r'\n((?::+[^\n]+\n?)+)', after)
         if ind:
             cands.append(re.sub(r'^:+', '', ind.group(1), flags=re.M))
-        reads = re.search(r'(?:citation reads|Citation):?\'*\s*\n*((?:[^\n{=][^\n]*\n?)+)', after, re.I)
+        reads = re.search(r"(?:citation reads|Citation):?'*\s*\n*((?:[^\n{=][^\n]*\n?)+)", after, re.I)
         if reads:
             cands.append(reads.group(1))
         if after_body:
-            # Drop the header lines (rank, place, G.O. ...) and any sentence introducing the citation.
             paras = [p for p in after_body.split('\n\n') if p.strip() and not re.match(r'\s*[*|{!]', p)]
             cands.append('\n\n'.join(p for p in paras if not re.search(r'citation reads|Rank and organization', p, re.I)))
-        texts = [plain(c) for c in cands]
-        # Prefer text with the award wording; fall back to anything that reads like a citation.
-        for t in [t for t in texts if CIT_WORDS.search(t)] + texts:
-            if looks_like_citation(t, marked=True):
-                return t
+        found += [t for t in (plain(c) for c in cands) if looks_like_citation(t, marked=True)]
     # 2) any long quote that reads like a citation
     blocks = [m.group(1) for m in re.finditer(r'<blockquote[^>]*>([\s\S]*?)</blockquote>', w, re.I)]
     blocks += template_bodies(w, r'block ?quote|quote box|quotation|quote|cquote')
-    good = [b for b in sorted((plain(b) for b in blocks), key=len, reverse=True) if looks_like_citation(b) and CIT_WORDS.search(b)]
-    if good:
-        return good[0]
+    found += [b for b in sorted((plain(b) for b in blocks), key=len, reverse=True) if looks_like_citation(b) and CIT_WORDS.search(b)]
     # 3) a paragraph in the article with the citation's usual wording
     paras = [plain(x) for x in w.split('\n\n')]
-    paras = [x for x in paras if re.search(r'above and beyond the call of duty', x, re.I) and len(x) > 200 and not x.startswith('|') and looks_like_citation(x)]
-    return max(paras, key=len) if paras else None
+    found += sorted((x for x in paras if re.search(r'above and beyond the call of duty', x, re.I) and len(x) > 200
+                     and not x.startswith('|') and looks_like_citation(x)), key=len, reverse=True)
+    ok = [t for t in found if not OTHER_MEDAL.search(t[:400])]
+    for t in ok:
+        if MOH_HALLMARK.search(t):
+            return t
+    return ok[0] if ok else None
+
+
+def strip_opening(t):
+    # The formal opening, in its many variants, up to the recipient's name (or "CITATION:").
+    t = t.lstrip(' "“:')
+    m = re.match(r'^(?:For )?The President of the United States.{0,120}?takes (?:great )?(?:pride|pleasure) in presenting the (?:Congressional )?Medal of Honor(?: \(?posthumously\)?)?\s*to:?\s*', t, flags=re.I)
+    if m:
+        t = t[m.end():]
+        c = re.search(r'as set forth in the following\W*CITATION\W*', t, flags=re.I)
+        if c and c.start() < 250:
+            t = t[c.end():]
+    return t
 
 
 def tidy_citation(t):
@@ -233,7 +249,7 @@ def tidy_citation(t):
     t = re.sub(r'^Citation:\s*', '', t)
     if re.search(r'Rank and organization', t[:300], re.I) and re.search(r'Citation:', t, re.I):
         t = re.sub(r'^.*?Citation:\s*', '', t, count=1, flags=re.I | re.S)
-    t = re.sub(r'^The President of the United States(?: of America)?,? (?:in the name of (?:The )?Congress,? )?takes (?:great )?pride in presenting the Medal of Honor(?: \(Posthumously\))? to ', '', t, flags=re.I)
+    t = strip_opening(t)
     t = re.sub(r'\s*\((?:ASN|Service Number|Serial No\.?|SN)[^)]*\)', '', t, flags=re.I)
     t = t.strip(' "“”:')
     if t and t[0].islower():

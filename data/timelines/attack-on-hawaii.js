@@ -31,11 +31,6 @@
     hashirajima: { name: 'Hashirajima anchorage, Hiroshima Bay (flagship Nagato)', lat: 33.97, lng: 132.43 },
     hitokappu: { name: 'Hitokappu Bay, Etorofu, Kuril Islands', lat: 44.92, lng: 147.63 },
     launch: { name: 'Kido Butai launch point, ~230 nmi north of Oahu', lat: 26.0, lng: -158.0 },
-    whiteHouse: { name: 'The White House, Washington, D.C.', lat: 38.8977, lng: -77.0365 },
-    stateDept: { name: 'State, War and Navy Building, Washington, D.C.', lat: 38.8975, lng: -77.039 },
-    warDept: { name: 'Munitions Building (War Dept.), Washington, D.C.', lat: 38.892, lng: -77.047 },
-    navyDept: { name: 'Main Navy Building, Washington, D.C.', lat: 38.8918, lng: -77.0445 },
-    capitol: { name: 'U.S. Capitol, Washington, D.C.', lat: 38.8899, lng: -77.0091 },
     pearl: { name: 'Pearl Harbor, Oahu', lat: 21.3649, lng: -157.9496 },
     entrance: { name: 'Entrance to Pearl Harbor', lat: 21.275, lng: -157.972 },
     fordIsland: { name: 'Naval Air Station Ford Island', lat: 21.364, lng: -157.961 },
@@ -49,11 +44,6 @@
     honolulu: { name: 'Honolulu, Oahu', lat: 21.3069, lng: -157.8583 },
     drydock: { name: 'Drydock No. 1, Pearl Harbor Navy Yard', lat: 21.3547, lng: -157.9467 },
     dock1010: { name: '1010 Dock, Pearl Harbor Navy Yard', lat: 21.3565, lng: -157.95 },
-    london: { name: 'London, United Kingdom', lat: 51.5007, lng: -0.1246 },
-    kuantan: { name: 'South China Sea, off Kuantan, Malaya', lat: 3.6, lng: 104.5 },
-    wake: { name: 'Wake Island', lat: 19.28, lng: 166.65 },
-    guam: { name: 'Guam', lat: 13.444, lng: 144.794 },
-    hongKong: { name: 'Hong Kong', lat: 22.3, lng: 114.17 },
   };
 
   // Battleship Row berths (south-east side of Ford Island).
@@ -128,12 +118,8 @@
         ],
         paths: [APPROACH],
       }),
-    E('1941-11-26', '16:45', 'EST', 'Hull Note delivered', 'political', P.stateDept, 14,
-      'Secretary of State Cordell Hull hands ambassadors Kichisaburō Nomura and Saburō Kurusu a ten-point proposal demanding that Japan withdraw from China and Indochina. Tokyo treats it as an ultimatum.',
-      { approx: true, theater: 'Americas' }),
-    E('1941-11-27', '14:00', 'EST', '"This dispatch is to be considered a war warning"', 'intelligence', P.navyDept, 14,
-      'Chief of Naval Operations Adm. Harold Stark warns Pacific commanders, including Adm. Husband Kimmel at Pearl Harbor, that an aggressive move by Japan is expected within days. The Philippines, Thailand, Malaya or Borneo are thought the likely targets.',
-      { approx: true, theater: 'Americas' }),
+
+
     E('1941-11-27', '15:00', 'HST', 'Army in Hawaii goes on sabotage alert', 'intelligence', P.shafter, 12,
       'After an Army warning from Washington, Lt. Gen. Walter Short orders Alert No. 1, guarding against sabotage by local agents. Aircraft are parked tightly together so they are easier to guard, which makes them easy targets from the air.',
       { approx: true }),
@@ -161,12 +147,8 @@
       { name: 'Japanese Consulate, Nuuanu Avenue, Honolulu', lat: 21.318, lng: -157.852 }, 13,
       'Takeo Yoshikawa, a naval intelligence officer posing as a consular clerk, sends his final report on the warships in Pearl Harbor, noting no barrage balloons, no torpedo nets around the battleships, and that the carriers are absent.',
       { approx: true }),
-    E('1941-12-06', '21:00', 'EST', 'Roosevelt appeals directly to Emperor Hirohito', 'political', P.whiteHouse, 15,
-      'President Franklin D. Roosevelt sends a personal message to the Emperor urging that Japanese troops be withdrawn from Indochina to preserve peace. Delayed by Japanese censors in Tokyo, it arrives too late to matter.',
-      { theater: 'Americas' }),
-    E('1941-12-06', '21:30', 'EST', 'Roosevelt reads the intercepted reply: "This means war"', 'intelligence', P.whiteHouse, 15,
-      'Lt. Lester Schulz delivers the first 13 parts of Japan’s 14-part reply to the Hull Note, decrypted by MAGIC code-breakers. After reading them, Roosevelt tells Harry Hopkins it means war. The parts do not name a time or place.',
-      { approx: true, theater: 'Americas' }),
+
+
 
     // ---------------- 7 December: before the attack ----------------
     E('1941-12-07', '03:42', 'HST', 'USS Condor sights a periscope', 'intelligence', { ...P.entrance, name: 'Off the entrance to Pearl Harbor' }, 12,
@@ -327,15 +309,9 @@
     E('1941-12-07', '10:00', 'HST', 'USS Oglala capsizes', 'loss', P.dock1010, 15,
       'Her hull opened by the torpedo that hit Helena, the elderly minelayer Oglala is towed clear of the cruiser and rolls over at the dock.',
       { approx: true }),
-    E('1941-12-07', '10:00', 'EST', 'Final part of Japan’s message delivered', 'intelligence', P.whiteHouse, 15,
-      'The 14th part of Japan’s reply, decrypted overnight, reaches the President. It declares further negotiations useless but contains no declaration of war.',
-      { approx: true, theater: 'Americas' }),
-    E('1941-12-07', '10:30', 'EST', 'The "1 p.m." instruction decoded', 'intelligence', P.warDept, 14,
-      'A short intercepted message instructs the Japanese envoys to deliver the 14-part reply at exactly 1:00 p.m. Washington time. Col. Rufus Bratton realizes that is dawn in Hawaii.',
-      { approx: true, theater: 'Americas' }),
-    E('1941-12-07', '12:00', 'EST', 'Marshall’s warning sent by commercial telegram', 'intelligence', P.warDept, 14,
-      'Army Chief of Staff Gen. George Marshall drafts an urgent warning to Pacific commanders. With Army radio to Hawaii hampered by atmospheric conditions, it goes by commercial RCA telegraph without priority marking.',
-      { approx: true, theater: 'Americas' }),
+
+
+
     E('1941-12-07', '11:45', 'HST', 'Marshall’s warning arrives, hours too late', 'intelligence', P.shafter, 12,
       'The telegram, received in Honolulu as the attack began, is delivered to Fort Shafter by a motorcycle messenger. It is not decoded and seen by Gen. Short until mid-afternoon.',
       { approx: true }),
@@ -346,143 +322,72 @@
     E('1941-12-07', '13:30', 'HST', 'Nagumo decides against a third strike', 'movement', P.launch, 5,
       'With his aircraft recovered and his carriers undamaged, Nagumo chooses not to launch another attack. He fears the unlocated U.S. carriers and his fleet’s vulnerability. The oil tank farms, repair shops and submarine base are left intact, which later proves critical. The fleet withdraws to the northwest.',
       { approx: true, paths: [WITHDRAWAL] }),
-    E('1941-12-07', '13:40', 'EST', 'Roosevelt told of the attack', 'political', P.whiteHouse, 15,
-      'Navy Secretary Frank Knox telephones the President, who is lunching in the Oval Study with Harry Hopkins, with a radio message from Pearl Harbor: air raid, this is not drill. Hopkins thinks there must be some mistake. Roosevelt believes it is likely true.',
-      { approx: true, theater: 'Americas' }),
-    E('1941-12-07', '14:20', 'EST', 'Japanese envoys meet Hull after the attack has begun', 'political', P.stateDept, 14,
-      'Delayed by slow typing at their embassy, Nomura and Kurusu hand Secretary Hull the 14-part message more than an hour after bombs began falling. Hull, already informed, dismisses them angrily.',
-      { theater: 'Americas' }),
-    E('1941-12-07', '14:26', 'EST', 'News breaks across America', 'home-front', P.whiteHouse, 13,
-      'Press Secretary Stephen Early releases the news to the wire services. Radio bulletins interrupt Sunday programming nationwide, including the broadcast of a football game between the New York Giants and Brooklyn Dodgers.',
-      { approx: true, theater: 'Americas' }),
+
+
+
     E('1941-12-07', '15:30', 'HST', 'Martial law declared in Hawaii', 'home-front',
       { name: 'ʻIolani Palace, Honolulu (Territorial government)', lat: 21.3068, lng: -157.859 }, 14,
       'Territorial Governor Joseph Poindexter proclaims martial law and suspends habeas corpus. Gen. Short becomes military governor. Military rule will last nearly three years.'),
     E('1941-12-07', '18:00', 'HST', 'Arrests of Japanese community leaders begin', 'home-front', P.honolulu, 12,
       'FBI agents and military police begin detaining Japanese community leaders, priests, teachers and businessmen in Hawaii from pre-compiled lists. Similar arrests begin on the mainland.',
       { approx: true }),
-    E('1941-12-07', '20:30', 'EST', 'Roosevelt meets his cabinet', 'political', P.whiteHouse, 15,
-      'The President convenes the cabinet in the Oval Study, telling them it is the most serious meeting since 1861. Congressional leaders join later in the evening, and he drafts his address to Congress.',
-      { approx: true, theater: 'Americas' }),
+
     E('1941-12-07', '21:00', 'HST', 'Friendly fire downs Enterprise fighters', 'attack', P.fordIsland, 12,
       'Six F4F Wildcats from Enterprise attempt to land at Ford Island after dark. Jittery gunners across the harbor open fire, shooting down several and killing some of their pilots.',
       { approx: true }),
-    E('1941-12-07', '21:30', 'MID', 'Japanese destroyers shell Midway', 'attack',
-      { name: 'Midway Atoll', lat: 28.21, lng: -177.38 }, 10,
-      'The destroyers Akebono and Ushio bombard Midway, damaging the power plant and a seaplane hangar. 1st Lt. George Cannon, mortally wounded, refuses evacuation until his men are safe and becomes the first Marine awarded the Medal of Honor in the war.',
-      { approx: true }),
-    E('1941-12-07', '22:00', 'EST', 'Canada declares war on Japan', 'political',
-      { name: 'Ottawa, Canada', lat: 45.4236, lng: -75.7009 }, 11,
-      'Canada declares war on Japan within hours of the attack, ahead of the United States.',
-      { approx: true, theater: 'Americas' }),
 
-    // ---------------- 8 December: the wider war erupts ----------------
+
+
+    // ---------------- 8 December ----------------
     E('1941-12-08', '00:15', 'JST', 'Roosevelt’s message reaches Tokyo, too late', 'political', P.tokyo, 12,
       'Ambassador Joseph Grew delivers Roosevelt’s appeal to Foreign Minister Shigenori Tōgō around midnight, after hours of delay. By the time it reaches the Emperor, the strike force is already launching.',
       { approx: true, theater: 'Asia' }),
-    E('1941-12-08', '00:25', 'MYT', 'Japanese landings at Kota Bharu, Malaya', 'invasion',
-      { name: 'Kota Bharu, Kelantan, British Malaya', lat: 6.13, lng: 102.24 }, 10,
-      'Japanese troops storm the beaches at Kota Bharu against strong resistance from Indian troops and Australian Hudson bombers. In absolute time this begins over an hour before the first bombs fall on Pearl Harbor.',
-      { theater: 'Asia' }),
-    E('1941-12-08', '04:00', 'ICT', 'Japan invades Thailand at Singora and Pattani', 'invasion',
-      { name: 'Singora (Songkhla), Thailand', lat: 7.2, lng: 100.6 }, 9,
-      'Japanese forces land at Singora and Pattani on Thailand’s Kra Isthmus, the main thrust toward Malaya and Singapore. Thailand agrees to a ceasefire within hours.',
-      { approx: true, theater: 'Asia' }),
-    E('1941-12-08', '04:00', 'CHN', 'Japan seizes Shanghai’s International Settlement', 'invasion',
-      { name: 'Shanghai, China', lat: 31.24, lng: 121.49 }, 12,
-      'Japanese forces move into the International Settlement. The British gunboat HMS Peterel refuses to surrender and is sunk, while the U.S. river gunboat USS Wake is captured.',
-      { approx: true, theater: 'Asia' }),
-    E('1941-12-08', '04:15', 'MYT', 'Singapore bombed', 'attack',
-      { name: 'Singapore', lat: 1.29, lng: 103.85 }, 11,
-      'Japanese bombers from Indochina raid Singapore. The city’s lights are still on and the civil defense headquarters is unmanned. Dozens of civilians are killed.',
-      { approx: true, theater: 'Asia' }),
+
+
+
+
     E('1941-12-08', '05:40', 'HST', 'Kazuo Sakamaki captured: first Japanese POW', 'home-front',
       { name: 'Waimanalo, near Bellows Field', lat: 21.355, lng: -157.705 }, 13,
       'After his midget submarine (HA-19) runs aground on a reef, Ensign Kazuo Sakamaki swims ashore exhausted and is captured by Cpl. David Akui of the Hawaii National Guard. He becomes America’s first prisoner of war of the Pacific War.',
       { approx: true }),
-    E('1941-12-08', '08:00', 'HKT', 'Hong Kong attacked', 'invasion', P.hongKong, 11,
-      'Japanese aircraft destroy the small RAF force at Kai Tak airfield while troops cross the border from China into the New Territories, starting the Battle of Hong Kong.',
-      { approx: true, theater: 'Asia' }),
-    E('1941-12-08', '08:27', 'ChST', 'Guam bombed', 'attack', P.guam, 11,
-      'Bombers from nearby Saipan attack the lightly defended U.S. island of Guam, sinking the minesweeper USS Penguin.',
-      { approx: true }),
+
+
     E('1941-12-08', '11:45', 'JST', 'Imperial Rescript declares war', 'political', P.tokyo, 11,
       'The Emperor’s rescript declaring war on the United States and the British Empire is issued and broadcast. Japanese newspapers trumpet the victory at Hawaii.',
       { approx: true, theater: 'Asia' }),
-    E('1941-12-08', '12:00', 'WAKE', 'Wake Island bombed', 'attack', P.wake, 12,
-      'Thirty-six bombers from the Marshall Islands hit Wake Island under cover of a rain squall, destroying most of the Marine Wildcat fighters delivered by Enterprise days earlier on the ground.',
-      { approx: true }),
-    E('1941-12-08', '12:30', 'EST', '"A date which will live in infamy"', 'political', P.capitol, 15,
-      'Roosevelt addresses a joint session of Congress, broadcast to the largest radio audience in American history, and asks for a declaration of war on Japan. The speech lasts about seven minutes.',
-      { theater: 'Americas', wiki: { 'joint session of Congress': 'Infamy_speech' }, facts: [['Length', 'About 7 minutes'], ['Audience', 'Estimated 81% of American homes listening']] }),
-    E('1941-12-08', '12:35', 'PHT', 'Clark Field caught on the ground', 'attack',
-      { name: 'Clark Field, Luzon, Philippines', lat: 15.19, lng: 120.56 }, 12,
-      'More than nine hours after news of Pearl Harbor reached Manila, Japanese bombers from Formosa find the Far East Air Force’s B-17s and P-40s lined up at Clark Field. About half of Gen. MacArthur’s air strength is destroyed in a single raid.',
-      { approx: true, theater: 'Asia' }),
-    E('1941-12-08', '13:10', 'EST', 'Congress votes for war', 'political', P.capitol, 15,
-      'The Senate votes 82–0 and the House 388–1 to declare war on Japan. The only vote against is Rep. Jeannette Rankin of Montana, who had also voted against entering World War I.',
-      { approx: true, theater: 'Americas' }),
+
+
+
+
     E('1941-12-08', '13:30', 'HST', 'Survivors cut free from Oklahoma’s hull', 'home-front', ROW.oklahoma, 15,
       'Navy Yard workers led by civilian Julio DeCastro cut through the overturned hull of Oklahoma after hearing tapping from inside. Over about 36 hours they rescue 32 trapped sailors.',
       { approx: true }),
-    E('1941-12-08', '15:00', 'BST', 'Britain declares war on Japan', 'political', P.london, 12,
-      'Prime Minister Winston Churchill informs the House of Commons that Britain is at war with Japan, which has attacked British territory in Malaya and Hong Kong.',
-      { approx: true, theater: 'Europe' }),
-    E('1941-12-08', '16:10', 'EST', 'Roosevelt signs the declaration of war', 'political', P.whiteHouse, 15,
-      'Wearing a black armband in mourning, the President signs the joint resolution declaring that a state of war exists between the United States and the Empire of Japan.',
-      { theater: 'Americas' }),
+
+
     E('1941-12-08', '17:00', 'HST', 'Enterprise returns to a shattered harbor', 'movement', P.pearl, 12,
       'Enterprise enters Pearl Harbor at dusk past the wreckage and burning oil. Halsey is reported to have vowed that, by the war’s end, Japanese would be spoken only in hell. The carrier refuels and sails again before dawn.',
       { approx: true }),
 
     // ---------------- Aftermath ----------------
-    E('1941-12-09', '12:00', 'CHN', 'China formally declares war on Japan, Germany and Italy', 'political',
-      { name: 'Chongqing, China (wartime capital)', lat: 29.56, lng: 106.55 }, 10,
-      'Having fought Japan since 1937 without a formal declaration, the Nationalist government in Chongqing now declares war on Japan, and on Germany and Italy.',
-      { approx: true, theater: 'Asia' }),
-    E('1941-12-09', '22:00', 'EST', 'Roosevelt’s fireside chat', 'political', P.whiteHouse, 15,
-      'In a radio address to the nation, Roosevelt describes the attack and warns Americans to prepare for a long, hard war. He says the nation is now in it, all the way.',
-      { theater: 'Americas' }),
-    E('1941-12-10', '07:00', 'ChST', 'Guam invaded and surrenders', 'invasion', P.guam, 11,
-      'About 5,000 Japanese troops land on Guam. Outnumbered and lightly armed, the garrison under Capt. George McMillin surrenders after brief resistance.',
-      { approx: true }),
-    E('1941-12-10', '06:00', 'PHT', 'Japanese landings on northern Luzon', 'invasion',
-      { name: 'Aparri, Luzon, Philippines', lat: 18.36, lng: 121.64 }, 10,
-      'Japanese troops land at Aparri and Vigan to seize airfields in northern Luzon, the opening of the invasion of the Philippines.',
-      { approx: true, theater: 'Asia' }),
-    E('1941-12-10', '12:33', 'MYT', 'HMS Repulse sunk', 'loss', P.kuantan, 8,
-      'The battlecruiser Repulse of Force Z, steaming to intercept Japanese landings without air cover, is sunk by land-based Japanese torpedo bombers from Indochina.',
-      { theater: 'Asia' }),
-    E('1941-12-10', '13:20', 'MYT', 'HMS Prince of Wales sunk', 'loss', P.kuantan, 8,
-      'The battleship Prince of Wales follows Repulse to the bottom. Admiral Tom Phillips is lost with 840 men across both ships. They are the first capital ships ever sunk by aircraft alone while under way at sea. Churchill later wrote that he never received a more direct shock.',
-      { theater: 'Asia', facts: [['Lost', '840 men in total, including Adm. Tom Phillips'], ['Aircraft', 'G3M and G4M bombers of the 22nd Air Flotilla']] }),
-    E('1941-12-11', '05:00', 'WAKE', 'Wake Island throws back an invasion', 'attack', P.wake, 12,
-      'Marine coastal guns and the four surviving Wildcats repel the Japanese landing force, sinking the destroyers Hayate and Kisaragi. It is the first failure of a Japanese amphibious assault in the war.',
-      { approx: true }),
-    E('1941-12-11', '15:00', 'CEST', 'Germany declares war on the United States', 'political',
-      { name: 'Kroll Opera House (Reichstag), Berlin', lat: 52.518, lng: 13.369 }, 12,
-      'Adolf Hitler announces in the Reichstag that Germany is at war with the United States, a decision historians regard as one of his gravest strategic mistakes.',
-      { approx: true, theater: 'Europe' }),
-    E('1941-12-11', '14:45', 'CEST', 'Italy declares war on the United States', 'political',
-      { name: 'Palazzo Venezia, Rome', lat: 41.896, lng: 12.482 }, 13,
-      'Benito Mussolini announces Italy’s declaration of war on the United States from the balcony of the Palazzo Venezia.',
-      { approx: true, theater: 'Europe' }),
-    E('1941-12-11', '15:05', 'EST', 'U.S. declares war on Germany and Italy', 'political', P.capitol, 14,
-      'Congress responds within hours, unanimously declaring war on Germany and Italy. Roosevelt signs both resolutions the same afternoon. The war is now truly global.',
-      { approx: true, theater: 'Americas' }),
+
+
+
+
+
+
+
+
+
+
     E('1941-12-17', '12:00', 'HST', 'Kimmel and Short relieved; Nimitz named', 'political',
       { name: 'CINCPAC headquarters, Submarine Base Pearl Harbor', lat: 21.353, lng: -157.94 }, 13,
       'Adm. Kimmel and Lt. Gen. Short are relieved of command. Adm. Chester W. Nimitz is named the new Commander in Chief of the Pacific Fleet.',
       { approx: true }),
-    E('1941-12-23', '07:30', 'WAKE', 'Wake Island falls', 'invasion', P.wake, 12,
-      'A second, much larger Japanese assault, supported by the carriers Sōryū and Hiryū detached from the returning Pearl Harbor force, overwhelms Wake’s defenders after a night of fighting. A relief expedition is recalled.',
-      { approx: true }),
+
     E('1941-12-23', '12:00', 'JST', 'Kido Butai returns to Japan', 'movement', P.hashirajima, 6,
       'The Pearl Harbor strike force arrives back in the Inland Sea to a heroes’ welcome, having lost no ships. Within months the same carriers will strike Darwin and Ceylon.',
       { approx: true, paths: [WITHDRAWAL] }),
-    E('1941-12-25', '15:15', 'HKT', 'Hong Kong surrenders: "Black Christmas"', 'invasion', P.hongKong, 11,
-      'After 18 days of fighting, Governor Sir Mark Young surrenders Hong Kong to the Japanese at the Peninsula Hotel. A brutal occupation follows.',
-      { approx: true, theater: 'Asia' }),
+
     E('1941-12-31', '10:00', 'HST', 'Nimitz takes command aboard USS Grayling', 'political',
       { name: 'USS Grayling, Submarine Base Pearl Harbor', lat: 21.352, lng: -157.942 }, 14,
       'With the battleships sunk, Adm. Nimitz takes command of the Pacific Fleet on the deck of the submarine Grayling. He will lead it to victory at Midway six months later.',

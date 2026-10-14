@@ -130,7 +130,7 @@ body {
 .map-crumbs {
   position: absolute; top: 10px; left: 54px; z-index: 640;
   display: flex; align-items: center; gap: 4px;
-  max-width: calc(100% - 54px - 390px); /* stop short of the event panel */
+  max-width: calc(100% - 54px - clamp(420px, 40vw, 680px) - 36px); /* stop short of the event panel */
 }
 .map-crumbs:empty { display: none; }
 .map-crumbs .crumb {
@@ -358,9 +358,15 @@ body.overview-mode .day-strip { visibility: hidden; }
   position: absolute;
   top: 12px;
   right: 12px;
-  width: min(360px, calc(100% - 24px));
+  /* Wide enough for long citations; the camera keeps events to the left of it. app.js shrinks
+     --panel-scale a little to fit long text; beyond that it scrolls, with no visible scrollbar:
+     the edges fade where there's more (.more-above / .more-below). */
+  width: min(clamp(420px, 40vw, 680px), calc(100% - 24px));
   max-height: calc(100% - 24px);
   overflow-y: auto;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+  --s: var(--panel-scale, 1);
   background: var(--panel);
   border: 1px solid var(--line);
   border-top: 4px solid var(--marker-color, var(--accent));
@@ -369,6 +375,13 @@ body.overview-mode .day-strip { visibility: hidden; }
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
 }
 .panel[hidden] { display: none; }
+.panel::-webkit-scrollbar { display: none; }
+.panel.more-below { -webkit-mask-image: linear-gradient(#000 calc(100% - 56px), transparent); mask-image: linear-gradient(#000 calc(100% - 56px), transparent); }
+.panel.more-above { -webkit-mask-image: linear-gradient(transparent, #000 28px); mask-image: linear-gradient(transparent, #000 28px); }
+.panel.more-above.more-below {
+  -webkit-mask-image: linear-gradient(transparent, #000 28px, #000 calc(100% - 56px), transparent);
+  mask-image: linear-gradient(transparent, #000 28px, #000 calc(100% - 56px), transparent);
+}
 .panel-close {
   position: absolute; top: 4px; right: 8px;
   background: none; border: none;
@@ -396,7 +409,7 @@ body.overview-mode .day-strip { visibility: hidden; }
 
 .panel-nav {
   display: flex; align-items: center; gap: 8px;
-  font-size: 11px; color: var(--muted);
+  font-size: calc(12px * var(--s)); color: var(--muted);
   margin: 0 28px 10px 0;
 }
 .panel-nav button {
@@ -408,7 +421,7 @@ body.overview-mode .day-strip { visibility: hidden; }
 
 .panel .tag {
   display: inline-block;
-  font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+  font-size: calc(11px * var(--s)); letter-spacing: 0.15em; text-transform: uppercase;
   color: var(--marker-color, var(--muted));
   margin-bottom: 6px;
   filter: brightness(1.4);
@@ -416,14 +429,14 @@ body.overview-mode .day-strip { visibility: hidden; }
 .panel h2 {
   font-family: var(--font-head);
   font-weight: 400;
-  font-size: 21px;
+  font-size: calc(26px * var(--s));
   line-height: 1.2;
   margin: 0 0 6px;
 }
-.panel .meta { font-size: 12px; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
+.panel .meta { font-size: calc(13px * var(--s)); color: var(--muted); margin-bottom: calc(12px * var(--s)); line-height: 1.5; }
 .panel .meta strong { color: var(--ink); font-weight: 500; }
-.panel p { font-size: 14px; line-height: 1.5; margin: 0 0 14px; }
-.panel dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0; font-size: 13px; }
+.panel p { font-size: calc(16px * var(--s)); line-height: 1.55; margin: 0 0 calc(14px * var(--s)); }
+.panel dl { display: grid; grid-template-columns: auto 1fr; gap: calc(6px * var(--s)) 14px; margin: 0; font-size: calc(14px * var(--s)); }
 .panel dt { color: var(--muted); }
 .panel dd { margin: 0; }
 .panel a.wiki {
@@ -438,7 +451,7 @@ body.overview-mode .day-strip { visibility: hidden; }
   margin-top: 16px; padding: 9px 12px;
   background: #2a2823; color: var(--ink);
   border: 1px solid var(--marker-color, var(--line));
-  font: inherit; font-size: 13px; text-align: left; cursor: pointer;
+  font: inherit; font-size: calc(14px * var(--s)); text-align: left; cursor: pointer;
 }
 .panel-link:hover { background: #34312a; }
 
@@ -475,7 +488,8 @@ body.overview-mode .day-strip { visibility: hidden; }
 
 /* Sequence of the current day's events, in chronological order. */
 .day-strip { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-.day-strip[hidden] { display: none; }
+/* Keep its space on single-event days so the panel below the map never changes height. */
+.day-strip[hidden] { display: flex; visibility: hidden; }
 .day-strip-label { font-size: 11px; color: var(--muted); white-space: nowrap; min-width: 92px; }
 .day-strip-chips { display: flex; gap: 1px; flex: 1; min-width: 0; height: 16px; align-items: stretch; overflow: hidden; padding: 3px; margin: -3px; }
 .day-strip-chips button {

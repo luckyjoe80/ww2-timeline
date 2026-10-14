@@ -20,6 +20,8 @@ Then visit <http://localhost:8417>. Deep links work: `#battle-of-midway/1942-06-
 | --- | --- | --- |
 | War in the Pacific | The Road to Pearl Harbor | `data/timelines/road-to-pearl-harbor.js` |
 | | The Attack on Hawaii | `data/timelines/attack-on-hawaii.js` |
+| | From Pearl Harbor to Guadalcanal | `data/timelines/pearl-harbor-to-guadalcanal.js` |
+| | The Road to Tokyo Bay | `data/timelines/road-to-tokyo-bay.js` |
 | | The Battle of Midway | `data/timelines/battle-of-midway.js` |
 | | Submarine Operations | `data/timelines/pacific-submarines.js` |
 | Production | B-17 Production (atlas) | `data/atlases/b17-production.js` |

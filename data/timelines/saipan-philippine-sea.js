@@ -1,0 +1,290 @@
+// Timeline: Saipan and the Philippine Sea (War in the Pacific).
+// The opening of Operation Forager: the invasion of Saipan, 15 June – 9 July 1944, and the
+// Battle of the Philippine Sea, 19–20 June 1944, from the preliminary strikes and bombardment
+// to the last banzai charge, the deaths at the northern cliffs and Tōjō's fall.
+// Checked against the English Wikipedia articles "Battle of Saipan", "Battle of the Philippine
+// Sea", "Japanese aircraft carrier Taihō", "Japanese aircraft carrier Shōkaku", "Japanese
+// aircraft carrier Hiyō", "Jisaburō Ozawa", "Raymond A. Spruance", "Marc Mitscher",
+// "Yoshitsugu Saitō", "Chūichi Nagumo", "Hideki Tojo", "Ralph C. Smith" and "Benjamin L. Salomon"
+// (October 2026).
+//
+// Times are local Marianas time (ChST) as the sources give them, including for the carrier
+// battle far to the west. Where the battle and ship articles differ (Shōkaku's torpedoing,
+// Taihō's sinking), both are noted. Event schema: see data/timelines/attack-on-hawaii.js.
+
+(function () {
+  const P = {
+    washington: { name: 'Washington, D.C.', lat: 38.89, lng: -77.03 },
+    pearl: { name: 'Pearl Harbor, Oahu', lat: 21.35, lng: -157.95 },
+    majuro: { name: 'Majuro Atoll, Marshall Islands', lat: 7.1, lng: 171.38 },
+    tawi: { name: 'Tawi-Tawi anchorage, Sulu Archipelago', lat: 5.2, lng: 120.0 },
+    guimaras: { name: 'Guimaras Island, central Philippines', lat: 10.6, lng: 122.6 },
+    sanBernardino: { name: 'San Bernardino Strait, Philippines', lat: 12.55, lng: 124.2 },
+    batjan: { name: 'Batjan (Bacan), Moluccas', lat: -0.6, lng: 127.5 },
+    rendezvous: { name: 'Western Philippine Sea (approx.)', lat: 13.5, lng: 130.0 },
+    jfleet: { name: 'Japanese Mobile Fleet, west of the Marianas (approx.)', lat: 12.5, lng: 137.5 },
+    jfleet20: { name: 'Japanese Mobile Fleet, retiring northwest (approx.)', lat: 16.0, lng: 133.0 },
+    tf58: { name: 'Task Force 58, west of the Marianas (approx.)', lat: 14.5, lng: 143.5 },
+    tf58w: { name: 'Task Force 58, steaming west (approx.)', lat: 15.0, lng: 139.0 },
+    taiho: { name: 'Where Taihō sank', lat: 12.083, lng: 138.2 },
+    shokaku: { name: 'Where Shōkaku sank, north of Yap', lat: 11.667, lng: 137.667 },
+    hiyo: { name: 'Where Hiyō sank', lat: 16.333, lng: 132.533 },
+    orote: { name: 'Orote Field, Guam', lat: 13.44, lng: 144.63 },
+    saipan: { name: 'Saipan, Mariana Islands', lat: 15.18, lng: 145.75 },
+    tinian: { name: 'Saipan and Tinian', lat: 15.08, lng: 145.68 },
+    offSaipan: { name: 'Off the west coast of Saipan', lat: 15.17, lng: 145.62 },
+    beaches: { name: 'Invasion beaches, Charan Kanoa, Saipan', lat: 15.155, lng: 145.70 },
+    charanKanoa: { name: 'North of Charan Kanoa, Saipan', lat: 15.17, lng: 145.705 },
+    aslito: { name: 'Aslito Field, southern Saipan', lat: 15.119, lng: 145.729 },
+    nafutan: { name: 'Nafutan Point, Saipan', lat: 15.10, lng: 145.775 },
+    centralLine: { name: 'Central Saipan, south of Mount Tapotchau', lat: 15.175, lng: 145.74 },
+    deathValley: { name: '“Death Valley”, east of Mount Tapotchau (approx.)', lat: 15.185, lng: 145.755 },
+    tapotchau: { name: 'Mount Tapotchau, Saipan', lat: 15.189, lng: 145.743 },
+    garapan: { name: 'Garapan, Saipan', lat: 15.21, lng: 145.72 },
+    harakiri: { name: '“Harakiri Gulch”, northern Saipan (approx.)', lat: 15.245, lng: 145.775 },
+    makunsha: { name: 'Near Makunsha, northern Saipan (approx.)', lat: 15.26, lng: 145.79 },
+    tanapag: { name: 'Tanapag plain, Saipan', lat: 15.24, lng: 145.755 },
+    marpi: { name: 'Banzai Cliff, Marpi Point, Saipan', lat: 15.289, lng: 145.82 },
+    yawata: { name: 'Yawata Steel Works, Kyushu', lat: 33.87, lng: 130.8 },
+    philippines: { name: 'Central Philippines (approx.)', lat: 10.3, lng: 124.0 },
+    cfJapan: { name: 'Combined Fleet command, Japan (approx.)', lat: 35.4, lng: 139.9 },
+    tokyo: { name: 'Tokyo', lat: 35.68, lng: 139.76 },
+  };
+
+  const ev = (date, title, type, location, zoom, summary, extra = {}) => ({
+    id: extra.id || `${date}-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40)}`,
+    date, title, type, location, zoom, summary,
+    theater: extra.theater || 'Pacific',
+    ...extra,
+  });
+  const at = (time, extra = {}) => ({ time, tz: 'ChST', ...extra });
+  const ord = (sortTime, extra = {}) => ({ sortTime, tz: 'ChST', ...extra }); // order within the day only; no time shown
+
+  WW2.events['saipan-philippine-sea'] = [
+    // ---------- Background ----------
+    ev('1944-03-12', 'The Marianas invasion is brought forward', 'political', P.washington, 8,
+      'The Joint Chiefs of Staff move the invasion of the Mariana Islands up to 15 June, months ahead of the date set at Cairo. The islands would give the new B-29 bombers airfields within range of Japan’s cities. Admiral Chester Nimitz names the campaign Forager, with Saipan as its first objective.',
+      { facts: [['Codename', 'Operation Forager'], ['Objectives', 'Saipan, Tinian, Guam']] }),
+    ev('1944-03-31', 'Admiral Koga is killed; the Z Plan is lost', 'intelligence', P.philippines, 6,
+      'The flying boat carrying Admiral Mineichi Koga, commander of the Combined Fleet, flies into a typhoon and crashes. His chief of staff survives the crash of a second aircraft, but the briefcase holding the Z Plan, the Navy’s scheme for a decisive battle, is recovered by Filipino guerrillas and passed to MacArthur’s intelligence service. Koga’s successor, Admiral Soemu Toyoda, issues it with few changes as Operation A-Go, so the Americans know its outline in advance.',
+      { approx: true }),
+    ev('1944-05-14', 'The Mobile Fleet gathers at Tawi-Tawi', 'movement', P.tawi, 9,
+      'Vice Admiral Jisaburō Ozawa’s 1st Mobile Fleet, with nine carriers, reaches Tawi-Tawi off Borneo, close to the oil fields whose unrefined crude it burns. Ozawa flies his flag in the brand-new armoured carrier Taihō. American submarines are so active around the anchorage that he soon has to stop training flights at sea, and his young pilots lose practice they badly need.',
+      { facts: [['Commander', 'Vice Admiral Jisaburō Ozawa (in Taihō)'], ['Carriers', '3 fleet, 6 light'], ['Aircraft', 'nearly 500']] }),
+    ev('1944-05-25', 'The invasion force sails from Hawaii', 'movement', P.pearl, 8,
+      'The two Marine divisions leave Pearl Harbor between 19 and 31 May and the Army’s 27th Infantry Division on 25 May, staging through Eniwetok and Kwajalein. With more than 500 ships and 300,000 men, the expedition is under way before the Allies land in Normandy. Lieutenant General Holland Smith commands the troops ashore; Vice Admiral Richmond K. Turner the landings; Admiral Raymond Spruance the whole operation.',
+      { approx: true, facts: [['Assault troops', 'about 60,000: 2nd and 4th Marine Divisions, 27th Infantry Division'], ['Fleet commander', 'Admiral Raymond Spruance, Fifth Fleet']],
+        paths: [{ label: 'Invasion convoys to Saipan (approximate)', kind: 'route', coords: [[21.35, -157.95], [11.43, 162.35], [15.17, 145.62]] }] }),
+    ev('1944-06-06', 'Task Force 58 sails from Majuro', 'movement', P.majuro, 8,
+      'On the day the Allies land in Normandy, Vice Admiral Marc Mitscher’s Fast Carrier Task Force leaves Majuro for the Marianas with 15 carriers. Opposing it on Saipan are nearly 32,000 Japanese troops, about double the American estimate, under Lieutenant General Yoshitsugu Saitō of the 43rd Division.',
+      { facts: [['Commander', 'Vice Admiral Marc Mitscher'], ['Japanese garrison', 'nearly 32,000, including 6,000 naval troops']],
+        paths: [{ label: 'Task Force 58 to the Marianas (approximate)', kind: 'route', coords: [[7.1, 171.38], [12, 158], [15.0, 147.5]] }] }),
+
+    // ---------- 11–14 June: strikes and bombardment ----------
+    ev('1944-06-11', 'Hellcats sweep Saipan and Tinian', 'attack', P.tinian, 10,
+      'More than 200 F6F Hellcats from Task Force 58 surprise the Japanese airfields on Saipan and Tinian, putting about 130 aircraft out of action for the loss of 11. Strikes continue for three more days, wrecking most of the land-based 1st Air Fleet and giving the Americans control of the air. The Combined Fleet staff sets Operation A-Go in motion.',
+      { facts: [['Japanese aircraft knocked out', 'about 130'], ['U.S. losses', '11 aircraft']] }),
+    ev('1944-06-13', 'Fast battleships open the bombardment', 'attack', P.offSaipan, 10,
+      'Seven fast battleships and 11 destroyers under Vice Admiral Willis Lee begin shelling Saipan. Their crews are not trained for shore bombardment and fire from more than five miles out for fear of mines. Much of Garapan and Charan Kanoa is wrecked, but few of the island’s defences are hit.'),
+    ev('1944-06-13', 'Ozawa sails from Tawi-Tawi', 'movement', P.tawi, 7,
+      'The 1st Mobile Fleet leaves Tawi-Tawi and threads through the Philippine islands toward the Marianas, refuelling at Guimaras on the way.',
+      { paths: [{ label: 'Mobile Fleet to the Philippine Sea (approximate)', kind: 'route', coords: [[5.2, 120.0], [10.6, 122.6], [12.55, 124.2], [13.5, 130.0]] }] }),
+    ev('1944-06-13', 'Yamato and Musashi turn north', 'movement', P.batjan, 7,
+      'Vice Admiral Matome Ugaki’s battleships Yamato and Musashi had been sent south to break up MacArthur’s landing on Biak. With the Marianas under attack they are ordered to join Ozawa instead, leaving the Biak beachhead in peace.',
+      { approx: true }),
+    ev('1944-06-14', 'Old battleships close in', 'attack', P.offSaipan, 10,
+      'Seven older battleships, 11 cruisers and 26 destroyers under Rear Admiral Jesse B. Oldendorf take over the shelling. Trained for the work, and finding no mines, they come closer and destroy many anti-aircraft positions, but most of the beach defences survive.',
+      { facts: [['Ships', '7 battleships, 11 cruisers, 26 destroyers']] }),
+
+    // ---------- 15 June: D-Day ----------
+    ev('1944-06-15', 'The Marines land at Charan Kanoa', 'invasion', P.beaches, 12,
+      'After a morning of naval and air bombardment, the 2nd Marine Division lands on the Red and Green beaches at Charan Kanoa and the 4th Marine Division on Blue and Yellow beaches to the south. About 700 amphibious vehicles carry the assault waves across the reef, and within 20 minutes some 8,000 men are ashore. Artillery and mortars zeroed in from the hills behind the beaches rake them all day.',
+      at('08:40', { facts: [['Landing vehicles', '393 amphibious tractors, 140 amphibious tanks'], ['Men ashore in 20 minutes', 'about 8,000']],
+        link: { timeline: 'road-to-tokyo-bay', event: '1944-06-15-saipan-invaded', label: 'See Saipan in The Road to Tokyo Bay' } })),
+    ev('1944-06-15', '“The fate of the Empire rests upon this battle”', 'political', P.cfJapan, 6,
+      'Less than half an hour after the landings begin, Admiral Toyoda orders Operation A-Go to destroy the American fleet. He signals the whole fleet with the words Admiral Tōgō used before Tsushima in 1905: the fate of the Empire rests on this one battle, and every man must do his utmost.',
+      at('09:10', { approx: true })),
+    ev('1944-06-15', 'B-29s bomb Japan from China', 'attack', P.yawata, 8,
+      'Timed to coincide with the landings, B-29s based in China attack the Yawata Steel Works on Kyushu, the first raid on the Japanese home islands by the new bombers. Saipan is meant to give them much closer bases.',
+      { approx: true, ...ord('12:00') }),
+    ev('1944-06-15', 'Flying Fish sights the Japanese carriers', 'intelligence', P.sanBernardino, 8,
+      'The submarine Flying Fish sees a Japanese carrier and battleship force coming out of the San Bernardino Strait, and an hour later Seahorse reports battleships and cruisers 200 miles east of Mindanao. Flying Fish waits until dark to surface and radio her report. Spruance is sure a major battle is coming.',
+      at('18:35')),
+    ev('1944-06-15', 'A shallow beachhead at nightfall', 'invasion', P.beaches, 11,
+      'By evening the Marines hold a strip about 5.5 miles long and half a mile deep, only two-thirds of the day’s objective, with a wide gap between the two divisions north of Charan Kanoa. Casualties exceed 2,000, most from artillery and mortar fire, and about 40 percent of the landing vehicles have been knocked out. Through the night Saitō launches piecemeal counterattacks; tanks, artillery and naval star shells help beat them all back.',
+      ord('19:00', { facts: [['U.S. casualties', 'over 2,000'], ['Vehicles lost or damaged', '164']] })),
+
+    // ---------- 16–18 June ----------
+    ev('1944-06-16', 'The 27th Division lands; Guam is postponed', 'invasion', P.beaches, 11,
+      'Holland Smith commits his reserve, landing two regiments of the Army’s 27th Infantry Division, and proposes putting off the invasion of Guam, planned for 18 June, indefinitely. The Marines spend the day closing the gap between their divisions.'),
+    ev('1944-06-16', 'Ozawa and Ugaki meet in the Philippine Sea', 'movement', P.rendezvous, 6,
+      'The main parts of the Japanese fleet rendezvous in the western Philippine Sea and finish refuelling the next day: nine carriers, five battleships including Yamato and Musashi, and nearly 500 aircraft against Task Force 58’s 15 carriers, seven fast battleships and almost 1,000 planes. Ozawa counts on the longer range of his aircraft and on hundreds of land-based planes in the Marianas that no longer exist.',
+      { link: { timeline: 'yamato', event: '1944-06-19-battle-of-the-philippine-sea', label: 'See this in Battleship Yamato' } }),
+    ev('1944-06-16', 'Spruance gathers his carriers west of Saipan', 'movement', P.tf58, 7,
+      'After consulting Nimitz, Spruance orders Mitscher to bring back the two carrier groups he has sent north to intercept aircraft reinforcements from Japan and to form up west of Saipan. The older battleships, cruisers and escort carriers stay behind to guard the landings. His orders put protecting the invasion first.',
+      { approx: true }),
+    ev('1944-06-16', 'Japanese tanks attack the beachhead', 'attack', P.charanKanoa, 12,
+      'During the night Saitō throws about 35 tanks and some 1,000 men at the beachhead north of Charan Kanoa. The attack is poorly coordinated, and the naval troops meant to join it do not. Bazookas, anti-tank guns, Shermans and self-propelled howitzers knock out about 31 of the tanks.',
+      { approx: true, ...ord('22:00'), facts: [['Japanese tanks', 'about 35 attacking, about 31 destroyed']] }),
+    ev('1944-06-18', 'Aslito Field is taken', 'invasion', P.aslito, 12,
+      'The 27th Infantry Division captures Aslito Field, the main airfield of the Marianas, as the Japanese fall back to Nafutan Point. The 4th Marine Division reaches the east coast, cutting the island in two. With the Japanese fleet coming, the transports pull back to the east, leaving the Army division short of ammunition and food.'),
+    ev('1944-06-18', 'Spruance refuses a night dash west', 'intelligence', P.tf58, 7,
+      'Shortly before midnight Nimitz passes on a radio fix placing a Japanese ship about 355 miles west-southwest of Task Force 58. Mitscher asks to steam west through the night so he can strike at dawn. After an hour Spruance says no: he fears a decoy drawing him away while another force slips in against the beachhead. Mitscher’s chief of staff, Arleigh Burke, expects to take a beating in the morning without being able to hit back.',
+      at('23:30', { approx: true })),
+
+    // ---------- 19 June: the Great Marianas Turkey Shoot ----------
+    ev('1944-06-19', 'A Guam-based Zero finds the fleet', 'intelligence', P.tf58, 8,
+      'A search plane from Guam sights Task Force 58 and radios a report, then attacks the picket destroyer Stockham and is shot down by Yarnall.',
+      at('05:50')),
+    ev('1944-06-19', 'Hellcats over Orote Field', 'attack', P.orote, 11,
+      'Radar shows Japanese aircraft taking off from Guam. Thirty Hellcats from Belleau Wood arrive while planes are still launching from Orote Field, and more Japanese aircraft come in from other islands. Thirty-five are shot down for the loss of one Hellcat, a pattern that will hold all day.',
+      ord('07:00', { approx: true })),
+    ev('1944-06-19', 'Albacore torpedoes Taihō', 'attack', P.taiho, 9,
+      'Taihō has just launched 42 aircraft for Ozawa’s second raid when the submarine Albacore fires six torpedoes at her. Her fire-control computer has failed, so Lieutenant Commander James W. Blanchard fires by eye. A pilot taking off, Warrant Officer Sakio Komatsu, dives his plane into one torpedo’s path; one hits, fracturing aviation fuel tanks. The damage looks slight and by 09:20 the jammed forward elevator well has been planked over.',
+      at('08:16', { link: { timeline: 'pacific-submarines', event: '1944-06-19-albacore-sinks-the-carrier-taih', label: 'See Albacore in Submarine Operations' } })),
+    ev('1944-06-19', '“Hey, Rube!”', 'intelligence', P.tf58, 8,
+      'Large numbers of Japanese aircraft appear on radar about 150 miles west. Mitscher recalls his fighters from Guam with the old circus cry “Hey, Rube!”. At 10:23 he turns the fleet into the wind, launches every fighter in layered patrols and sends his bombers to circle out of harm’s way to the east.',
+      at('09:57')),
+    ev('1944-06-19', 'The first raid is shredded', 'attack', P.tf58, 8,
+      'The 68 aircraft of the first carrier raid stop to regroup 70 miles out, and the Hellcats catch them there. Within minutes 25 are down for the loss of one fighter, and 16 more fall soon after. A few reach the battle line, and one bomb hits South Dakota, killing or wounding more than 50 men. No plane gets through to the carriers.',
+      at('10:36', { facts: [['Raid I', '68 aircraft, over 40 shot down']] })),
+    ev('1944-06-19', 'The second raid: 97 of 107 destroyed', 'attack', P.tf58, 8,
+      'Radar detects a second, larger raid of 107 aircraft. At least 70 are shot down before reaching the ships. Six near-miss two of Rear Admiral Alfred E. Montgomery’s carriers; torpedo planes attack Enterprise and Princeton without success. Only ten of the raid survive.',
+      at('11:07', { facts: [['Raid II', '107 aircraft, 97 lost']] })),
+    ev('1944-06-19', 'Cavalla torpedoes Shōkaku', 'attack', P.shokaku, 9,
+      'The submarine Cavalla, under Commander Herman J. Kossler, fires six torpedoes at Shōkaku while she is refuelling and rearming aircraft; three, possibly four, hit. Fuel fires spread out of control and at 12:10 vapour explodes through the ship. She sinks bow first about 140 miles north of Yap, taking more than 1,200 men with her. Captain Hiroshi Matsubara and about 570 others are rescued. (The battle article puts the attack at about noon.)',
+      at('11:22', { facts: [['Dead', 'about 1,263–1,272'], ['Survivors', 'about 570']],
+        link: { timeline: 'pacific-submarines', event: '1944-06-19-cavalla-sinks-the-carrier-sh-kaku', label: 'See Cavalla in Submarine Operations' } })),
+    ev('1944-06-19', 'A third raid comes in from the north', 'attack', P.tf58, 8,
+      'Forty fighters meet a raid of 47 aircraft 50 miles out. Only seven are shot down, but most of the rest do not press home their attack, and the few that do achieve nothing. Forty of them return to their carriers.',
+      at('13:00', { approx: true })),
+    ev('1944-06-19', 'The fourth raid dies over Guam', 'attack', P.orote, 10,
+      'Given a wrong position for the American fleet, the fourth raid cannot find it and heads for Guam and Rota to refuel. One group stumbles on Montgomery’s carriers and loses half its planes; nine dive bombers attack Wasp and Bunker Hill without a hit and eight are shot down. Over Orote Field, 27 Hellcats catch the rest as they land: 30 of 49 are shot down and the others wrecked. Back aboard Lexington, a pilot says it was like an old-time turkey shoot.',
+      ord('14:00', { approx: true, wiki: { Lexington: 'USS_Lexington_(CV-16)' } })),
+    ev('1944-06-19', 'Taihō blows up', 'loss', P.taiho, 9,
+      'An inexperienced damage-control officer has turned Taihō’s ventilation to full to clear the fuel fumes, spreading them through the ship. About six and a half hours after the torpedo hit, they ignite: the flight deck heaves up and the sides blow out. Ozawa wants to go down with her, but his staff persuades him to leave; he transfers by the destroyer Wakatsuki to the cruiser Haguro, taking the Emperor’s portrait with him.',
+      at('14:30', { approx: true })),
+    ev('1944-06-19', 'Taihō sinks', 'loss', P.taiho, 9,
+      'A second great explosion tears Taihō apart and Japan’s newest carrier sinks stern first. Of about 2,150 aboard, 1,650 are lost. Two of Ozawa’s three fleet carriers have been sunk by submarines in a single day.',
+      at('16:28', { facts: [['Lost', '1,650 of 2,150'], ['Position', '12°05′N 138°12′E']] })),
+    ev('1944-06-19', 'The Great Marianas Turkey Shoot', 'attack', P.tf58, 7,
+      'By nightfall Japan has lost more than 350 aircraft, counting those caught over Guam; the Americans about 30. Of 373 carrier aircraft sent out in four raids, 243 have been lost. Not a single American carrier has been hit. Skilled, numerous American pilots, radar-directed fighters and proximity-fuzed anti-aircraft shells have overwhelmed Japanese aircrews with little training. After dark Task Force 58 turns west at last.',
+      ord('20:00', { facts: [['Japanese aircraft lost', 'more than 350'], ['U.S. aircraft lost', 'about 30']],
+        link: { timeline: 'road-to-tokyo-bay', event: '1944-06-19-battle-of-the-philippine-sea', label: 'See this in The Road to Tokyo Bay' } })),
+    ev('1944-06-19', 'Saitō falls back to the centre of Saipan', 'movement', P.centralLine, 11,
+      'With his forces about halved, Saitō withdraws to a new line across the middle of the island, from Garapan over the slopes of Mount Tapotchau to Magicienne Bay. American casualties ashore already exceed 6,000, and Holland Smith calls in his last reserve, the 27th Division’s 106th Regiment.',
+      ord('18:00', { approx: true })),
+
+    // ---------- 20 June: the mission beyond darkness ----------
+    ev('1944-06-20', 'Ozawa plans to fight on', 'movement', P.jfleet20, 7,
+      'Ozawa moves his flag to Zuikaku, his last fleet carrier, and learns that he has only about 150 aircraft left. Believing his airmen’s inflated claims and counting on planes on Guam and Rota, he begins planning new strikes for 21 June while the fleet withdraws northwest to refuel.',
+      at('13:00', { approx: true })),
+    ev('1944-06-20', 'Found at last, at extreme range', 'intelligence', P.tf58w, 7,
+      'After a day of fruitless searching, a garbled report from an Enterprise search plane at 15:12 is confirmed at 15:40: the Japanese fleet is about 275 miles away, heading west at 20 knots. It is at the limit of the strike’s range and daylight is running out.',
+      at('15:40')),
+    ev('1944-06-20', 'Mitscher launches the strike', 'attack', P.tf58w, 7,
+      'Mitscher decides on an all-out strike, knowing the planes will have to land in the dark. After the first wave is airborne a new report puts the Japanese 60 miles further out. He cancels the second wave but lets the first go on: 226 aircraft, Hellcats, Avengers and dive bombers, head west into the setting sun.',
+      at('16:15', { approx: true, facts: [['Launched', '240 (14 turned back)'], ['Strike', '95 Hellcats, 54 Avengers, 51 Helldivers, 26 Dauntlesses']],
+        paths: [{ label: 'The strike of 20 June (approximate)', kind: 'strike', coords: [[15.0, 139.0], [16.333, 132.533]] }] })),
+    ev('1944-06-20', 'Hiyō is torpedoed at sunset', 'attack', P.hiyo, 8,
+      'The strike arrives just before sunset. About 35 Japanese fighters rise to meet it. Wasp’s group dives on oilers and damages two so badly they are scuttled. Avengers from Belleau Wood put a torpedo into the carrier Hiyō, and a bomb bursting above her bridge kills or wounds almost everyone there. Zuikaku, Junyō, Chiyoda and the battleship Haruna are also hit. Twenty American aircraft are shot down.',
+      ord('18:30', { approx: true, facts: [['U.S. aircraft lost in the attack', '20']] })),
+    ev('1944-06-20', 'Hiyō sinks', 'loss', P.hiyo, 8,
+      'About two hours after the torpedo hit, leaking petrol vapour explodes and knocks out all power. Hiyō sinks stern first. Her escorts pick up about 1,200 men; some 250 die.',
+      ord('20:30', { approx: true })),
+    ev('1944-06-20', '“Turn on the lights”', 'service', P.tf58w, 8,
+      'The first returning planes reach Task Force 58 short of fuel in the dark. Rear Admiral Joseph J. Clark lights up Hornet, searchlights pointing straight up, despite the risk from submarines; Mitscher backs him, and soon the whole task force is lit, with destroyers firing star shells. Pilots may land on any deck. Even so, 80 aircraft crash on deck or ditch, though about three-quarters of the crews are rescued that night or in the days that follow.',
+      at('20:45', { facts: [['Strike aircraft lost', '20 in combat, 80 on return'], ['Returned', '115 of 226']], wiki: { Hornet: 'USS_Hornet_(CV-12)' } })),
+    ev('1944-06-20', 'Toyoda calls off the battle', 'movement', P.jfleet20, 6,
+      'That night Toyoda orders Ozawa to withdraw. The Americans give chase but do not catch him. Japan has lost three carriers, more than 350 carrier aircraft and around 200 land-based planes, and the trained aircrews it spent a year rebuilding. Ozawa offers his resignation, which is refused. Spruance is criticised by aviators for letting the fleet escape, but Nimitz and King back him.',
+      ord('22:00', { approx: true, facts: [['Japanese losses', '3 carriers, about 550 aircraft'], ['U.S. losses', 'about 130 aircraft, 76 aviators']] })),
+
+    // ---------- Central Saipan ----------
+    ev('1944-06-22', 'The assault on Saitō’s line begins', 'attack', P.centralLine, 11,
+      'All three divisions attack the new Japanese line: the 2nd Marines toward Garapan and Mount Tapotchau, the 4th up the east coast, and the 27th into the rough ground between them. The same day P-47 fighters of the Seventh Air Force begin operating from Aslito Field, and heavy Army artillery opens fire.'),
+    ev('1944-06-23', 'Death Valley and Purple Heart Ridge', 'attack', P.deathValley, 12,
+      'The 27th Division starts late and stalls in a valley overlooked by a ridge held by some 4,000 Japanese. The soldiers name them “Death Valley” and “Purple Heart Ridge”. The American line bends into a horseshoe, opening gaps on the Marines’ flanks.'),
+    ev('1944-06-24', 'A Marine general relieves an Army general', 'political', P.saipan, 10,
+      'Frustrated with the 27th Division’s progress, Holland Smith relieves its commander, Major General Ralph C. Smith, and replaces him for now with Major General Sanderford Jarman. A Marine dismissing an Army general sets off a bitter inter-service dispute. The fight for the valley lasts six more days. Work also begins on turning Aslito into a B-29 base.',
+      { approx: true }),
+    ev('1944-06-25', 'The Marines take Mount Tapotchau', 'attack', P.tapotchau, 12,
+      'The 2nd Marine Division seizes Mount Tapotchau, the 474-metre summit at the centre of the island and the key artillery observation post in central Saipan. On the east coast the 4th Marine Division occupies most of the Kagman peninsula, which the Japanese have abandoned. In Tokyo the Emperor, told that all is lost, finally accepts that Saipan will fall.',
+      { facts: [['Height', '1,554 ft (474 m)']] }),
+    ev('1944-06-26', 'Breakout from Nafutan Point', 'attack', P.nafutan, 12,
+      'About 500 Japanese soldiers cut off at Nafutan Point break out at night and head for Aslito Field, where they destroy a P-47 and damage two more before running into Marine reserves and artillery. Almost all are killed. The next day the soldiers who had besieged the point move in and find no one alive.',
+      ord('23:00', { approx: true })),
+    ev('1944-06-27', '“We cannot hold”', 'intelligence', P.centralLine, 11,
+      'The 31st Army headquarters on Saipan signals that the island cannot be held against American artillery, sea and air power. Food and water are running out; in the limestone caves some men have had nothing to drink for three days and are eating snails and leaves.'),
+    ev('1944-06-30', 'Death Valley falls', 'attack', P.deathValley, 12,
+      'Under its new commander, Major General George Griner, the 27th Division takes Death Valley and Purple Heart Ridge and links up with the Marines on both sides. Saitō’s central line is broken and the Japanese retreat north. American casualties so far are about 11,000.',
+      { facts: [['U.S. casualties to date', 'about 11,000']] }),
+
+    // ---------- Northern Saipan ----------
+    ev('1944-07-02', 'The ruins of Garapan are taken', 'invasion', P.garapan, 12,
+      'Between 2 and 4 July the 2nd Marine Division clears the ruins of Garapan, the island’s capital, and its harbour. Saitō cannot form a new line; his army is breaking up, and he moves his last headquarters near Makunsha in the north.',
+      { approx: true }),
+    ev('1944-07-05', '“Harakiri Gulch”', 'attack', P.harakiri, 12,
+      'Pushing north toward Tanapag, the 27th Division runs into fierce resistance in a narrow canyon it names “Harakiri Gulch”, and a two-day fight follows. The 4th Marine Division drives on rapidly to the north.'),
+    ev('1944-07-06', 'Saitō orders the final attack', 'political', P.makunsha, 12,
+      'Trapped in the north with almost no food or water, his headquarters under fire, Saitō orders the survivors to make a final gyokusai attack the next day, under his chief of staff, Colonel Takuji Suzuki. According to the battle article he eats a last meal that night and commits seppuku (his biography puts his death at dawn on 10 July, after the island is declared secure). Vice Admiral Chūichi Nagumo, who led the carriers at Pearl Harbor and Midway, takes his own life at about the same time.'),
+    ev('1944-07-07', 'The largest banzai charge of the war', 'attack', P.tanapag, 12,
+      'At least 3,000 Japanese, soldiers, sailors, walking wounded and civilians, some armed only with bayonets on sticks, surge south along the Tanapag plain toward a gap in the American line. At about 04:45 they overrun two battalions of the 27th Division’s 105th Infantry, which lose about 900 men, 80 percent of their strength, and then two batteries of Marine artillery. When the 2nd Battalion’s aid station is overrun, its surgeon, Captain Benjamin L. Salomon, holds off the attackers with a machine gun so the wounded can escape, and is killed. A hastily formed line near Tanapag village stops the charge in the late morning; scattered fighting goes on all day.',
+      at('04:45', { approx: true, facts: [['Attackers', 'at least 3,000'], ['105th Infantry losses', 'about 900']],
+        link: { timeline: 'medal-of-honor', event: '1944-07-07-salomon-benjamin-l', label: 'See Captain Benjamin L. Salomon in Medal of Honor' } })),
+    ev('1944-07-08', 'Death at the northern cliffs', 'loss', P.marpi, 12,
+      'As the 4th Marine Division pushes toward Marpi Point at the northern tip, Marines watch hundreds of Japanese civilians die on the inland and sea cliffs. Some jump, others are pushed or thrown. Many have been told by propaganda that the Americans will torture and kill them; some are forced. Around 1,000 civilians take their own lives in the last days, at places later called Suicide Cliff and Banzai Cliff.',
+      { facts: [['Civilian deaths in the battle', 'an estimated 8,000–10,000'], ['Suicides', 'around 1,000']] }),
+    ev('1944-07-09', 'Saipan is declared secure', 'invasion', P.saipan, 10,
+      'The 4th Marine Division reaches the northern end of the island and Turner declares Saipan secure, 24 days after a landing he expected to take a week. Almost the entire garrison, about 30,000 men, is dead; American casualties are about 16,500, including 3,100 killed. Hundreds of Japanese remain hidden in caves for months.',
+      { facts: [['Japanese dead', 'about 30,000 military'], ['U.S. casualties', 'about 16,500 (3,100 killed)'], ['Civilians interned', 'about 14,000']] }),
+
+    // ---------- Aftermath ----------
+    ev('1944-07-18', 'Tōjō resigns', 'political', P.tokyo, 10,
+      'Saipan’s loss hits Japan harder than any earlier defeat. The Emperor withdraws his support from Hideki Tōjō, who resigns as prime minister and is succeeded by General Kuniaki Koiso. For the first time the government lets its people know the war is going badly.',
+      { link: { timeline: 'road-to-tokyo-bay', event: '1944-07-18-t-j-resigns', label: 'See this in The Road to Tokyo Bay' } }),
+    ev('1944-11-24', 'B-29s from Saipan strike Tokyo', 'attack', P.aslito, 10,
+      'Aslito, renamed Isely Field, now has its first B-29 runway. 111 B-29s set out from the Marianas for Tokyo on the first strategic bombing mission against Japan from the islands.',
+      { link: { timeline: 'road-to-tokyo-bay', event: '1944-11-24-b-29s-from-the-marianas-bomb-tokyo', label: 'See this in The Road to Tokyo Bay' } }),
+    ev('1945-12-01', 'Captain Ōba surrenders', 'service', P.saipan, 10,
+      'Captain Sakae Ōba, a survivor of the final charge, has led about 50 soldiers and civilians in the hills for some 16 months, raiding American camps for supplies. He brings them in three months after Japan’s surrender.'),
+  ];
+
+  // ---------- Shot list ----------
+  // Camera direction (see "Shots" in app.js). Events not listed use the automatic framing.
+  const pt = (place) => [place.lat, place.lng];
+  const SHOTS = {
+    'The Marines land at Charan Kanoa': { shot: 'tight', transition: 'fly' },
+    'Flying Fish sights the Japanese carriers': { shot: 'wide', transition: 'pull-back', frame: [pt(P.saipan)] },
+    'Ozawa and Ugaki meet in the Philippine Sea': { scene: 'approach', frame: [pt(P.saipan)] },
+    'Spruance gathers his carriers west of Saipan': { scene: 'approach' },
+    'Spruance refuses a night dash west': { shot: 'wide', frame: [pt(P.jfleet), pt(P.saipan)] },
+    // 19 June: both fleets in one frame for the raids...
+    'A Guam-based Zero finds the fleet': { scene: 'turkey-shoot', frame: [pt(P.jfleet), pt(P.orote)] },
+    'Hellcats over Orote Field': { scene: 'turkey-shoot' },
+    '“Hey, Rube!”': { scene: 'turkey-shoot' },
+    'The first raid is shredded': { scene: 'turkey-shoot' },
+    'The second raid: 97 of 107 destroyed': { scene: 'turkey-shoot' },
+    'A third raid comes in from the north': { scene: 'turkey-shoot' },
+    'The fourth raid dies over Guam': { scene: 'turkey-shoot' },
+    // ...and close on the Japanese carriers for the submarine attacks.
+    'Albacore torpedoes Taihō': { scene: 'submarines', transition: 'fly', frame: [pt(P.taiho), pt(P.shokaku)] },
+    'Cavalla torpedoes Shōkaku': { scene: 'submarines' },
+    'Taihō blows up': { scene: 'submarines' },
+    'Taihō sinks': { scene: 'submarines' },
+    'The Great Marianas Turkey Shoot': { shot: 'wide', transition: 'pull-back', frame: [pt(P.jfleet), pt(P.saipan)] },
+    // 20 June: the strike flies west and the planes come home in the dark.
+    'Found at last, at extreme range': { scene: 'beyond-darkness', frame: [pt(P.hiyo), pt(P.tf58w)] },
+    'Mitscher launches the strike': { scene: 'beyond-darkness' },
+    'Hiyō is torpedoed at sunset': { shot: 'tight', transition: 'fly' },
+    '“Turn on the lights”': { shot: 'tight', transition: 'fly' },
+    // Saipan's last days.
+    'The largest banzai charge of the war': { shot: 'tight' },
+    'Death at the northern cliffs': { shot: 'tight' },
+  };
+  const events = WW2.events['saipan-philippine-sea'];
+  for (const [title, shot] of Object.entries(SHOTS)) {
+    const e = events.find((x) => x.title === title);
+    if (!e) throw new Error(`saipan-philippine-sea shot list: no event titled "${title}"`);
+    Object.assign(e, shot);
+  }
+})();

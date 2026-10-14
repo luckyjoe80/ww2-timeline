@@ -56,6 +56,12 @@
     ChST: { offset: 600, label: 'Guam' },
     WAKE: { offset: 720, label: 'Wake' },
     MID: { offset: -660, label: 'Midway' },
+    SOL: { offset: 660, label: 'Solomons' },
+    PNG: { offset: 600, label: 'Papua' },
+    JAVA: { offset: 450, label: 'Java' },
+    BURMA: { offset: 390, label: 'Burma' },
+    IND: { offset: 330, label: 'India' },
+    OKI: { offset: 540, label: 'Okinawa' },
     BST: { offset: 60, label: 'London' },
     CEST: { offset: 120, label: 'Central European' },
     GMT: { offset: 0, label: 'GMT' },
@@ -663,6 +669,60 @@
     if (target) selectEvent(target);
   }
 
+  // ---------- Focal flights ----------
+  // Leaflet's flyTo animates the map's centre, so an event framed off-centre (left of the panel)
+  // drifts to the middle of the screen mid-flight and only slides into place at the end. This
+  // flies the same smooth zoom-out/zoom-in curve (van Wijk & Nuij, as Leaflet does) but on a
+  // focal point held at a fixed spot on screen: where the subject will sit when the flight lands.
+  function flyFocal(subject, targetZoom, focusPt, durationMs) {
+    map._stop();
+    const size = map.getSize();
+    const delta = size.divideBy(2).subtract(focusPt); // map centre relative to the focal spot, in px
+    const startZoom = map.getZoom();
+    const from = map.project(map.containerPointToLatLng(focusPt), startZoom);
+    const to = map.project(subject, startZoom);
+    const centerFor = (focalPx, z) => map.unproject(map.project(map.unproject(focalPx, startZoom), z).add(delta), z);
+    const w0 = Math.max(size.x, size.y);
+    const w1 = w0 * map.getZoomScale(startZoom, targetZoom);
+    const u1 = to.distanceTo(from) || 1;
+    const rho = 1.42, rho2 = rho * rho;
+    const sinh = (n) => (Math.exp(n) - Math.exp(-n)) / 2;
+    const cosh = (n) => (Math.exp(n) + Math.exp(-n)) / 2;
+    const tanh = (n) => sinh(n) / cosh(n);
+    const rr = (i) => {
+      const s1 = i ? -1 : 1, s2 = i ? w1 : w0;
+      const b = (w1 * w1 - w0 * w0 + s1 * rho2 * rho2 * u1 * u1) / (2 * s2 * rho2 * u1);
+      const sq = Math.sqrt(b * b + 1) - b;
+      return sq < 1e-9 ? -18 : Math.log(sq);
+    };
+    const r0 = rr(0);
+    const S = (rr(1) - r0) / rho;
+    const w = (t) => w0 * (cosh(r0) / cosh(r0 + rho * t));
+    const u = (t) => (w0 * (cosh(r0) * tanh(r0 + rho * t) - sinh(r0))) / rho2;
+    const land = () => map._move(centerFor(to, targetZoom), targetZoom)._moveEnd(true);
+    if (!isFinite(S) || S <= 0) { map._moveStart(true, false); land(); return; }
+    map._ww2Flying = true;
+    map._moveStart(true, false);
+    const t0 = performance.now();
+    const frame = () => {
+      const t = (performance.now() - t0) / durationMs;
+      if (t > 1) return land();
+      map._flyToFrame = L.Util.requestAnimFrame(frame); // map._stop() cancels it, as for flyTo
+      const st = (1 - Math.pow(1 - t, 1.5)) * S; // ease out
+      const z = Math.max(map.getMinZoom(), map.getScaleZoom(w0 / w(st), startZoom));
+      map._move(centerFor(from.add(to.subtract(from).multiplyBy(u(st) / u1)), z), z, { flyTo: true });
+    };
+    frame();
+  }
+  // Fly to frame `bounds` (as fitBounds with `opts`), keeping `subject` at its landing spot on screen.
+  function flyToBoundsFocal(bounds, opts, subject, durationMs) {
+    let { center, zoom } = map._getBoundsCenterZoom(bounds, opts);
+    // Land where the world's edges allow (fully zoomed out, the view can't shift past them).
+    if (map.options.maxBounds) center = map._limitCenter(center, zoom, map.options.maxBounds);
+    const focusPt = map.project(subject, zoom).subtract(map.project(center, zoom)).add(map.getSize().divideBy(2));
+    flyFocal(subject, zoom, focusPt, durationMs);
+  }
+
   // ---------- Shots ----------
   // Timelines can direct the camera with optional per-event fields; anything left out falls
   // back to the automatic framing below.
@@ -726,7 +786,7 @@
     const size = map.getSize();
     const wide = window.innerWidth > 640;
     const panelH = panel.hidden ? 0 : panel.offsetHeight;
-    const right = wide ? 400 : 40;
+    const right = wide ? panelRoom() : 40;
     const left = 40;
     const opts = {
       maxZoom: shot.maxZoom - (ev.shot === 'wide' ? 1 : 0),
@@ -762,7 +822,7 @@
       return;
     }
 
-    const flyIn = () => { if (seq === flySeq) map.flyToBounds(bounds, { ...opts, duration: IN_MS / 1000 }); };
+    const flyIn = () => { if (seq === flySeq) flyToBoundsFocal(bounds, opts, to, IN_MS); };
     if (ev.transition === 'fly') return flyIn();
     const forcePull = ev.transition === 'pull-back';
     if (!forcePull && from.distanceTo(to) < SAME_PLACE_M) return flyIn();
@@ -785,7 +845,7 @@
     kept.push(...prefetched);
     prefetchView(bounds, opts, pullZoom);        // the zoom back in from the pulled-back view
     prefetched = kept.concat(prefetched);
-    map.flyToBounds(both, { ...pullOpts, duration: OUT_MS / 1000 });
+    flyToBoundsFocal(both, pullOpts, to, OUT_MS);
     let held = false;
     const hold = () => {
       if (held || seq !== flySeq) return;
@@ -826,6 +886,7 @@
 
     renderMarkers();
     renderPanel();
+    fitPanel();
     renderDayStrip();
     renderStepButtons();
     renderMapCrumbs();
@@ -877,6 +938,32 @@
         lyr.marker.setZIndexOffset(ev === selected ? 1000 : age === 0 ? 500 : 0);
       }
     }
+  }
+
+  // Long text: first step the type size down a little to fit; beyond that the panel scrolls
+  // (wheel, touch or keys) with no scrollbar, its edges fading where there's more to read.
+  const PANEL_MIN_SCALE = 0.8;
+  function fitPanel() {
+    panel.scrollTop = 0;
+    if (panel.hidden) return;
+    let scale = 1;
+    panel.style.setProperty('--panel-scale', scale);
+    while (panel.scrollHeight > panel.clientHeight + 1 && scale > PANEL_MIN_SCALE) {
+      scale = Math.round((scale - 0.05) * 100) / 100;
+      panel.style.setProperty('--panel-scale', scale);
+    }
+    updatePanelFades();
+  }
+  function updatePanelFades() {
+    const more = panel.scrollHeight - panel.clientHeight;
+    panel.classList.toggle('more-above', more > 1 && panel.scrollTop > 4);
+    panel.classList.toggle('more-below', more > 1 && panel.scrollTop < more - 4);
+  }
+  panel.addEventListener('scroll', updatePanelFades, { passive: true });
+  // Room the camera leaves on the right for the panel, so events sit in the open map to its left.
+  function panelRoom() {
+    const w = panel.offsetWidth || Math.min(680, Math.max(420, window.innerWidth * 0.4));
+    return w + 12 + 40; // the panel's right margin plus a gap
   }
 
   function renderPanel() {
@@ -1478,6 +1565,7 @@
     atlasSite = null;
     overviewBtn.setAttribute('aria-pressed', 'true');
     renderAtlasPanel();
+    fitPanel();
     renderAtlasMap();
     renderAtlasBar();
     renderStepButtons();
@@ -1539,7 +1627,7 @@
     const wide = window.innerWidth > 640;
     const opts = {
       paddingTopLeft: [50, 60],
-      paddingBottomRight: [wide ? 410 : 50, 60],
+      paddingBottomRight: [wide ? panelRoom() : 50, 60],
       maxZoom: atlasSite ? 8 : 6,
     };
     flySeq++;
@@ -1553,6 +1641,7 @@
     atlasOverview = false;
     overviewBtn.setAttribute('aria-pressed', 'false');
     renderAtlasPanel();
+    fitPanel();
     renderAtlasMap();
     renderAtlasBar();
     renderStepButtons();
@@ -1564,6 +1653,7 @@
   function showSite(id) {
     atlasSite = id;
     renderAtlasPanel();
+    fitPanel();
     renderAtlasMap();
     renderAtlasBar();
     renderMapCrumbs();
@@ -1869,7 +1959,7 @@
       if (atlas && atlasOverview) showChapter(atlasChapter);
       else if (atlas) panel.hidden = true;
       else if (overview) toggleOverview();
-      else { panelClosed = true; renderPanel(); }
+      else { panelClosed = true; renderPanel(); fitPanel(); }
     }
   });
 
@@ -1901,6 +1991,7 @@
   new ResizeObserver(() => {
     map.invalidateSize();
     updateMinZoom();
+    fitPanel();
     const { x, y } = map.getSize();
     if (!x || !y) return;
     const first = !mapReady;
