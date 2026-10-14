@@ -1323,6 +1323,27 @@
     fitOverview(animate);
   }
 
+  // The events an overview frames: all of them if they fit in the open map (its width less
+  // `padX`) at the widest zoom; otherwise the stretch of that width holding the most events,
+  // so a timeline spread across the globe opens on where most of it happens.
+  function overviewFocus(evs, padX) {
+    const z = map.getMinZoom();
+    const open = map.getSize().x - padX;
+    if (!evs.length) return evs;
+    const xs = evs.map((e) => map.project(ovLatLng(e), z).x);
+    if (Math.max(...xs) - Math.min(...xs) <= open) return evs;
+    // Otherwise take the stretch holding the most events, a little narrower than the open map, so the fit zooms in a
+    // touch: at the widest zoom the map can't pan, and the stretch couldn't be centred.
+    const width = open * 0.8 - 2 * OV_CLUSTER_PX;
+    const pts = evs.map((e, i) => ({ e, x: xs[i] })).sort((a, b) => a.x - b.x);
+    let best = [0, 0];
+    for (let i = 0, j = 0; i < pts.length; i++) {
+      while (pts[i].x - pts[j].x > width) j++; // keep pts[j..i] within the width
+      if (i - j > best[1] - best[0]) best = [j, i];
+    }
+    return pts.slice(best[0], best[1] + 1).map((p) => p.e);
+  }
+
   // Frame the events in the period shown on the bar (the whole timeline unless zoomed in).
   function fitOverview(animate = true) {
     forgetShot();
@@ -1330,12 +1351,11 @@
     const evs = tl.events.filter(inPeriod);
     const target = evs.length ? evs : tl.events;
     if (!map.getSize().x) return; // no size yet (e.g. hidden tab)
-    const wide = window.innerWidth > 640;
     // Pixel padding only (no percentage pad): whole-war timelines span nearly the globe.
     const left = 50;
-    const bounds = L.latLngBounds(target.map(ovLatLng));
     // Leave room on the right for the overview's text panel.
-    const right = wide && !panel.hidden ? panelRoom() : 50;
+    const right = window.innerWidth > 640 && !panel.hidden ? panelRoom() : 50;
+    const bounds = L.latLngBounds(overviewFocus(target, left + right).map(ovLatLng));
     const opts = { paddingTopLeft: [left, 50], paddingBottomRight: [right, 50], maxZoom: 6 };
     if (animate) { cameraBusy(1200); prefetchView(bounds, opts, map.getZoom()); map.flyToBounds(bounds, { ...opts, duration: 1.2 }); }
     else map.fitBounds(bounds, { ...opts, animate: false });
@@ -1865,6 +1885,7 @@
     if (overview) overviewPanelClosed = true;
     else panelClosed = true;
     renderPanel();
+    if (overview) fitOverview(); // the map can use the panel's room now
   });
 
   panelBody.addEventListener('click', (e) => {

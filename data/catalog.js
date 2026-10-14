@@ -153,6 +153,17 @@ window.WW2 = {
       ],
     },
     {
+      title: 'Technology',
+      children: [
+        {
+          id: 'atomic-bomb',
+          title: 'The Atomic Bomb',
+          description: 'From the discovery of nuclear fission in Berlin and the Einstein–Szilárd letter through the Manhattan Project, Chicago Pile-1 and the Trinity test to the bombings of Hiroshima and Nagasaki and Japan’s surrender, 1938–1945.',
+          wiki: { Trinity: 'Trinity_(nuclear_test)', Leyte: 'Leyte', Hahn: 'Otto_Hahn', Frisch: 'Otto_Robert_Frisch', Lawrence: 'Ernest_Lawrence', Compton: 'Arthur_Compton', Sweeney: 'Charles_Sweeney', Bohr: 'Niels_Bohr' },
+        },
+      ],
+    },
+    {
       title: 'Production',
       children: [
         {
