@@ -333,6 +333,8 @@ body {
   to   { transform: scale(3.5); opacity: 0; }
 }
 
+.place-label > * { transition: opacity 0.6s; }
+.labels-hidden .place-label > * { opacity: 0; transition: opacity 0.25s; }
 .place-label i {
   position: absolute; left: -3px; top: -3px;
   width: 6px; height: 6px; border-radius: 50%;
@@ -542,6 +544,18 @@ body.overview-mode .day-strip { visibility: hidden; }
   font: inherit; font-size: calc(14px * var(--s)); text-align: left; cursor: pointer;
 }
 .panel-link:hover { background: #34312a; }
+/* Back to the timeline a cross-timeline link came from. */
+.panel-back {
+  display: flex; align-items: baseline; gap: 8px; max-width: calc(100% - 28px);
+  margin: 0 0 calc(12px * var(--s)); padding: 5px 10px;
+  background: rgba(224, 164, 60, 0.12); color: var(--ink);
+  border: 1px solid #e0a43c; font: inherit; font-size: calc(13px * var(--s)); cursor: pointer; text-align: left;
+}
+.panel-back small {
+  font-size: calc(11px * var(--s)); color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+}
+.panel-back:hover { background: rgba(224, 164, 60, 0.24); }
 
 /* ---------- Timeline ---------- */
 .timeline {

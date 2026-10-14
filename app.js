@@ -679,14 +679,16 @@
   // drifts to the middle of the screen mid-flight and only slides into place at the end. This
   // flies the same smooth zoom-out/zoom-in curve (van Wijk & Nuij, as Leaflet does) but on a
   // focal point held at a fixed spot on screen: where the subject will sit when the flight lands.
-  function flyFocal(subject, targetZoom, focusPt, durationMs) {
+  function flyFocal(subject, targetZoom, focusPt, durationMs, { inWorld = false } = {}) {
     map._stop();
     const size = map.getSize();
     const delta = size.divideBy(2).subtract(focusPt); // map centre relative to the focal spot, in px
     const startZoom = map.getZoom();
     const from = map.project(map.containerPointToLatLng(focusPt), startZoom);
     const to = map.project(subject, startZoom);
-    const centerFor = (focalPx, z) => map.unproject(map.project(map.unproject(focalPx, startZoom), z).add(delta), z);
+    // Each frame stays inside the single world: on a long flight the straight path would
+    // otherwise swing the view past the world's edge, sweeping blank map across the screen.
+    const centerFor = (focalPx, z) => softLimitCenter(map.project(map.unproject(focalPx, startZoom), z).add(delta), z);
     const w0 = Math.max(size.x, size.y);
     const w1 = w0 * map.getZoomScale(startZoom, targetZoom);
     const u1 = to.distanceTo(from) || 1;
@@ -704,7 +706,29 @@
     const S = (rr(1) - r0) / rho;
     const w = (t) => w0 * (cosh(r0) / cosh(r0 + rho * t));
     const u = (t) => (w0 * (cosh(r0) * tanh(r0 + rho * t) - sinh(r0))) / rho2;
-    const land = () => map._move(centerFor(to, targetZoom), targetZoom)._moveEnd(true);
+    // Near the world view the view can barely shift, and a straight path runs into the world's
+    // edges. `inWorld` flights (centre to centre) instead move through the room the view has at
+    // each zoom: position is a fraction of that room, which narrows smoothly as the camera pulls
+    // out, so the path never meets an edge and its speed never jumps.
+    const room = (z) => {
+      const half = size.divideBy(2), mb = map.options.maxBounds;
+      const nw = map.project(mb.getNorthWest(), z).add(half), se = map.project(mb.getSouthEast(), z).subtract(half);
+      return { nw, se };
+    };
+    const frac = (v, a, b) => (b > a ? Math.min(1, Math.max(0, (v - a) / (b - a))) : 0.5);
+    const at = (f, a, b) => (b > a ? a + f * (b - a) : (a + b) / 2);
+    let n0, n1;
+    if (inWorld && map.options.maxBounds) {
+      const r0w = room(startZoom), r1w = room(targetZoom);
+      const c0 = map.project(map.getCenter(), startZoom), c1 = map.project(subject, targetZoom);
+      n0 = L.point(frac(c0.x, r0w.nw.x, r0w.se.x), frac(c0.y, r0w.nw.y, r0w.se.y));
+      n1 = L.point(frac(c1.x, r1w.nw.x, r1w.se.x), frac(c1.y, r1w.nw.y, r1w.se.y));
+    }
+    const inWorldCenter = (p, z) => {
+      const r = room(z), n = n0.add(n1.subtract(n0).multiplyBy(p));
+      return map.unproject(L.point(at(n.x, r.nw.x, r.se.x), at(n.y, r.nw.y, r.se.y)), z);
+    };
+    const land = () => map._move(n0 ? subject : centerFor(to, targetZoom), targetZoom)._moveEnd(true);
     if (!isFinite(S) || S <= 0) { map._moveStart(true, false); land(); return; }
     map._ww2Flying = true;
     map._moveStart(true, false);
@@ -713,17 +737,43 @@
       const t = (performance.now() - t0) / durationMs;
       if (t > 1) return land();
       map._flyToFrame = L.Util.requestAnimFrame(frame); // map._stop() cancels it, as for flyTo
-      const st = (1 - Math.pow(1 - t, 1.5)) * S; // ease out
+      // Ease in and out: each move starts from rest as well as settling, so a pull-back's
+      // zoom-out, hold and zoom-in read as one motion instead of lurching into each phase.
+      const st = (0.5 - 0.5 * Math.cos(Math.PI * t)) * S;
       const z = Math.max(map.getMinZoom(), map.getScaleZoom(w0 / w(st), startZoom));
-      map._move(centerFor(from.add(to.subtract(from).multiplyBy(u(st) / u1)), z), z, { flyTo: true });
+      const p = u(st) / u1;
+      map._move(n0 ? inWorldCenter(p, z) : centerFor(from.add(to.subtract(from).multiplyBy(p)), z), z, { flyTo: true });
     };
     frame();
+  }
+  // Keep a view centre (pixel point at zoom z) inside the world, easing into the edges rather
+  // than stopping hard at them: a hard stop jolts the camera where it engages and releases.
+  // Away from the edges the centre is untouched; within half a screen of one it is drawn in
+  // smoothly (matching position and speed where the cushion begins), never quite reaching it.
+  function softLimitCenter(px, z) {
+    const mb = map.options.maxBounds;
+    if (!mb) return map.unproject(px, z);
+    const half = map.getSize().divideBy(2);
+    const nw = map.project(mb.getNorthWest(), z), se = map.project(mb.getSouthEast(), z);
+    const axis = (v, a, b) => {
+      const lo = a + v.h, hi = b - v.h;
+      if (hi <= lo) return (a + b) / 2; // the world is no bigger than the view: centre it
+      const cushion = Math.min((hi - lo) / 2, v.h / 2); // in screen pixels, so close-ups are untouched
+      if (v.x < lo + cushion) return lo + cushion * Math.exp((v.x - lo - cushion) / cushion);
+      if (v.x > hi - cushion) return hi - cushion * Math.exp((hi - cushion - v.x) / cushion);
+      return v.x;
+    };
+    return map.unproject(L.point(axis({ x: px.x, h: half.x }, nw.x, se.x), axis({ x: px.y, h: half.y }, nw.y, se.y)), z);
   }
   // Fly to frame `bounds` (as fitBounds with `opts`), keeping `subject` at its landing spot on screen.
   function flyToBoundsFocal(bounds, opts, subject, durationMs) {
     let { center, zoom } = map._getBoundsCenterZoom(bounds, opts);
     // Land where the world's edges allow (fully zoomed out, the view can't shift past them).
     if (map.options.maxBounds) center = map._limitCenter(center, zoom, map.options.maxBounds);
+    // To or from (nearly) the world view, fly centre to centre through the room the view has.
+    if (Math.min(zoom, map.getZoom()) < map.getMinZoom() + 1) {
+      return flyFocal(center, zoom, map.getSize().divideBy(2), durationMs, { inWorld: true });
+    }
     const focusPt = map.project(subject, zoom).subtract(map.project(center, zoom)).add(map.getSize().divideBy(2));
     flyFocal(subject, zoom, focusPt, durationMs);
   }
@@ -815,11 +865,13 @@
     }
     if (sameScene) return; // hold the scene's frame
     cameraBusy(OUT_MS + HOLD_MS + IN_MS);
+    hideLabelsDuringMove(seq, OUT_MS + HOLD_MS + IN_MS);
     prefetchView(bounds, opts, map.getZoom()); // where this move lands, and the levels on the way
 
     // A cut: jump straight there behind a quick fade (into or out of a parallel storyline).
     if (ev.transition === 'cut' || (prev && prev.transition === 'cut' && prev !== ev)) {
       map.fitBounds(bounds, { ...opts, animate: false });
+      showLabelsAfterMove(seq); // a cut doesn't travel
       const pane = map.getContainer();
       pane.classList.remove('cut-in');
       void pane.offsetWidth; // restart the animation
@@ -827,7 +879,11 @@
       return;
     }
 
-    const flyIn = () => { if (seq === flySeq) flyToBoundsFocal(bounds, opts, to, IN_MS); };
+    const flyIn = () => {
+      if (seq !== flySeq) return;
+      map.once('moveend', () => showLabelsAfterMove(seq)); // before the call: it may land at once
+      flyToBoundsFocal(bounds, opts, to, IN_MS);
+    };
     if (ev.transition === 'fly') return flyIn();
     const forcePull = ev.transition === 'pull-back';
     if (!forcePull && from.distanceTo(to) < SAME_PLACE_M) return flyIn();
@@ -860,6 +916,18 @@
     map.once('moveend', hold);
     setTimeout(hold, OUT_MS + 300); // in case the pull-back didn't need to move at all
   }
+  // Place names are hidden while the camera travels: they're only re-picked for the zoom when
+  // a move ends, so a zoom-out would carry close-up labels along and crowd them together.
+  const mapEl = map.getContainer();
+  let labelsHeldBy = 0;
+  function hideLabelsDuringMove(seq, ms) {
+    labelsHeldBy = seq;
+    mapEl.classList.add('labels-hidden');
+    setTimeout(() => showLabelsAfterMove(seq), ms + 1500); // in case the landing is never seen
+  }
+  function showLabelsAfterMove(seq) {
+    if (seq === labelsHeldBy) mapEl.classList.remove('labels-hidden');
+  }
   let flySeq = 0;
   let lastFlyTarget = null;
   let lastFlyEvent = null;
@@ -873,7 +941,7 @@
   // time don't reframe, or they'd snap the view to the destination mid-move.
   let cameraBusyUntil = 0;
   const cameraBusy = (ms) => { cameraBusyUntil = performance.now() + ms + 300; };
-  const userMoved = () => { appFramed = false; forgetShot(); };
+  const userMoved = () => { appFramed = false; forgetShot(); labelsHeldBy = 0; mapEl.classList.remove('labels-hidden'); };
   map.on('dragstart dblclick', userMoved);
   map.getContainer().addEventListener('wheel', userMoved, { passive: true });
   map.getContainer().querySelector('.leaflet-control-zoom')?.addEventListener('click', userMoved);
@@ -996,6 +1064,7 @@
       : `${formatLong(dayToMs(tl.start))} – ${formatLong(dayToMs(tl.end))}`;
     panel.style.setProperty('--marker-color', '#e0a43c');
     panelBody.innerHTML = `
+      ${backButton()}
       <span class="tag">Overview</span>
       <h2>${esc(tl.meta.title)}</h2>
       <div class="meta"><strong>${span}</strong><br>
@@ -1031,10 +1100,11 @@
     panel.style.setProperty('--marker-color', ev.color);
     panelBody.innerHTML = `
       <div class="countdown" hidden><div class="countdown-bar"><i></i></div><span></span></div>
+      ${backButton()}
       <div class="panel-nav">
         <button data-jump="first" aria-label="First event" title="First event" ${pos === 0 ? 'disabled' : ''}>«</button>
         <button data-step="-1" aria-label="Previous event" ${pos === 0 ? 'disabled' : ''}>‹</button>
-        <span>${pos + 1} of ${shown.length} · ${formatMed(dayToMs(currentDay))}</span>
+        <span>${pos + 1} of ${shown.length}</span>
         <button data-step="1" aria-label="Next event" ${pos === shown.length - 1 ? 'disabled' : ''}>›</button>
         <button data-jump="last" aria-label="Last event" title="Last event" ${pos === shown.length - 1 ? 'disabled' : ''}>»</button>
       </div>
@@ -1357,7 +1427,14 @@
     const right = window.innerWidth > 640 && !panel.hidden ? panelRoom() : 50;
     const bounds = L.latLngBounds(overviewFocus(target, left + right).map(ovLatLng));
     const opts = { paddingTopLeft: [left, 50], paddingBottomRight: [right, 50], maxZoom: 6 };
-    if (animate) { cameraBusy(1200); prefetchView(bounds, opts, map.getZoom()); map.flyToBounds(bounds, { ...opts, duration: 1.2 }); }
+    if (animate) {
+      const seq = ++flySeq;
+      cameraBusy(1200);
+      hideLabelsDuringMove(seq, 1200);
+      map.once('moveend', () => showLabelsAfterMove(seq));
+      prefetchView(bounds, opts, map.getZoom());
+      map.flyToBounds(bounds, { ...opts, duration: 1.2 });
+    }
     else map.fitBounds(bounds, { ...opts, animate: false });
   }
 
@@ -1908,8 +1985,39 @@
       selectEvent(target);
       return;
     }
+    if (e.target.closest('[data-back]')) return history.back(); // popstate goes back (see below)
     const link = e.target.closest('[data-link-timeline]');
-    if (link) setTimeline(link.dataset.linkTimeline, { eventId: link.dataset.linkEvent });
+    if (link) followLink(link.dataset.linkTimeline, link.dataset.linkEvent);
+  });
+
+  // ---------- Back from a cross-timeline link ----------
+  // Following a link into another timeline remembers where it came from. The panel then
+  // offers a way back, and so does the browser's Back button: each link adds a history
+  // entry, and going back through it returns to the timeline and event (or overview) left.
+  const backStack = [];
+  function followLink(timelineId, eventId) {
+    backStack.push({
+      timeline: tl.meta.id, title: tl.meta.title,
+      eventId: overview || !selected ? null : selected.id,
+      eventTitle: overview || !selected ? 'Overview' : selected.title,
+    });
+    history.pushState({ ww2Back: backStack.length }, '', location.href); // render() then rewrites this new entry
+    setTimeline(timelineId, { eventId });
+  }
+  function backButton() {
+    const b = backStack[backStack.length - 1];
+    return b ? `<button class="panel-back" data-back title="Back to ${esc(b.title)}: ${esc(b.eventTitle)}">← Back to ${esc(b.title)}<small>${esc(b.eventTitle)}</small></button>` : '';
+  }
+  window.addEventListener('popstate', () => {
+    const b = backStack.pop();
+    if (!b) { // an older entry (the picker clears the list): open what its link points to
+      const [id, date, eventId] = location.hash.slice(1).split('/');
+      if (timelines.has(id)) setTimeline(id, /^\d{4}-\d{2}-\d{2}$/.test(date || '') ? { dateISO: date, eventId } : {});
+      else if (atlases.has(id)) setTimeline(id);
+      return;
+    }
+    const ev = b.eventId && timelines.get(b.timeline).byId.get(b.eventId);
+    setTimeline(b.timeline, ev ? { eventId: ev.id, dateISO: ev.date } : {});
   });
   dayChips.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-id]');
@@ -2086,7 +2194,7 @@
     const item = e.target.closest('[data-pick]');
     if (item) {
       closePicker();
-      if (item.dataset.pick !== currentId()) setTimeline(item.dataset.pick);
+      if (item.dataset.pick !== currentId()) { backStack.length = 0; setTimeline(item.dataset.pick); }
     }
   });
   // Enter in the search box opens the first match.
