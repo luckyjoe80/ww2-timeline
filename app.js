@@ -47,6 +47,11 @@
   const TIMEZONES = {
     HST: { offset: -630, label: 'Hawaii' },
     EST: { offset: -300, label: 'Eastern' },
+    // US "war time" (year-round daylight saving, February 1942 – September 1945).
+    EWT: { offset: -240, label: 'Eastern War Time' },
+    CWT: { offset: -300, label: 'Central War Time' },
+    MWT: { offset: -360, label: 'Mountain War Time' },
+    PWT: { offset: -420, label: 'Pacific War Time' },
     JST: { offset: 540, label: 'Tokyo' },
     MYT: { offset: 450, label: 'Malaya' },
     ICT: { offset: 420, label: 'Thailand' },
@@ -966,9 +971,49 @@
     return w + 12 + 40; // the panel's right margin plus a gap
   }
 
+  // How long a timeline runs, in words.
+  function durationLabel(days) {
+    if (days <= 62) return `${days} days`;
+    if (days < 730) return `about ${Math.round(days / 30.44)} months`;
+    return `about ${Math.round(days / 365.25)} years`;
+  }
+
+  // In the overview the panel describes the whole timeline: a line of atmosphere and what it
+  // covers (both from data/intros.js, else the catalog description), its span and a way in.
+  function renderOverviewPanel() {
+    const evs = tl.events;
+    const ctx = tl.linkCtx || (tl.linkCtx = { wiki: tl.meta.wiki });
+    const used = new Set();
+    const intro = [].concat((WW2.intros && WW2.intros[tl.meta.id]) || tl.meta.description || []);
+    const flavor = WW2.flavor && WW2.flavor[tl.meta.id];
+    const perDay = new Map();
+    for (const e of evs) perDay.set(e.day, (perDay.get(e.day) || 0) + 1);
+    let busiest = null;
+    for (const [day, n] of perDay) if (!busiest || n > busiest.n) busiest = { day, n };
+    const places = new Set(evs.map((e) => e.location.name)).size;
+    const span = tl.start === tl.end
+      ? formatLong(dayToMs(tl.start))
+      : `${formatLong(dayToMs(tl.start))} – ${formatLong(dayToMs(tl.end))}`;
+    panel.style.setProperty('--marker-color', '#e0a43c');
+    panelBody.innerHTML = `
+      <span class="tag">Overview</span>
+      <h2>${esc(tl.meta.title)}</h2>
+      <div class="meta"><strong>${span}</strong><br>
+        ${fmtInt(evs.length)} events on ${fmtInt(perDay.size)} days · ${fmtInt(places)} places</div>
+      ${flavor ? `<p class="flavor">${esc(flavor)}</p>` : ''}
+      ${intro.map((t) => `<p>${linkify(t, ctx, used)}</p>`).join('')}
+      <dl>
+        <dt>Span</dt><dd>${durationLabel(tl.end - tl.start + 1)}</dd>
+        ${busiest && busiest.n > 1 ? `<dt>Busiest day</dt><dd>${formatLong(dayToMs(busiest.day))}, ${busiest.n} events</dd>` : ''}
+      </dl>
+      <button class="panel-link" data-ov-start>Start the timeline →</button>`;
+    panel.hidden = false;
+  }
+
   function renderPanel() {
     if (overview) {
-      panel.hidden = true;
+      if (overviewPanelClosed) panel.hidden = true;
+      else renderOverviewPanel();
       return;
     }
     if (!selected || selected.day !== currentDay || panelClosed) {
@@ -1243,6 +1288,7 @@
   const overviewLayer = L.layerGroup();
   const overviewBtn = $('btn-overview');
   let overview = false;
+  let overviewPanelClosed = false; // user dismissed the overview's text panel
   let ovPlaces = []; // overview dots in order of each one's first event
   let ovIndex = -1;  // which of them Previous/Next group has reached
 
@@ -1266,6 +1312,7 @@
   function enterOverview({ animate = true } = {}) {
     pause();
     overview = true;
+    overviewPanelClosed = false;
     flySeq++; // cancel any camera move in progress
     overviewBtn.setAttribute('aria-pressed', 'true');
     document.body.classList.add('overview-mode');
@@ -1287,7 +1334,9 @@
     // Pixel padding only (no percentage pad): whole-war timelines span nearly the globe.
     const left = 50;
     const bounds = L.latLngBounds(target.map(ovLatLng));
-    const opts = { paddingTopLeft: [left, 50], paddingBottomRight: [50, 50], maxZoom: 6 };
+    // Leave room on the right for the overview's text panel.
+    const right = wide && !panel.hidden ? panelRoom() : 50;
+    const opts = { paddingTopLeft: [left, 50], paddingBottomRight: [right, 50], maxZoom: 6 };
     if (animate) { cameraBusy(1200); prefetchView(bounds, opts, map.getZoom()); map.flyToBounds(bounds, { ...opts, duration: 1.2 }); }
     else map.fitBounds(bounds, { ...opts, animate: false });
   }
@@ -1813,7 +1862,8 @@
   overviewBtn.addEventListener('click', toggleOverview);
   $('panel-close').addEventListener('click', () => {
     if (atlas) { panel.hidden = true; return; }
-    panelClosed = true;
+    if (overview) overviewPanelClosed = true;
+    else panelClosed = true;
     renderPanel();
   });
 
@@ -1827,6 +1877,7 @@
       if (chapterLink) return showChapter(Number(chapterLink.dataset.atlasChapter));
       return;
     }
+    if (e.target.closest('[data-ov-start]')) return startFromOverview();
     const stepBtn = e.target.closest('[data-step]'); // (not "step": that would shadow step() above)
     if (stepBtn) { pause(); stepEvent(Number(stepBtn.dataset.step)); return; }
     const jumpBtn = e.target.closest('[data-jump]');
@@ -2048,7 +2099,7 @@
       if (atlas && atlasOverview) showChapter(atlasChapter);
       else if (atlas) panel.hidden = true;
       else if (overview) toggleOverview();
-      else { panelClosed = true; renderPanel(); fitPanel(); }
+      else { if (overview) overviewPanelClosed = true; else panelClosed = true; renderPanel(); fitPanel(); }
     }
   });
 

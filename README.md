@@ -52,6 +52,7 @@ styles.css              all styling
 data/catalog.js         the picker's groups and per-timeline settings
 data/wiki.js            phrase → Wikipedia article glossary for automatic links
 data/places.js          period place labels shown on the map
+data/intros.js          overview text and a line of atmosphere for each timeline
 data/timelines/*.js     one file per timeline (fills WW2.events[id])
 data/atlases/*.js       one file per atlas (fills WW2.atlases[id])
 ```
@@ -62,6 +63,7 @@ data/atlases/*.js       one file per atlas (fills WW2.atlases[id])
 2. Add an entry to `data/catalog.js` (options are documented at the top of that file).
 3. Add a `<script>` tag for it in `index.html`, before `app.js`.
 4. Add any new names to `data/wiki.js` so they link to Wikipedia.
+5. Add its overview text and atmosphere line to `data/intros.js`.
 
 Optionally, direct the camera with a shot list (`scene`, `frame`, `shot`, `transition`); see "Shots" in `app.js` and the end of `data/timelines/battle-of-midway.js` for an example.
 

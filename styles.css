@@ -737,3 +737,9 @@ body:not(.in-overview) #btn-start { display: none; }
 /* A "cut" between storylines: the map jumps behind a quick fade in. */
 .leaflet-container.cut-in .leaflet-map-pane { animation: cut-in 0.5s ease-out; }
 @keyframes cut-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* The overview's line of atmosphere above the factual text. */
+.panel p.flavor {
+  font-style: italic; color: var(--muted); border-left: 2px solid #e0a43c;
+  padding-left: 12px; margin-left: 0;
+}
