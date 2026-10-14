@@ -227,8 +227,6 @@
     ev('1944-02-04', 'I-175 is sunk', 'loss', P.kwajalein, 7,
       'The destroyer Charrette and the destroyer escort Fair find I-175 and sink her with Hedgehog anti-submarine mortars, a little over two months after she sank Liscome Bay.',
       { wiki: { 'Charrette': 'USS_Charrette', 'Fair': 'USS_Fair' } }),
-    ev('2015-07-26', 'Tarawa’s lost Marines come home', 'life', P.betio, 12,
-      'More than a hundred of the Americans killed on Betio were never brought home. A battlefield cemetery whose location was lost by the end of the war was found in March 2015, and the remains of 36 Marines buried there, among them Alexander Bonnyman, are repatriated, arriving at Joint Base Pearl Harbor–Hickam. More remains, from a mass grave found in 2019, follow.'),
   ];
 
   // ---------- Shot list ----------

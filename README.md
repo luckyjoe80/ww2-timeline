@@ -22,8 +22,21 @@ Then visit <http://localhost:8417>. Deep links work: `#battle-of-midway/1942-06-
 | | The Attack on Hawaii | `data/timelines/attack-on-hawaii.js` |
 | | From Pearl Harbor to Guadalcanal | `data/timelines/pearl-harbor-to-guadalcanal.js` |
 | | The Road to Tokyo Bay | `data/timelines/road-to-tokyo-bay.js` |
-| | The Battle of Midway | `data/timelines/battle-of-midway.js` |
 | | Submarine Operations | `data/timelines/pacific-submarines.js` |
+| Pacific Battles | The Fall of the Philippines | `data/timelines/philippines-1941-42.js` |
+|  | Malaya and Singapore | `data/timelines/malaya-singapore.js` |
+|  | The Battle of the Java Sea | `data/timelines/java-sea.js` |
+|  | The Battle of the Coral Sea | `data/timelines/coral-sea.js` |
+|  | The Battle of Midway | `data/timelines/battle-of-midway.js` |
+|  | The Kokoda Track | `data/timelines/kokoda-track.js` |
+|  | Guadalcanal | `data/timelines/guadalcanal.js` |
+|  | Tarawa | `data/timelines/tarawa.js` |
+|  | Imphal and Kohima | `data/timelines/imphal-kohima.js` |
+|  | Saipan and the Philippine Sea | `data/timelines/saipan-philippine-sea.js` |
+|  | The Battle of Leyte Gulf | `data/timelines/leyte-gulf.js` |
+|  | Iwo Jima | `data/timelines/iwo-jima.js` |
+|  | The Firebombing of Japan | `data/timelines/firebombing-of-japan.js` |
+|  | Okinawa | `data/timelines/okinawa.js` |
 | Production | B-17 Production (atlas) | `data/atlases/b17-production.js` |
 | Medals | Medal of Honor (every World War II award) | `data/timelines/medal-of-honor.js` |
 | People | Isoroku Yamamoto | `data/timelines/yamamoto.js` |

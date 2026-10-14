@@ -90,7 +90,7 @@
 
     // ---------- L-Day ----------
     ev('1945-04-01', 'L-Day: the Tenth Army lands at Hagushi', 'invasion', P.hagushi, 10,
-      'In the largest amphibious assault of the Pacific War, XXIV Corps and III Amphibious Corps land on the Hagushi beaches on Okinawa’s west coast. Ushijima has chosen not to fight at the water’s edge, and the troops walk ashore almost unopposed. The plan is to make Okinawa the springboard for the invasion of Japan.',
+      'In the largest amphibious assault of the Pacific War, XXIV Corps and III Amphibious Corps land on the Hagushi beaches on Okinawa’s west coast. The troops get ashore against little opposition. The plan is to make Okinawa the springboard for the invasion of Japan.',
       { ...ord('08:30'),
         facts: [['Tenth Army', '182,821 personnel at the start'], ['Divisions', 'Army 7th, 27th, 77th, 96th; Marine 1st, 2nd, 6th'], ['Fleet', '18 battleships, 27 cruisers, 177 destroyers and escorts, 39 carriers']],
         link: { timeline: 'road-to-tokyo-bay', event: '1945-04-01-okinawa-invaded', label: 'See this in Road to Tokyo Bay' } }),
@@ -150,7 +150,7 @@
       'The 77th Infantry Division assaults Ie Shima, a small, flat island off the end of the Motobu Peninsula with an airfield. Alongside the usual hazards, it faces kamikaze attacks and even local women armed with spears.'),
     ev('1945-04-18', 'Ernie Pyle is killed on Ie Shima', 'loss', P.pyle, 12,
       'The war correspondent Ernie Pyle, the best-known chronicler of the ordinary American soldier, came ashore with the 305th Infantry the day before. Riding in a jeep toward a new command post, his party is fired on by a Japanese machine gun. When Pyle raises his head from a ditch, a bullet kills him instantly. The soldiers of the 77th later put up a memorial at the spot, which still stands.',
-      { facts: [['Born', '3 August 1900, Indiana'], ['Pulitzer Prize', '1944, for his front-line reporting']] }),
+      { facts: [['Pulitzer Prize', '1944, for his front-line reporting']] }),
     ev('1945-04-18', 'Yae-Take is cleared', 'attack', P.motobu, 11,
       'After heavy fighting in the ravines and rocky ridges of Mount Yae-Take, at the heart of the Motobu Peninsula, the 6th Marine Division clears the last organized Japanese resistance in the north. The division has taken the Ishikawa Isthmus, Nago and the peninsula in 13 days.'),
     ev('1945-04-19', 'The biggest barrage of the Pacific War', 'attack', P.kakazu, 11,
@@ -239,13 +239,10 @@
     ev('1945-07-29', 'Callaghan is the last ship sunk', 'loss', P.fleet, 8,
       'On radar picket duty off Okinawa, the destroyer Callaghan is hit by an obsolete wood-and-fabric biplane trainer flown as a kamikaze. She is the last American warship sunk in the war.'),
     ev('1945-08-15', 'Ugaki’s last flight', 'loss', P.iheya, 9,
-      'Hours after Japan announces its surrender, Vice Admiral Matome Ugaki, commander of the 5th Air Fleet that directed the kamikaze campaign from Kyushu, flies in one of the last kamikaze raids and is killed near Iheyajima.',
+      'Hours after Japan announces its surrender, Vice Admiral Matome Ugaki, commander of the Kyushu-based 5th Air Fleet, flies in one of the last kamikaze raids and is killed near Iheyajima.',
       { approx: true }),
-    ev('1945-09-07', 'Surrender in the Ryukyus', 'political', P.kadena, 10,
-      'The formal surrender ceremony for the Ryukyus is held near Kadena airfield. Okinawa, its towns, its records and its castle largely destroyed, passes under American military government.'),
-    ev('1995-06-23', 'The Cornerstone of Peace', 'life', P.mabuni, 12,
-      'Okinawa unveils the Cornerstone of Peace at Mabuni, where the last fighting took place. It lists every known person who died in the battle, soldier or civilian, Japanese, American or other. By 2024 it carries more than 242,000 names, about 149,000 of them Okinawan.',
-      { approx: true, facts: [['Names (2023)', '242,046: 149,634 Okinawans, 77,823 Japanese soldiers, 14,010 Americans, and others']] }),
+    ev('1945-09-07', 'The surrender ceremony at Kadena', 'political', P.kadena, 10,
+      'The official surrender ceremony on Okinawa is held near Kadena airfield. Okinawa, its towns, its records and its castle largely destroyed, passes under American military government.'),
   ];
 
   // ---------- Shot list ----------

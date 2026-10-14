@@ -159,7 +159,7 @@
     ev('1944-11-21', 'Sealion sinks the battleship Kongō', 'loss', US,
       { name: 'Taiwan Strait', lat: 26.2, lng: 121.4 }, 8,
       'Shortly after midnight, Sealion makes radar contact with a Japanese force heading for home after Leyte Gulf. She sinks the battleship Kongō and the destroyer Urakaze. Kongō is the only Japanese battleship sunk by a submarine.',
-      { link: { timeline: 'yamato', event: '1944-11-21-survives-a-submarine-attack-on-the-way-ho', label: 'See this in Battleship Yamato' } }),
+      { link: { timeline: 'yamato', event: '1944-11-21-survives-a-submarine-attack-on-the-way-h', label: 'See this in Battleship Yamato' } }),
     ev('1944-11-29', 'Archerfish sinks Shinano', 'loss', US,
       { name: 'Off the Kii Peninsula, 65 miles from land', lat: 33.117, lng: 137.067 }, 7,
       'Ten days after commissioning, the giant carrier Shinano, built on the hull of a Yamato-class battleship, is hit by four torpedoes from Archerfish. Her crew, confident in her armor, are slow to fight the flooding, and she capsizes at 10:57. 1,435 officers, men and civilians are lost, including her captain. She remains the largest ship ever sunk by a submarine.',

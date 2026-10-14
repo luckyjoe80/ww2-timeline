@@ -2,7 +2,7 @@
 // Operation Detachment, 19 February – 26 March 1945: Kuribayashi's underground defences and the
 // long bombardment, the landings, Mount Suribachi and its two flag raisings, the drive north
 // through the Meat Grinder, the airfields, the last stand in the Gorge and the final attack of
-// 26 March, with the mopping-up, the B-29 landings and the last holdouts afterwards.
+// 26 March, with the mopping-up and the B-29 landings afterwards.
 // Checked against the English Wikipedia articles "Battle of Iwo Jima", "Raising the Flag on Iwo
 // Jima", "Tadamichi Kuribayashi", "Mount Suribachi", "Iwo Jima", "Naval Base Iwo Jima",
 // "Holland Smith", "Harry Schmidt (USMC)", "Takeichi Nishi", "Rinosuke Ichimaru",
@@ -219,8 +219,6 @@
     ev('1945-06-15', 'A runway for Superfortresses', 'service', P.airfield2, 11,
       'In June more than 800 B-29s land on Iwo Jima, the busiest month of the war there. Most stop to refuel or for minor repairs; none that month lands because of battle damage. Seabees lengthen Central Field to 9,800 feet by 12 July. Whether the island saved as many aircrew as was later claimed remains disputed, but its value as an emergency field became the battle’s best-known justification.',
       { approx: true, facts: [['Central Field runway', '9,800 × 200 ft by 12 July 1945']] }),
-    ev('1949-01-06', 'The last holdouts surrender', 'life', P.iwo, 10,
-      'Two Japanese naval machine gunners, survivors of the garrison who have hidden on the island for almost four years, finally give themselves up.'),
   ];
 
   // ---------- Shot list ----------
