@@ -12,11 +12,11 @@
 <body>
   <header class="topbar">
     <div class="brand">
-      <button id="menu-toggle" class="menu-toggle" aria-label="Choose a timeline" aria-controls="picker" aria-haspopup="dialog" title="Choose a timeline">☰</button>
-      <div>
-        <h1>WW2 <span>Day by Day</span></h1>
-        <button id="timeline-title" class="timeline-title" aria-haspopup="dialog" title="Choose a timeline"></button>
-      </div>
+      <h1>WW2 <span>Day by Day</span></h1>
+      <button id="menu-toggle" class="switcher" aria-controls="picker" aria-haspopup="dialog" title="Switch to another timeline or atlas">
+        <span id="timeline-title" class="switcher-title"></span>
+        <span class="switcher-caret" aria-hidden="true">▾</span>
+      </button>
     </div>
     <div class="date-readout">
       <div id="weekday" class="weekday"></div>
@@ -36,19 +36,24 @@
     </aside>
   </main>
 
-  <!-- Timeline picker: groups on the left, that group's timelines and atlases on the right. -->
+  <!-- Timeline picker: by group (groups left, cards right) or all timelines by date on a shared axis. -->
   <div id="picker" class="picker" hidden>
     <div class="picker-backdrop" data-picker-close></div>
     <div class="picker-dialog" role="dialog" aria-modal="true" aria-labelledby="picker-title">
       <div class="picker-head">
         <h2 id="picker-title">Choose a timeline</h2>
-        <input id="picker-search" type="search" placeholder="Search timelines and atlases…" aria-label="Search" autocomplete="off" />
+        <div class="picker-tabs" role="tablist" aria-label="View">
+          <button role="tab" id="tab-groups" data-view="groups" aria-selected="true">By group</button>
+          <button role="tab" id="tab-list" data-view="list" aria-selected="false">All, by date</button>
+        </div>
+        <input id="picker-search" type="search" placeholder="Search…" aria-label="Search timelines and atlases" autocomplete="off" />
         <button class="picker-close" data-picker-close aria-label="Close">×</button>
       </div>
-      <div class="picker-body">
+      <div id="picker-body" class="picker-body" role="tabpanel" aria-labelledby="tab-groups">
         <nav id="picker-groups" class="picker-groups" aria-label="Groups"></nav>
         <div id="picker-items" class="picker-items"></div>
       </div>
+      <div id="picker-list" class="picker-list" role="tabpanel" aria-labelledby="tab-list" hidden></div>
     </div>
   </div>
 

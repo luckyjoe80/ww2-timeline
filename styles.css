@@ -45,15 +45,25 @@ body {
   letter-spacing: 0.04em;
 }
 .topbar h1 span { color: var(--muted); }
-.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.timeline-title {
-  display: block; max-width: 100%;
-  background: none; border: none; padding: 0; margin: 0;
-  font: inherit; font-size: 12px; color: var(--muted); text-align: left; cursor: pointer;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+.brand { display: flex; align-items: center; min-width: 0; }
+.topbar h1 { white-space: nowrap; flex: none; line-height: 34px; }
+/* The current timeline's name, set like the title beside it and doubling as the way to switch. */
+.switcher {
+  display: flex; align-items: center; gap: 12px; min-width: 0; height: 34px;
+  margin-left: 18px; padding: 0 0 0 18px;
+  background: none; border: none; border-left: 1px solid var(--line);
+  color: var(--ink); font: inherit; cursor: pointer;
 }
-.timeline-title::after { content: ' ▾'; font-size: 10px; }
-.timeline-title:hover { color: var(--ink); }
+.switcher-title {
+  font-family: var(--font-head); font-size: 22px; letter-spacing: 0.04em; line-height: 34px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+}
+.switcher-caret {
+  flex: none; display: grid; place-items: center; width: 24px; height: 24px;
+  border: 1px solid #e0a43c; border-radius: 50%; color: #e0a43c; font-size: 12px; line-height: 1;
+}
+.switcher:hover .switcher-title, .switcher[aria-expanded='true'] .switcher-title { color: #e0a43c; }
+.switcher:hover .switcher-caret, .switcher[aria-expanded='true'] .switcher-caret { background: #e0a43c; color: var(--bg); }
 
 /* ---------- Timeline picker (modal) ---------- */
 .picker { position: fixed; inset: 0; z-index: 3000; display: flex; align-items: center; justify-content: center; }
@@ -61,14 +71,22 @@ body {
 .picker-backdrop { position: absolute; inset: 0; background: rgba(10, 9, 8, 0.66); }
 .picker-dialog {
   position: relative;
-  width: min(920px, calc(100vw - 32px));
-  height: min(600px, calc(100dvh - 48px));
+  width: min(1080px, calc(100vw - 32px));
+  height: min(860px, calc(100dvh - 48px));
   display: flex; flex-direction: column;
   background: var(--bg); border: 1px solid var(--line);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
 }
 .picker-head { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
 .picker-head h2 { font-family: var(--font-head); font-weight: 400; font-size: 20px; margin: 0; white-space: nowrap; }
+.picker-tabs { display: flex; flex: none; border: 1px solid var(--line); }
+.picker-tabs button {
+  background: none; border: none; color: var(--muted); font: inherit; font-size: 13px;
+  padding: 7px 12px; cursor: pointer; white-space: nowrap;
+}
+.picker-tabs button + button { border-left: 1px solid var(--line); }
+.picker-tabs button:hover { color: var(--ink); }
+.picker-tabs button[aria-selected='true'] { background: rgba(224, 164, 60, 0.16); color: var(--ink); box-shadow: inset 0 -2px 0 #e0a43c; }
 .picker-head input {
   flex: 1; min-width: 0; height: 32px; padding: 0 10px;
   background: #2a2823; border: 1px solid var(--line); color: var(--ink);
@@ -108,6 +126,76 @@ body {
 .picker-desc { font-size: 12px; color: var(--muted); line-height: 1.45; }
 .picker-item small { font-size: 11px; color: var(--muted); margin-top: auto; padding-top: 4px; }
 .picker-none { color: var(--muted); font-size: 13px; }
+.picker-body[hidden], .picker-list[hidden] { display: none; }
+
+/* All timelines by date: name | dates | span on a shared 1941–1945 axis. The rows share
+   the dialog's height so the whole list fits without scrolling; if the window is too short
+   it scrolls with no scrollbar, fading at the cut edges. */
+.picker-list {
+  --cols: minmax(200px, 1.25fr) 210px 2fr;
+  --band-l: 0; --band-w: 0;
+  flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 8px 18px 14px;
+}
+.list-head, .list-row { display: grid; grid-template-columns: var(--cols); gap: 14px; align-items: center; }
+.list-head {
+  font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted);
+  padding: 4px 10px 8px; border-bottom: 1px solid var(--line);
+}
+.list-axis { position: relative; height: 1em; }
+.list-axis span { position: absolute; transform: translateX(-50%); letter-spacing: 0.05em; }
+.list-axis span:first-child { transform: none; }
+.list-rows {
+  flex: 1; min-height: 0; display: flex; flex-direction: column;
+  overflow-y: auto; scrollbar-width: none;
+}
+.list-rows::-webkit-scrollbar { display: none; }
+.list-rows.more-below { -webkit-mask-image: linear-gradient(#000 calc(100% - 28px), transparent); mask-image: linear-gradient(#000 calc(100% - 28px), transparent); }
+.list-rows.more-above { -webkit-mask-image: linear-gradient(transparent, #000 28px); mask-image: linear-gradient(transparent, #000 28px); }
+.list-rows.more-above.more-below { -webkit-mask-image: linear-gradient(transparent, #000 28px, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(transparent, #000 28px, #000 calc(100% - 28px), transparent); }
+.list-group {
+  flex: none; margin: 12px 0 2px; padding: 0 10px;
+  font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: #e0a43c; font-weight: 500;
+}
+.list-group:first-child { margin-top: 8px; }
+.list-row {
+  flex: 1 0 24px; max-height: 40px;
+  background: none; border: none; border-bottom: 1px solid rgba(74, 69, 59, 0.5);
+  border-left: 3px solid transparent;
+  color: var(--ink); font: inherit; text-align: left; cursor: pointer; padding: 0 10px 0 7px;
+}
+.list-row:hover { background: rgba(255, 255, 255, 0.04); }
+.list-row.current { border-left-color: #e0a43c; background: rgba(224, 164, 60, 0.08); }
+.list-name { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.list-name strong {
+  font-family: var(--font-head); font-weight: 400; font-size: 15px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.list-dates { display: flex; align-items: baseline; gap: 8px; font-size: 12px; color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.list-dates small { font-size: 10px; color: var(--muted); }
+.list-track {
+  position: relative; height: 100%; min-height: 18px;
+  /* year lines at each 1 January */
+  background: repeating-linear-gradient(to right, rgba(168, 158, 136, 0.18) 0 1px, transparent 1px 20%);
+}
+.list-track::before {
+  content: ''; position: absolute; top: 0; bottom: 0;
+  left: var(--band-l); width: var(--band-w); background: rgba(224, 164, 60, 0.1);
+}
+.list-track-none { background: none; }
+.list-track-none::before { display: none; }
+.list-bar {
+  position: absolute; top: 50%; height: 8px; transform: translateY(-50%);
+  background: #a89e88; border-radius: 4px;
+}
+.list-row:hover .list-bar, .list-row.current .list-bar { background: #e0a43c; }
+.list-bar.clip-l { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.list-bar.clip-r { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.list-bar.clip-l::before, .list-bar.clip-r::after {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  font-size: 9px; line-height: 1; color: var(--muted);
+}
+.list-bar.clip-l::before { content: '◀'; right: calc(100% + 3px); }
+.list-bar.clip-r::after { content: '▶'; left: calc(100% + 3px); }
 .menu-toggle {
   background: #2a2823; color: var(--ink);
   border: 1px solid var(--line);
@@ -625,7 +713,18 @@ body:not(.in-overview) #btn-start { display: none; }
   .picker-head h2 { display: none; }
   .minimap { display: none; }
   .stage .panel { max-height: 50%; }
-  .timeline-title { display: none; }
+  .topbar h1 span { display: none; }
+  .topbar h1 { line-height: 28px; }
+  .switcher { height: 28px; margin-left: 10px; padding-left: 10px; gap: 8px; }
+  .switcher-title { font-size: 17px; line-height: 28px; }
+  .switcher-caret { width: 20px; height: 20px; font-size: 10px; }
+  .picker-head { flex-wrap: wrap; gap: 10px; }
+  .picker-head input { order: 3; flex-basis: 100%; }
+  .picker-list { --cols: minmax(0, 1fr) 42%; padding: 6px 10px 10px; }
+  .list-dates, .list-head span:nth-child(2) { display: none; }
+  .list-row { flex-basis: 40px; max-height: 52px; }
+  .list-name strong { white-space: normal; font-size: 14px; line-height: 1.2; }
+  .list-axis span:nth-child(even) { display: none; }
   .panel { top: auto; bottom: 8px; right: 12px; max-height: 50%; }
   .day-strip { flex-wrap: wrap; gap: 4px; }
   .day-strip-label { min-width: 0; }

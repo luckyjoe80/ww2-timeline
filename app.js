@@ -1845,12 +1845,16 @@
   });
 
   // ---------- Timeline picker (modal) ----------
-  // Groups from the catalog on the left; the chosen group's timelines and atlases on the
-  // right as cards. Searching matches titles and descriptions across every group.
+  // Two views. "By group": groups from the catalog on the left, the chosen group's timelines
+  // and atlases on the right as cards. "All, by date": every timeline in one list ordered by
+  // start date within its group, each row with its span on a shared time axis so they can be compared.
+  // Searching matches titles and descriptions in either view.
   const picker = $('picker');
   const pickerSearch = $('picker-search');
   const pickerGroups = catalog.filter((n) => n.children);
   let pickerGroup = 0;
+  let pickerView = 'groups';
+  try { if (localStorage.getItem('ww2.pickerView') === 'list') pickerView = 'list'; } catch (e) { /* no storage */ }
   const currentId = () => (atlas ? atlas.meta.id : tl && tl.meta.id);
 
   function leafSummary(n) {
@@ -1874,10 +1878,82 @@
     </button>`;
   }
 
+  // The list view's shared axis: the Pacific war with a little either side. Spans that run
+  // past it are clipped, with an arrow on the clipped end.
+  const AXIS_START = msToDay(parseISO('1941-01-01'));
+  const AXIS_END = msToDay(parseISO('1946-01-01'));
+  const axisPct = (day) => ((Math.max(AXIS_START, Math.min(AXIS_END, day)) - AXIS_START) / (AXIS_END - AXIS_START)) * 100;
+  const monthYear = (day) => {
+    const d = new Date(dayToMs(day));
+    return `${MONTHS[d.getUTCMonth()].slice(0, 3)} ${d.getUTCFullYear()}`;
+  };
+  const spanLabel = (a, b) => {
+    const [x, y] = [monthYear(a), monthYear(b)];
+    return x === y ? x : `${x} – ${y}`;
+  };
+  const byStart = (a, b) => (!a.t - !b.t) || (a.t && (a.t.start - b.t.start || a.t.end - b.t.end)) || 0;
+  const listGroups = pickerGroups.map((g) => ({
+    g, entries: g.children.map((n) => ({ n, g, t: timelines.get(n.id) })).sort(byStart),
+  }));
+
+  function listRow({ n, g, t }) {
+    const current = n.id === currentId();
+    if (!t) {
+      const a = WW2.atlases[n.id];
+      return `<button class="list-row${current ? ' current' : ''}" data-pick="${esc(n.id)}">
+        <span class="list-name" title="${esc(g.title)}"><strong>${esc(n.title)}</strong></span>
+        <span class="list-dates">${esc((a && a.period) || '')}<small>atlas</small></span>
+        <span class="list-track list-track-none"></span>
+      </button>`;
+    }
+    const l = axisPct(t.start), r = axisPct(t.end);
+    const clip = `${t.start < AXIS_START ? ' clip-l' : ''}${t.end > AXIS_END ? ' clip-r' : ''}`;
+    return `<button class="list-row${current ? ' current' : ''}" data-pick="${esc(n.id)}" data-l="${l}" data-w="${Math.max(r - l, 0.4)}">
+      <span class="list-name" title="${esc(g.title)}"><strong>${esc(n.title)}</strong></span>
+      <span class="list-dates">${spanLabel(t.start, t.end)}<small>${t.events.length} events</small></span>
+      <span class="list-track"><span class="list-bar${clip}" style="left:${l}%;width:${Math.max(r - l, 0.4)}%"></span></span>
+    </button>`;
+  }
+
+  function renderList(matches) {
+    const list = $('picker-list');
+    const sections = listGroups.map(({ g, entries }) => ({ g, rows: entries.filter((x) => matches(x.n)) })).filter((x) => x.rows.length);
+    const years = [];
+    for (let y = 1941; y <= 1945; y++) years.push(`<span style="left:${axisPct(msToDay(parseISO(`${y}-01-01`)))}%">${y}</span>`);
+    list.innerHTML = sections.length
+      ? `<div class="list-head"><span>Timeline</span><span>Covers</span><span class="list-axis">${years.join('')}</span></div>
+         <div class="list-rows">${sections.map(({ g, rows }) =>
+           `<h3 class="list-group">${esc(g.title)}</h3>${rows.map(listRow).join('')}`).join('')}</div>`
+      : `<p class="picker-none">Nothing matches “${esc(pickerSearch.value.trim())}”.</p>`;
+    setListBand(list.querySelector('.list-row.current'));
+    updateListFades();
+  }
+
+  // A faint band across every row marks the hovered timeline's span (or the current one's).
+  function setListBand(row) {
+    const list = $('picker-list');
+    const on = row && row.dataset.l != null;
+    list.style.setProperty('--band-l', on ? `${row.dataset.l}%` : '0');
+    list.style.setProperty('--band-w', on ? `${row.dataset.w}%` : '0');
+  }
+
+  function updateListFades() {
+    const box = $('picker-list').querySelector('.list-rows');
+    if (!box) return;
+    box.classList.toggle('more-above', box.scrollTop > 2);
+    box.classList.toggle('more-below', box.scrollTop + box.clientHeight < box.scrollHeight - 2);
+  }
+
   function renderPicker() {
     if (picker.hidden) return;
     const q = pickerSearch.value.trim().toLowerCase();
     const matches = (n) => !q || `${n.title} ${n.description || ''}`.toLowerCase().includes(q);
+    const list = pickerView === 'list';
+    $('picker-body').hidden = list;
+    $('picker-list').hidden = !list;
+    $('tab-groups').setAttribute('aria-selected', String(!list));
+    $('tab-list').setAttribute('aria-selected', String(list));
+    if (list) return renderList(matches);
     $('picker-groups').innerHTML = pickerGroups.map((g, i) => {
       const count = g.children.filter(matches).length;
       return `<button class="picker-group${!q && i === pickerGroup ? ' active' : ''}${q && !count ? ' empty' : ''}" data-group="${i}">
@@ -1912,10 +1988,23 @@
   }
 
   menuToggle.addEventListener('click', openPicker);
-  $('timeline-title').addEventListener('click', openPicker);
+  $('picker-list').addEventListener('mouseover', (e) => {
+    const row = e.target.closest('.list-row');
+    if (row) setListBand(row);
+  });
+  $('picker-list').addEventListener('mouseleave', () => setListBand($('picker-list').querySelector('.list-row.current')));
+  $('picker-list').addEventListener('scroll', updateListFades, true);
+  new ResizeObserver(updateListFades).observe($('picker-list'));
   pickerSearch.addEventListener('input', renderPicker);
   picker.addEventListener('click', (e) => {
     if (e.target.closest('[data-picker-close]')) return closePicker();
+    const tab = e.target.closest('[data-view]');
+    if (tab) {
+      pickerView = tab.dataset.view;
+      try { localStorage.setItem('ww2.pickerView', pickerView); } catch (err) { /* no storage */ }
+      renderPicker();
+      return pickerSearch.focus();
+    }
     const group = e.target.closest('[data-group]');
     if (group) {
       pickerSearch.value = '';
@@ -1930,7 +2019,7 @@
   });
   // Enter in the search box opens the first match.
   pickerSearch.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') picker.querySelector('[data-pick]')?.click();
+    if (e.key === 'Enter') picker.querySelector(`${pickerView === 'list' ? '#picker-list' : '#picker-body'} [data-pick]`)?.click();
   });
 
   // Year labels depend on the bar's width.
