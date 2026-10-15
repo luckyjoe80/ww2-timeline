@@ -43,6 +43,28 @@
     life: { label: 'Life & career', color: '#b08d57' },
   };
 
+  // Countries for timelines whose legend is by country (catalog `legend: 'country'`), grouped
+  // by side: Allied in cool colours, Axis in warm ones, so the sides read at a glance.
+  const SIDES = {
+    Allied: {
+      'Britain': '#4f9bd6',
+      'United States': '#3157a6',
+      'Poland': '#4fb3a4',
+      'Australia': '#6aa85a',
+      'Soviet Union': '#9a7cc9',
+      'Netherlands': '#9fbf8a',
+    },
+    Axis: {
+      'Germany': '#c8402f',
+      'Japan': '#e0a43c',
+      'Italy': '#b8682a',
+    },
+  };
+  const COUNTRY_COLORS = Object.assign({}, ...Object.values(SIDES));
+  // A marker shared by several countries is split into equal slices of their colours.
+  const splitFill = (colors) => `linear-gradient(90deg, ${colors.map((c, i) =>
+    `${c} ${(i * 100) / colors.length}% ${((i + 1) * 100) / colors.length}%`).join(', ')})`;
+
   // 1941 offsets in minutes from GMT. Hawaii was on GMT−10:30 until 1947.
   const TIMEZONES = {
     HST: { offset: -630, label: 'Hawaii' },
@@ -117,8 +139,12 @@
           tzInfo: tz,
           day: msToDay(dateMs),
           abs: dateMs + (hh * 60 + mm - tz.offset) * 60000,
-          // A timeline can color by theater (e.g. by navy) instead of by event type.
-          color: (meta.colors && meta.colors[e.theater]) || (TYPES[e.type] || TYPES.attack).color,
+          // A timeline can color by theater (e.g. by navy) or by country instead of by event type.
+          // `country` may list several (an event involving both sides); the first sets the colour.
+          color: (meta.legend === 'country' && COUNTRY_COLORS[[].concat(e.country)[0]])
+            || (meta.colors && meta.colors[e.theater]) || (TYPES[e.type] || TYPES.attack).color,
+          fill: meta.legend === 'country' && Array.isArray(e.country) && e.country.length > 1
+            ? splitFill(e.country.map((c) => COUNTRY_COLORS[c] || '#888')) : null,
         };
       })
       .sort((a, b) => a.day - b.day || a.abs - b.abs);
@@ -217,16 +243,12 @@
   });
   L.control.zoom({ position: 'topleft' }).addTo(map);
 
-  // Tile layers draw only the one world window (see setWorld), never repeated copies of it.
+  // The map is one finite world (see setWorld): markers, labels, framing, flights and the
+  // limits on panning and zooming all live in that single window. The tiles alone wrap, as
+  // scenery, so wherever the view runs past an edge (behind the text panel, or mid-flight)
+  // the map simply continues instead of showing blank.
   let worldCenter = 0;
-  const WorldTiles = L.TileLayer.extend({
-    _isValidTile(coords) {
-      if (!L.TileLayer.prototype._isValidTile.call(this, coords)) return false;
-      const span = 360 / 2 ** coords.z; // degrees of longitude per tile at this tile zoom
-      const west = -180 + coords.x * span; // unwrapped, so copies east or west fall outside
-      return west + span > worldCenter - 180 + 1e-6 && west < worldCenter + 180 - 1e-6;
-    },
-  });
+  const WorldTiles = L.TileLayer;
   const worldTiles = [];
   // Shared by both tile layers: keep more off-screen tiles so panning back is instant. (They
   // still load at each zoom level a flight passes through; prefetchView warms those levels.)
@@ -326,18 +348,25 @@
   const wrapLatLng = (lat, lng) => L.latLng(lat, wrapLng(lng));
   function setWorld(centerLng) {
     const c = Math.round(centerLng);
-    const changed = c !== worldCenter;
     worldCenter = c;
-    if (changed) worldTiles.forEach((t) => t.redraw());
-    const bounds = L.latLngBounds([[-85, worldCenter - 180], [85, worldCenter + 180]]);
     // Not setMaxBounds: it starts an animated pan inside the new bounds, which cancels the fly
     // (or undoes the fit) that always follows a switch of world. Set the bounds and keep the
     // usual moveend check instead; the view lands inside them anyway.
     if (!map.options.maxBounds) map.on('moveend', map._panInsideMaxBounds);
-    map.options.maxBounds = bounds;
     updateMinZoom();
+    updateWorldBounds();
     fitMini();
   }
+  // How far the view may go: the single world, plus, past its east edge, the width of the text
+  // panel at that zoom. An event near the edge can then still be framed in the open map left
+  // of the panel; whatever blank lies beyond the edge stays behind the panel.
+  function worldBounds(z) {
+    const room = window.innerWidth > 640 && !panel.hidden ? panelRoom() : 0;
+    const extra = (room / (256 * 2 ** z)) * 360;
+    return L.latLngBounds([[-85, worldCenter - 180], [85, worldCenter + 180 + extra]]);
+  }
+  function updateWorldBounds() { map.options.maxBounds = worldBounds(map.getZoom()); }
+  map.on('zoomend', updateWorldBounds);
   // Never zoom out past the point where one world no longer fills the map.
   function updateMinZoom() {
     const { x, y } = map.getSize();
@@ -410,8 +439,13 @@
   // the timeline bar, the day strip, stepping and playback.
   let legendDiv;
   const hiddenKeys = new Set(); // legend categories currently hidden
-  const legendKey = (e) => (tl.meta.colors ? e.theater : e.type);
-  const isShown = (e) => !hiddenKeys.has(legendKey(e));
+  // An event's legend categories: its type or theater, or its countries (one or several).
+  const legendKeys = (e) => (tl.meta.filter === 'story' ? [e.story]
+    : tl.meta.legend === 'country' ? [].concat(e.country) : [tl.meta.colors ? e.theater : e.type]);
+  const legendKey = (e) => legendKeys(e)[0]; // the main one, which sets its colour
+  // A legend group (a side, for country legends) and the categories it holds.
+  const groupKeys = (side) => Object.keys(SIDES[side] || {});
+  const isShown = (e) => legendKeys(e).some((k) => !hiddenKeys.has(k)); // shown if any of its categories is
   const inPeriod = (e) => e.day >= view.start && e.day <= view.end; // within the bar's zoomed period
   let shown = []; // the current timeline's events that pass the filter, in order
   const legend = L.control({ position: 'bottomleft' });
@@ -422,6 +456,8 @@
   };
   legend.addTo(map);
   function renderLegend() {
+    if (tl.meta.filter === 'story') return renderStoryLegend();
+    if (tl.meta.legend === 'country') return renderCountryLegend();
     const entries = tl.meta.colors
       ? Object.entries(tl.meta.colors).map(([key, color]) => ({ key, label: key, color }))
       : Object.entries(TYPES).map(([key, t]) => ({ key, label: t.label, color: t.color }));
@@ -436,6 +472,45 @@
       `<button type="button" class="legend-item${hiddenKeys.has(t.key) ? ' off' : ''}" data-key="${esc(t.key)}" aria-pressed="${!hiddenKeys.has(t.key)}">
         <i style="background:${t.color}"></i>${esc(t.label)}<span class="legend-count">${counts[t.key] || 0}</span></button>`).join('');
   }
+  // Stories as the filter (one click focuses on a single story), with a key to the country
+  // colours the events keep.
+  function renderStoryLegend() {
+    const present = new Set(tl.events.map((e) => e.story));
+    const counts = {};
+    for (const e of tl.events) if (inPeriod(e)) counts[e.story] = (counts[e.story] || 0) + 1;
+    const showAll = `<button type="button" class="legend-showall" data-show-all ${hiddenKeys.size ? '' : 'disabled'}>Show all</button>`;
+    const stories = Object.entries(tl.meta.stories).filter(([id]) => present.has(id)).map(([id, label]) =>
+      `<button type="button" class="legend-item story${hiddenKeys.has(id) ? ' off' : ''}" data-key="${esc(id)}" aria-pressed="${!hiddenKeys.has(id)}">
+        <i></i>${esc(label)}<span class="legend-count">${counts[id] || 0}</span></button>`).join('');
+    const countries = [...new Set(tl.events.flatMap((e) => [].concat(e.country || [])))];
+    const key = countries.length
+      ? `<div class="legend-key">${Object.values(SIDES).flatMap((side) => Object.entries(side))
+        .filter(([c]) => countries.includes(c)).map(([c, color]) => `<span><i style="background:${color}"></i>${esc(c)}</span>`).join('')}</div>`
+      : '';
+    legendDiv.innerHTML = `<div class="legend-hint"><span>${overview ? 'Hover to preview · ' : ''}Click a story to focus on it</span>${showAll}</div>${stories}${key}`;
+  }
+
+  // Countries listed under their side. A side's heading selects or clears all its countries.
+  function renderCountryLegend() {
+    const present = new Set(tl.events.flatMap(legendKeys));
+    const counts = {};
+    for (const e of tl.events) if (inPeriod(e)) for (const k of legendKeys(e)) counts[k] = (counts[k] || 0) + 1;
+    const showAll = `<button type="button" class="legend-showall" data-show-all ${hiddenKeys.size ? '' : 'disabled'}>Show all</button>`;
+    const item = (key, color) =>
+      `<button type="button" class="legend-item${hiddenKeys.has(key) ? ' off' : ''}" data-key="${esc(key)}" aria-pressed="${!hiddenKeys.has(key)}">
+        <i style="background:${color}"></i>${esc(key)}<span class="legend-count">${counts[key] || 0}</span></button>`;
+    const groups = Object.entries(SIDES).map(([side, countries]) => {
+      const keys = Object.keys(countries).filter((k) => present.has(k));
+      if (!keys.length) return '';
+      // A side's count is of events, so one shared by two of its countries counts once.
+      const total = tl.events.filter((e) => inPeriod(e) && legendKeys(e).some((k) => keys.includes(k))).length;
+      const off = keys.every((k) => hiddenKeys.has(k));
+      return `<button type="button" class="legend-group${off ? ' off' : ''}" data-group="${esc(side)}" aria-pressed="${!off}">${esc(side)}<span class="legend-count">${total}</span></button>`
+        + keys.map((k) => item(k, countries[k])).join('');
+    }).join('');
+    legendDiv.innerHTML = `<div class="legend-hint"><span>${overview ? 'Hover to preview · ' : ''}Click to select</span>${showAll}</div>` + groups;
+  }
+
   // Click selects: with everything showing, a click shows only that category (what the hover
   // preview showed); further clicks add or remove categories; removing the last shows all again.
   legendDiv.addEventListener('click', (e) => {
@@ -449,10 +524,23 @@
       applyFilter();
       return;
     }
+    const keys = [...legendDiv.querySelectorAll('[data-key]')].map((b) => b.dataset.key);
+    const group = e.target.closest('[data-group]');
+    if (group) {
+      // A side works like one category: alone first, then added or removed as a whole.
+      const mine = groupKeys(group.dataset.group).filter((k) => keys.includes(k));
+      if (hiddenKeys.size === 0) keys.filter((k) => !mine.includes(k)).forEach((k) => hiddenKeys.add(k));
+      else if (mine.some((k) => hiddenKeys.has(k))) mine.forEach((k) => hiddenKeys.delete(k));
+      else {
+        mine.forEach((k) => hiddenKeys.add(k));
+        if (keys.every((k) => hiddenKeys.has(k))) hiddenKeys.clear();
+      }
+      applyFilter();
+      return;
+    }
     const btn = e.target.closest('[data-key]');
     if (!btn) return;
     const key = btn.dataset.key;
-    const keys = [...legendDiv.querySelectorAll('[data-key]')].map((b) => b.dataset.key);
     if (hiddenKeys.size === 0) {
       keys.filter((k) => k !== key).forEach((k) => hiddenKeys.add(k));
     } else if (hiddenKeys.has(key)) {
@@ -477,7 +565,14 @@
     previewKey = key;
     buildOverview();
   }
-  legendDiv.addEventListener('pointerover', (e) => setPreview(e.target.closest('[data-key]')?.dataset.key || null));
+  legendDiv.addEventListener('pointerover', (e) => {
+    const group = e.target.closest('[data-group]');
+    setPreview(group ? `side:${group.dataset.group}` : e.target.closest('[data-key]')?.dataset.key || null);
+  });
+  // Whether an event belongs to the hovered legend entry (a category, or a whole side).
+  const inPreview = (ev) => legendKeys(ev).some((k) => (previewKey.startsWith('side:')
+    ? groupKeys(previewKey.slice(5)).includes(k)
+    : k === previewKey));
   legendDiv.addEventListener('pointerleave', () => setPreview(null));
 
   // Re-apply the legend filter everywhere. If the selected event is now hidden, deselect it.
@@ -555,7 +650,7 @@
     for (const ev of t.events) {
       const icon = L.divIcon({
         className: 'event-marker',
-        html: `<div class="ring" style="--marker-color:${ev.color}"></div><div class="dot" style="--marker-color:${ev.color}"></div>`,
+        html: `<div class="ring" style="--marker-color:${ev.color}"></div><div class="dot" style="--marker-color:${ev.color}${ev.fill ? `;--marker-fill:${ev.fill}` : ''}"></div>`,
         iconSize: [28, 28],
       });
       const when = [formatLong(dayToMs(ev.day)), localTimeLabel(ev)].filter(Boolean).join(' · ');
@@ -622,6 +717,7 @@
     }
     stripDay = null;
     $('timeline-title').textContent = tl.meta.title;
+    setView((tl.meta.views || [])[0]);
     hiddenKeys.clear();
     shown = tl.events.slice();
     renderLegend();
@@ -711,7 +807,7 @@
     // each zoom: position is a fraction of that room, which narrows smoothly as the camera pulls
     // out, so the path never meets an edge and its speed never jumps.
     const room = (z) => {
-      const half = size.divideBy(2), mb = map.options.maxBounds;
+      const half = size.divideBy(2), mb = worldBounds(z);
       const nw = map.project(mb.getNorthWest(), z).add(half), se = map.project(mb.getSouthEast(), z).subtract(half);
       return { nw, se };
     };
@@ -751,8 +847,8 @@
   // Away from the edges the centre is untouched; within half a screen of one it is drawn in
   // smoothly (matching position and speed where the cushion begins), never quite reaching it.
   function softLimitCenter(px, z) {
-    const mb = map.options.maxBounds;
-    if (!mb) return map.unproject(px, z);
+    if (!map.options.maxBounds) return map.unproject(px, z);
+    const mb = worldBounds(z);
     const half = map.getSize().divideBy(2);
     const nw = map.project(mb.getNorthWest(), z), se = map.project(mb.getSouthEast(), z);
     const axis = (v, a, b) => {
@@ -769,7 +865,7 @@
   function flyToBoundsFocal(bounds, opts, subject, durationMs) {
     let { center, zoom } = map._getBoundsCenterZoom(bounds, opts);
     // Land where the world's edges allow (fully zoomed out, the view can't shift past them).
-    if (map.options.maxBounds) center = map._limitCenter(center, zoom, map.options.maxBounds);
+    if (map.options.maxBounds) center = map._limitCenter(center, zoom, worldBounds(zoom));
     // To or from (nearly) the world view, fly centre to centre through the room the view has.
     if (Math.min(zoom, map.getZoom()) < map.getMinZoom() + 1) {
       return flyFocal(center, zoom, map.getSize().divideBy(2), durationMs, { inWorld: true });
@@ -960,9 +1056,11 @@
     renderMarkers();
     renderPanel();
     fitPanel();
+    updateWorldBounds(); // the room past the world's edge depends on whether the panel is open
     renderDayStrip();
     renderStepButtons();
     renderMapCrumbs();
+    if (viewMode === 'connections') renderGraph();
   }
 
   function warDayLabel(day) {
@@ -1071,12 +1169,27 @@
         ${fmtInt(evs.length)} events on ${fmtInt(perDay.size)} days · ${fmtInt(places)} places</div>
       ${flavor ? `<p class="flavor">${esc(flavor)}</p>` : ''}
       ${intro.map((t) => `<p>${linkify(t, ctx, used)}</p>`).join('')}
+      ${tl.meta.stories ? `<p class="views-hint"><strong>Connections</strong> shows how the events led to one another, story by story; <strong>Map</strong> shows where they happened. Switch between them below.</p>` : ''}
       <dl>
         <dt>Span</dt><dd>${durationLabel(tl.end - tl.start + 1)}</dd>
         ${busiest && busiest.n > 1 ? `<dt>Busiest day</dt><dd>${formatLong(dayToMs(busiest.day))}, ${busiest.n} events</dd>` : ''}
       </dl>
       <button class="panel-link" data-ov-start>Start the timeline →</button>`;
     panel.hidden = false;
+  }
+
+  // For timelines with connections: the events this one follows from, and those that follow it.
+  function connectionLinks(ev) {
+    if (!tl.meta.stories) return '';
+    const before = (ev.after || []).map((id) => tl.byId.get(id)).filter(Boolean);
+    const after = tl.events.filter((e) => (e.after || []).includes(ev.id));
+    if (!before.length && !after.length) return '';
+    const list = (evs) => evs.map((e) =>
+      `<button type="button" data-goto="${esc(e.id)}" style="--c:${e.color}"><i></i>${esc(e.title)}<small>${esc(formatMed(dayToMs(e.day)))}</small></button>`).join('');
+    return `<div class="connections">
+      ${before.length ? `<div><span>Because of</span>${list(before)}</div>` : ''}
+      ${after.length ? `<div><span>Led to</span>${list(after)}</div>` : ''}
+    </div>`;
   }
 
   function renderPanel() {
@@ -1108,11 +1221,12 @@
         <button data-step="1" aria-label="Next event" ${pos === shown.length - 1 ? 'disabled' : ''}>›</button>
         <button data-jump="last" aria-label="Last event" title="Last event" ${pos === shown.length - 1 ? 'disabled' : ''}>»</button>
       </div>
-      <span class="tag">${esc((TYPES[ev.type] || TYPES.attack).label)} · ${esc(ev.theater)}</span>
+      <span class="tag">${esc((tl.meta.stories && tl.meta.stories[ev.story]) || (TYPES[ev.type] || TYPES.attack).label)} · ${esc(tl.meta.legend === 'country' && ev.country ? [].concat(ev.country).join(' & ') : ev.theater)}</span>
       <h2>${esc(ev.title)}</h2>
       <div class="meta">${when}${esc(ev.location.name)}</div>
       <p>${summary}</p>
       ${facts ? `<dl>${facts}</dl>` : ''}
+      ${connectionLinks(ev)}
       ${ev.link && timelines.has(ev.link.timeline)
         ? `<button class="panel-link" data-link-timeline="${esc(ev.link.timeline)}" data-link-event="${esc(ev.link.event || '')}">${esc(ev.link.label)} →</button>`
         : ''}`;
@@ -1482,7 +1596,7 @@
     ovPlaces = [];
     ovIndex = -1;
     for (const ev of tl.events) {
-      const passes = previewKey ? legendKey(ev) === previewKey : isShown(ev); // hover preview overrides the filter
+      const passes = previewKey ? inPreview(ev) : isShown(ev); // hover preview overrides the filter
       if (!passes || !inPeriod(ev)) continue; // filtered via the legend, or outside the bar's period
       const p = map.project(ovLatLng(ev), z);
       let c = clusters.find((cl) => cl.p.distanceTo(p) < OV_CLUSTER_PX);
@@ -1502,7 +1616,7 @@
       const byKey = {};
       for (const e of evs) {
         const k = legendKey(e);
-        byKey[k] = byKey[k] || { color: e.color, label: tl.meta.colors ? k : (TYPES[k] || TYPES.attack).label, count: 0 };
+        byKey[k] = byKey[k] || { color: e.color, label: tl.meta.filter === 'story' ? tl.meta.stories[k] || k : tl.meta.colors || tl.meta.legend ? k : (TYPES[k] || TYPES.attack).label, count: 0 };
         byKey[k].count++;
       }
       const parts = Object.values(byKey).sort((a, b) => b.count - a.count);
@@ -1693,6 +1807,7 @@
     atlasPreview = null;
     document.body.classList.add('atlas-mode');
     $('timeline-title').textContent = atlas.meta.title;
+    setView('map');
     $('weekday').textContent = data.subtitle || '';
     $('current-date').textContent = data.period || '';
     $('war-day').textContent = data.headline || '';
@@ -1962,7 +2077,9 @@
     if (overview) overviewPanelClosed = true;
     else panelClosed = true;
     renderPanel();
+    updateWorldBounds();
     if (overview) fitOverview(); // the map can use the panel's room now
+    else if (!map._ww2Flying) map.panInsideBounds(map.options.maxBounds); // no blank map in the open
   });
 
   panelBody.addEventListener('click', (e) => {
@@ -1976,6 +2093,8 @@
       return;
     }
     if (e.target.closest('[data-ov-start]')) return startFromOverview();
+    const go = e.target.closest('[data-goto]');
+    if (go) { pause(); return selectEvent(tl.byId.get(go.dataset.goto)); }
     const stepBtn = e.target.closest('[data-step]'); // (not "step": that would shadow step() above)
     if (stepBtn) { pause(); stepEvent(Number(stepBtn.dataset.step)); return; }
     const jumpBtn = e.target.closest('[data-jump]');
@@ -2231,6 +2350,246 @@
       else { if (overview) overviewPanelClosed = true; else panelClosed = true; renderPanel(); fitPanel(); }
     }
   });
+
+  // ---------- Connections view ----------
+  // For timelines with `stories` (see data/catalog.js): the events as a graph instead of a map.
+  // Stories are lanes, time runs left to right (one step per event, so busy years get room),
+  // and arrows run from each event to the ones it led to. Selecting an event lights up its
+  // whole chain, what led to it and what followed, and fades the rest. The map keeps working
+  // underneath, so the inset in the corner shows where each event happened.
+  const graphEl = L.DomUtil.create('div', 'graph', map.getContainer());
+  graphEl.hidden = true;
+  L.DomEvent.disableClickPropagation(graphEl);
+  L.DomEvent.disableScrollPropagation(graphEl);
+  L.DomEvent.on(graphEl, 'pointerdown touchstart', L.DomEvent.stopPropagation);
+  let viewMode = 'map';
+  let graphPan = 0; // horizontal offset of the graph's content, in px
+  const viewToggle = $('view-toggle');
+
+  function setView(mode) {
+    const can = !!(tl && !atlas && tl.meta.stories);
+    viewMode = can && mode === 'connections' ? 'connections' : 'map';
+    graphEl.hidden = viewMode !== 'connections';
+    document.body.classList.toggle('graph-view', viewMode === 'connections');
+    viewToggle.hidden = !can;
+    for (const b of viewToggle.querySelectorAll('[data-view]')) b.setAttribute('aria-pressed', String(b.dataset.view === viewMode));
+    if (viewMode === 'connections') { graphPan = 0; graphKey = null; renderGraph({ recenter: true }); }
+  }
+  viewToggle.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-view]');
+    if (b) setView(b.dataset.view);
+  });
+
+  // An event's chain: every event it follows from, and every event that follows from it.
+  function chainOf(ev) {
+    const next = new Map();
+    for (const e of tl.events) for (const id of e.after || []) {
+      if (!next.has(id)) next.set(id, []);
+      next.get(id).push(e.id);
+    }
+    const seen = new Set([ev.id]);
+    const walk = (ids, up) => {
+      for (const id of ids) {
+        if (seen.has(id)) continue;
+        seen.add(id);
+        walk(up ? tl.byId.get(id).after || [] : next.get(id) || [], up);
+      }
+    };
+    walk(ev.after || [], true);
+    walk(next.get(ev.id) || [], false);
+    return seen;
+  }
+
+  // The graph is drawn once per layout (timeline, size, overview or not, panel open or not) and
+  // then updated in place, so moving between events animates: the view glides along, chains
+  // fade in and out, and the selected event's story lane brightens.
+  let graphKey = null;   // the layout currently drawn
+  let graph = null;      // its geometry
+  let graphLabelsKey = null;
+  let graphManual = false; // the user has dragged or scrolled since the last selection
+  let graphSelId = null;
+
+  function renderGraph({ recenter = false, instant = false } = {}) {
+    if (graphEl.hidden || !tl || !tl.meta.stories) return;
+    const W = graphEl.clientWidth, H = graphEl.clientHeight;
+    if (!W || !H) return;
+    const fit = overview || !selected;
+    const right = window.innerWidth > 640 && !panel.hidden ? panelRoom() : 24;
+    const legendW = legendDiv && legendDiv.offsetWidth ? legendDiv.offsetWidth : 190;
+    const key = [tl.meta.id, W, H, fit, right, legendW].join('|');
+    if (key !== graphKey) {
+      buildGraph(W, H, fit, right, legendW);
+      graphKey = key;
+      graphLabelsKey = null;
+      instant = true;
+      recenter = true;
+    }
+    updateGraph({ recenter, instant });
+  }
+
+  function buildGraph(W, H, fit, right, legendW) {
+    const stories = Object.entries(tl.meta.stories);
+    const lane = new Map(stories.map(([id], i) => [id, i]));
+    const evs = tl.events;
+    // The legend sits at the bottom left, so the graph starts to its right; lane names are
+    // captions at the top of each lane.
+    const labelW = legendW + 30, top = 30, bottom = 14;
+    const free = Math.max(120, W - labelW - right);
+    const laneH = (H - top - bottom) / stories.length;
+    // Overview: the whole graph fits beside the panel. Following events: room to read a chain.
+    const step = fit ? free / evs.length : Math.max(26, free / evs.length);
+    const gx = (i) => step * (i + 0.5);
+    const gy = (e) => top + laneH * ((lane.get(e.story) ?? 0) + 0.5);
+    const r = Math.max(4, Math.min(9, step * 0.34));
+    graph = { W, H, labelW, top, free, step, width: step * evs.length, gx, gy, r };
+
+    const lanes = stories.map(([id], i) =>
+      `<rect class="lane${i % 2 ? ' odd' : ''}" data-lane="${esc(id)}" x="0" y="${top + laneH * i}" width="${W}" height="${laneH}"/>`).join('');
+    let content = '';
+    let year = null, lastLabel = -Infinity;
+    evs.forEach((e, i) => {
+      const yr = e.date.slice(0, 4);
+      if (yr === year) return;
+      year = yr;
+      const x = gx(i) - step / 2;
+      content += `<line class="year" x1="${x}" y1="${top - 6}" x2="${x}" y2="${H - bottom}"/>`;
+      if (x - lastLabel >= 34) { // where years are crowded, label only some of them
+        content += `<text class="year-label" x="${x + 4}" y="${top - 10}">${yr}</text>`;
+        lastLabel = x;
+      }
+    });
+    for (const e of evs) {
+      for (const id of e.after || []) {
+        const from = tl.byId.get(id);
+        const x1 = gx(from.index), y1 = gy(from), x2 = gx(e.index), y2 = gy(e);
+        // Gentle curves: the bend spreads over the whole distance, at least two steps wide.
+        const dx = Math.max(step * 2, (x2 - x1) * 0.55);
+        content += `<path class="edge" data-from="${esc(from.id)}" data-to="${esc(e.id)}" d="M${x1 + r},${y1} C${x1 + dx},${y1} ${x2 - dx},${y2} ${x2 - r - 3},${y2}" marker-end="url(#arrow)"/>`;
+      }
+    }
+    for (const e of evs) {
+      const cs = [].concat(e.country || []).map((c) => COUNTRY_COLORS[c]).filter(Boolean);
+      content += `<g class="node" data-ev="${esc(e.id)}" transform="translate(${gx(e.index)},${gy(e)})">`
+        + `<title>${esc(e.title)} · ${esc(formatMed(dayToMs(e.day)))}</title>`
+        + `<circle r="${r}" style="fill:${cs[0] || e.color}"/>`
+        + (cs.length > 1 ? `<path d="M0,${-r} A${r},${r} 0 0 1 0,${r} Z" style="fill:${cs[1]}"/>` : '')
+        + (r >= 7 ? '<text class="num" dy="0.35em"></text>' : '')
+        + '</g>';
+    }
+    graphEl.innerHTML = `<svg width="${W}" height="${H}" role="img" aria-label="Connections between events">
+      <defs>
+        <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="arrow"/></marker>
+        <marker id="arrow-hot" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="arrow hot"/></marker>
+        <clipPath id="graph-clip"><rect x="${labelW - 4}" y="0" width="${W - labelW + 4}" height="${H}"/></clipPath>
+      </defs>
+      ${lanes}
+      <g clip-path="url(#graph-clip)"><g class="graph-pan">
+        <g class="now" style="opacity:0"><rect class="now-past" x="-100000" y="${top - 6}" width="100000" height="${H - top - bottom + 6}"/>
+          <line class="now-line" x1="0" y1="${top - 6}" x2="0" y2="${H - bottom}"/><text class="now-date" x="5" y="${H - bottom - 6}"></text></g>
+        ${content}</g></g>
+      <g class="graph-pan graph-labels"></g>
+      ${stories.map(([id, label], i) => `<line class="lane-rule" x1="${labelW - 4}" y1="${top + laneH * i}" x2="${W}" y2="${top + laneH * i}"/>`
+        + `<text class="lane-label" data-lane-label="${esc(id)}" x="${labelW}" y="${top + laneH * i + 18}">${esc(label)}</text>`).join('')}
+    </svg>`;
+  }
+
+  function updateGraph({ recenter, instant }) {
+    const g = graph;
+    const sel = selected && !overview ? selected : null;
+    if ((sel && sel.id) !== graphSelId) { graphSelId = sel && sel.id; graphManual = false; }
+    // Keep the selected event in the open part of the view (unless the user is moving about).
+    if (!sel) graphPan = 0;
+    else if (!graphManual) {
+      const sx = g.gx(sel.index) + graphPan;
+      if (recenter || sx < g.step * 2 || sx > g.free - g.step * 2) graphPan = g.free * 0.42 - g.gx(sel.index);
+    }
+    graphPan = Math.max(Math.min(0, g.free - g.width), Math.min(0, graphPan));
+    for (const el of graphEl.querySelectorAll('.graph-pan')) {
+      el.classList.toggle('instant', !!instant);
+      el.style.transform = `translate(${g.labelW + graphPan}px, 0px)`;
+    }
+
+    // Time so far: a line that glides to the selected event as you step, shading the past.
+    const now = graphEl.querySelector('.now');
+    now.classList.toggle('instant', !!instant);
+    now.style.opacity = sel ? 1 : 0;
+    if (sel) {
+      now.style.transform = `translate(${g.gx(sel.index)}px, 0px)`;
+      now.querySelector('.now-date').textContent = formatMed(dayToMs(sel.day));
+    }
+
+    const chain = sel ? chainOf(sel) : null;
+    for (const lane of graphEl.querySelectorAll('[data-lane]')) lane.classList.toggle('current', !!(sel && lane.dataset.lane === sel.story));
+    for (const label of graphEl.querySelectorAll('[data-lane-label]')) {
+      label.classList.toggle('current', !!(sel && label.dataset.laneLabel === sel.story));
+      label.classList.toggle('off', tl.meta.filter === 'story' && hiddenKeys.has(label.dataset.laneLabel));
+    }
+    for (const node of graphEl.querySelectorAll('.node')) {
+      const e = tl.byId.get(node.dataset.ev);
+      node.classList.toggle('selected', e === sel);
+      node.classList.toggle('dim', !!(chain && !chain.has(e.id)));
+      node.classList.toggle('off', !isShown(e));
+      node.classList.toggle('future', !!(sel && e.index > sel.index));
+      const num = node.querySelector('.num');
+      if (num) { const n = shown.indexOf(e); num.textContent = n >= 0 ? n + 1 : ''; }
+    }
+    for (const edge of graphEl.querySelectorAll('.edge')) {
+      const from = tl.byId.get(edge.dataset.from), to = tl.byId.get(edge.dataset.to);
+      const hot = !!(chain && chain.has(from.id) && chain.has(to.id));
+      edge.classList.toggle('hot', hot);
+      edge.classList.toggle('dim', !!(chain && !hot));
+      edge.classList.toggle('off', !isShown(from) || !isShown(to));
+      edge.setAttribute('marker-end', `url(#arrow${hot ? '-hot' : ''})`);
+    }
+
+    // Names along the selected chain, kept inside the visible area (one that would run off an
+    // edge slides inward), alternating above and below to limit overlap. Redrawn, with a fade,
+    // only when the chain or the view changes.
+    const labelsKey = [sel && sel.id, Math.round(graphPan), [...hiddenKeys].join()].join('|');
+    if (labelsKey === graphLabelsKey) return;
+    graphLabelsKey = labelsKey;
+    const lo = -graphPan + 6, hi = -graphPan + g.free - 6;
+    let html = '';
+    tl.events.filter((e) => chain && chain.has(e.id)).forEach((e, k) => {
+      const t = e.title.length > 34 ? e.title.slice(0, 33) + '…' : e.title;
+      const half = t.length * 3.1; // about half the label's width at 11px
+      const x = Math.max(lo + half, Math.min(hi - half, g.gx(e.index)));
+      // Above, unless that would run into the lane's header at its left end.
+      const header = (tl.meta.stories[e.story] || '').length * 8.5 + 16;
+      const above = k % 2 === 0 && x - half > lo + header;
+      const y = g.gy(e) + (above ? -g.r - 9 : g.r + 16);
+      html += `<text class="node-label${e === sel ? ' sel' : ''}" x="${x}" y="${y}">${esc(t)}</text>`;
+    });
+    graphEl.querySelector('.graph-labels').innerHTML = html;
+  }
+
+  // Click an event to select it; drag or scroll sideways to move along the graph.
+  let graphDrag = null, graphDragged = false;
+  graphEl.addEventListener('click', (e) => {
+    if (graphDragged) return;
+    const header = e.target.closest('[data-lane-label]');
+    if (header && tl.meta.filter === 'story') {
+      legendDiv.querySelector(`[data-key="${CSS.escape(header.dataset.laneLabel)}"]`)?.click();
+      return;
+    }
+    const node = e.target.closest('[data-ev]');
+    if (node) { pause(); selectEvent(tl.byId.get(node.dataset.ev)); }
+  });
+  graphEl.addEventListener('pointerdown', (e) => { graphDrag = { x: e.clientX, pan: graphPan }; graphDragged = false; });
+  window.addEventListener('pointermove', (e) => {
+    if (!graphDrag) return;
+    const dx = e.clientX - graphDrag.x;
+    if (Math.abs(dx) > 4) graphDragged = true;
+    if (graphDragged) { graphPan = graphDrag.pan + dx; graphManual = true; renderGraph({ instant: true }); }
+  });
+  window.addEventListener('pointerup', () => { graphDrag = null; setTimeout(() => { graphDragged = false; }, 0); });
+  graphEl.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    graphPan -= Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    graphManual = true;
+    renderGraph({ instant: true });
+  }, { passive: false });
+  new ResizeObserver(() => renderGraph()).observe(graphEl);
 
   // ---------- Init ----------
   // Deep links: #timeline-id/YYYY-MM-DD/event-id (older links #YYYY-MM-DD/event-id still work).

@@ -69,6 +69,8 @@ data/atlases/*.js       one file per atlas (fills WW2.atlases[id])
 4. Add any new names to `data/wiki.js` so they link to Wikipedia.
 5. Add its overview text and atmosphere line to `data/intros.js`.
 
+A timeline can also color and filter by country instead of event type (`legend: 'country'`, with a `country` on each event, one or a list), and can offer a Connections view: a graph of story lanes with arrows from each event to those it led to (`stories` and `views` in the catalog, with `story` and `after` on each event). See the options at the top of `data/catalog.js` and the end of `data/timelines/codebreaking.js` for an example.
+
 Optionally, direct the camera with a shot list (`scene`, `frame`, `shot`, `transition`); see "Shots" in `app.js` and the end of `data/timelines/battle-of-midway.js` for an example.
 
 ## Sources and credits

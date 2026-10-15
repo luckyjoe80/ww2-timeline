@@ -284,4 +284,63 @@
     if (!e) throw new Error(`submarine-technology shot list: no event titled "${title}"`);
     Object.assign(e, shot);
   }
+  // ---------- Countries ----------
+  // Whose work each event is about (the codebreakers, the builders, the navy whose boat or
+  // weapon it features), for the legend, which groups countries into Allied and Axis. An event
+  // involving more than one country lists them all, the main one (which sets its colour) first.
+  const COUNTRY = {
+    "Squalus sinks on a test dive": 'United States',
+    "U-47 in Scapa Flow": ['Germany', 'Britain'],
+    "The torpedo crisis off Norway": 'Germany',
+    "Germany captures the Dutch snorkel": ['Netherlands', 'Germany'],
+    "Tambor and the torpedo data computer": 'United States',
+    "Submarines from the Great Lakes": 'United States',
+    "Walter’s V-80 reaches 28 knots": 'Germany',
+    "Upholder’s periscope attack on Conte Rosso": ['Britain', 'Italy'],
+    "U-570 surrenders to an aircraft": ['Germany', 'Britain'],
+    "Drum, the first Gato-class boat": 'United States',
+    "Midget submarines at Pearl Harbor": 'Japan',
+    "Manned torpedoes cripple two battleships": ['Italy', 'Britain'],
+    "Type IX boats off New York": 'Germany',
+    "Peto is launched at Manitowoc": 'United States',
+    "Westinghouse copies the German electric torpedo": ['United States', 'Germany'],
+    "Lockwood’s net test": 'United States',
+    "The Leigh Light’s first kill": 'Britain',
+    "I-19’s Type 95 salvo": ['Japan', 'United States'],
+    "Balao: the thick-skinned fleet boat": 'United States',
+    "Fido, the homing “mine”": 'United States',
+    "Leonardo da Vinci gives herself away": 'Italy',
+    "Nimitz switches off the magnetic exploder": 'United States',
+    "Type XXI ordered for section building": 'Germany',
+    "The snorkel goes to sea": 'Germany',
+    "Tinosa’s duds": 'United States',
+    "Hunting the milk cows": 'Germany',
+    "Torpedoes against the cliffs of Kahoʻolawe": 'United States',
+    "The Gnat and the Foxer": 'Germany',
+    "X-craft under Tirpitz": ['Britain', 'Germany'],
+    "The first Type XXIII": 'Germany',
+    "The first Type XXI is launched": 'Germany',
+    "England’s Hedgehog": ['Britain', 'United States'],
+    "U-505 captured at sea": ['Germany', 'United States'],
+    "I-52 sunk by sound": ['Japan', 'United States'],
+    "The first Kaiten": 'Japan',
+    "The first Squid kill": 'Britain',
+    "Tang’s circular run": 'United States',
+    "Sea Owl sails with the Cutie": 'United States',
+    "I-400, the submarine aircraft carrier": 'Japan',
+    "S-13 sinks Wilhelm Gustloff": ['Soviet Union', 'Germany'],
+    "I-201, the fast underwater boat": 'Japan',
+    "Venturer sinks U-864 underwater": ['Britain', 'Germany'],
+    "U-1206 and the deep-water toilet": 'Germany',
+    "U-2511 sails on the only Type XXI patrol": 'Germany',
+    "The last U-boat sinkings": 'Germany',
+    "Rehearsing for the Panama Canal": 'Japan',
+    "Operation Deadlight": ['Britain', 'Germany'],
+    "I-400 reaches Pearl Harbor for study": ['Japan', 'United States'],
+    "Truman dives in a Type XXI": ['United States', 'Germany'],
+  };
+  for (const e of events) {
+    e.country = COUNTRY[e.title];
+    if (!e.country) throw new Error(`submarine-technology: no country for "${e.title}"`);
+  }
 })();

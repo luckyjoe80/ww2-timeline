@@ -301,4 +301,145 @@
     if (!e) throw new Error(`codebreaking shot list: no event titled "${title}"`);
     Object.assign(e, shot);
   }
+  // ---------- Countries ----------
+  // Whose work each event is about (the codebreakers, the builders, the navy whose boat or
+  // weapon it features), for the legend, which groups countries into Allied and Axis. An event
+  // involving more than one country lists them all, the main one (which sets its colour) first.
+  const COUNTRY = {
+    "The Black Chamber is closed": 'United States',
+    "Friedman hires his first codebreakers": 'United States',
+    "Rejewski solves the Enigma wiring": 'Poland',
+    "Britain opens a listening post in Hong Kong": 'Britain',
+    "Sinclair buys Bletchley Park": 'Britain',
+    "Britain orders the Typex": 'Britain',
+    "The bomba": 'Poland',
+    "Japan’s diplomats switch to PURPLE": 'Japan',
+    "The Japanese Navy introduces JN-25": 'Japan',
+    "The Pyry meeting": ['Poland', 'Britain'],
+    "The codebreakers move to Bletchley": 'Britain',
+    "The Polish codebreakers escape": 'Poland',
+    "First wartime break at PC Bruno": 'Poland',
+    "The first bombe, “Victory”": 'Britain',
+    "A Typex falls into German hands": ['Germany', 'Britain'],
+    "PURPLE is broken": 'United States',
+    "A PURPLE machine for Britain": ['United States', 'Britain'],
+    "Enigma keys seized in the Lofotens": 'Britain',
+    "Matapan: “Today’s the day minus three”": 'Britain',
+    "U-110 is captured": ['Britain', 'Germany'],
+    "Hitler confides in Ōshima": ['United States', 'Japan'],
+    "Tunny: one message sent twice": 'Britain',
+    "Knox breaks the Abwehr Enigma": 'Britain',
+    "The B-Dienst reads the convoy cipher": ['Germany', 'Britain'],
+    "“Action this day”": 'Britain',
+    "The fourteen-part message": ['United States', 'Japan'],
+    "The Axis cannot read American machines": ['Japan', 'Germany'],
+    "Shark: the Atlantic goes dark": ['Britain', 'Germany'],
+    "Station CAST escapes Corregidor": 'United States',
+    "FRUMEL reads “RZP”": 'United States',
+    "Central Bureau is founded": ['Australia', 'United States'],
+    "The first Navajo code talkers": 'United States',
+    "HYPO finds “AF”": 'United States',
+    "The Chicago Tribune lets it slip": 'United States',
+    "Rommel loses “the good source”": ['Germany', 'United States'],
+    "Ultra at Alam el Halfa": 'Britain',
+    "Kilindini breaks the merchant-ship code": 'Britain',
+    "U-559: two men drown for the weather code": ['Britain', 'Germany'],
+    "The Poles flee Cadix": 'Poland',
+    "Shark is broken": 'Britain',
+    "Venona begins": ['United States', 'Soviet Union'],
+    "Ultra over the Bismarck Sea": 'United States',
+    "Yamamoto’s itinerary": 'United States',
+    "Tunny warns of Kursk": ['Britain', 'Soviet Union'],
+    "American bombes": 'United States',
+    "The BRUSA Agreement": ['Britain', 'United States'],
+    "The B-Dienst loses the convoys": ['Germany', 'Britain'],
+    "The North Cape": ['Britain', 'Germany'],
+    "The trunk at Sio": 'Australia',
+    "Colossus goes to work": 'Britain',
+    "Colossus Mark 2, just in time": 'Britain',
+    "Comanche code talkers land at Utah Beach": 'United States',
+    "Delhi reads the Burma air raids": 'Britain',
+    "A SIGABA goes missing": 'United States',
+    "Navajo voices on Iwo Jima": 'United States',
+    "Japan’s acceptance is decrypted": ['United States', 'Japan'],
+    "The secret comes out": 'United States',
+    "The UKUSA Agreement": ['Britain', 'United States'],
+  };
+  for (const e of events) {
+    e.country = COUNTRY[e.title];
+    if (!e.country) throw new Error(`codebreaking: no country for "${e.title}"`);
+  }
+  // ---------- Stories and connections ----------
+  // For the Connections view: the story (lane) each event belongs to, and the earlier events
+  // it follows from, linked only where the event's own text states the connection.
+  const STORY = {
+    "The Black Chamber is closed": ['japan', []],
+    "Friedman hires his first codebreakers": ['japan', []],
+    "Rejewski solves the Enigma wiring": ['enigma', []],
+    "Britain opens a listening post in Hong Kong": ['japan', []],
+    "Sinclair buys Bletchley Park": ['enigma', []],
+    "Britain orders the Typex": ['secure', []],
+    "The bomba": ['enigma', ["Rejewski solves the Enigma wiring"]],
+    "Japan’s diplomats switch to PURPLE": ['japan', ["Friedman hires his first codebreakers"]],
+    "The Japanese Navy introduces JN-25": ['japan', []],
+    "The Pyry meeting": ['enigma', ["The bomba"]],
+    "The codebreakers move to Bletchley": ['enigma', ["Sinclair buys Bletchley Park"]],
+    "The Polish codebreakers escape": ['enigma', ["The Pyry meeting"]],
+    "First wartime break at PC Bruno": ['enigma', ["The codebreakers move to Bletchley", "The Polish codebreakers escape"]],
+    "The first bombe, “Victory”": ['enigma', ["The codebreakers move to Bletchley"]],
+    "A Typex falls into German hands": ['axis', ["Britain orders the Typex"]],
+    "PURPLE is broken": ['japan', ["Friedman hires his first codebreakers", "Japan’s diplomats switch to PURPLE"]],
+    "A PURPLE machine for Britain": ['alliance', ["PURPLE is broken"]],
+    "Enigma keys seized in the Lofotens": ['enigma', []],
+    "Matapan: “Today’s the day minus three”": ['ultra', []],
+    "U-110 is captured": ['enigma', []],
+    "Hitler confides in Ōshima": ['japan', ["PURPLE is broken"]],
+    "Tunny: one message sent twice": ['lorenz', []],
+    "Knox breaks the Abwehr Enigma": ['enigma', []],
+    "The B-Dienst reads the convoy cipher": ['axis', []],
+    "“Action this day”": ['enigma', []],
+    "The fourteen-part message": ['japan', ["PURPLE is broken"]],
+    "The Axis cannot read American machines": ['secure', []],
+    "Shark: the Atlantic goes dark": ['enigma', []],
+    "Station CAST escapes Corregidor": ['japan', []],
+    "FRUMEL reads “RZP”": ['japan', ["Station CAST escapes Corregidor"]],
+    "Central Bureau is founded": ['japan', []],
+    "The first Navajo code talkers": ['secure', []],
+    "HYPO finds “AF”": ['japan', []],
+    "The Chicago Tribune lets it slip": ['japan', ["HYPO finds “AF”"]],
+    "Rommel loses “the good source”": ['axis', []],
+    "Ultra at Alam el Halfa": ['ultra', []],
+    "Kilindini breaks the merchant-ship code": ['japan', []],
+    "U-559: two men drown for the weather code": ['enigma', []],
+    "The Poles flee Cadix": ['enigma', ["First wartime break at PC Bruno"]],
+    "Shark is broken": ['enigma', ["Shark: the Atlantic goes dark", "U-559: two men drown for the weather code"]],
+    "Venona begins": ['alliance', []],
+    "Ultra over the Bismarck Sea": ['japan', ["Station CAST escapes Corregidor"]],
+    "Yamamoto’s itinerary": ['japan', ["The Japanese Navy introduces JN-25"]],
+    "Tunny warns of Kursk": ['ultra', ["Tunny: one message sent twice"]],
+    "American bombes": ['enigma', ["The first bombe, “Victory”"]],
+    "The BRUSA Agreement": ['alliance', ["A PURPLE machine for Britain"]],
+    "The B-Dienst loses the convoys": ['axis', ["The B-Dienst reads the convoy cipher"]],
+    "The North Cape": ['ultra', []],
+    "The trunk at Sio": ['japan', ["Central Bureau is founded"]],
+    "Colossus goes to work": ['lorenz', ["Tunny: one message sent twice"]],
+    "Colossus Mark 2, just in time": ['lorenz', ["Colossus goes to work", "Knox breaks the Abwehr Enigma"]],
+    "Comanche code talkers land at Utah Beach": ['secure', []],
+    "Delhi reads the Burma air raids": ['japan', []],
+    "A SIGABA goes missing": ['secure', ["The Axis cannot read American machines"]],
+    "Navajo voices on Iwo Jima": ['secure', ["The first Navajo code talkers"]],
+    "Japan’s acceptance is decrypted": ['japan', []],
+    "The secret comes out": ['japan', ["PURPLE is broken", "The fourteen-part message"]],
+    "The UKUSA Agreement": ['alliance', ["The BRUSA Agreement"]],
+  };
+  for (const e of events) {
+    const [story, after] = STORY[e.title] || [];
+    if (!story) throw new Error(`codebreaking: no story for "${e.title}"`);
+    e.story = story;
+    e.after = after.map((t) => {
+      const from = events.find((x) => x.title === t);
+      if (!from) throw new Error(`codebreaking: "${e.title}" follows unknown "${t}"`);
+      return from.id;
+    });
+  }
 })();

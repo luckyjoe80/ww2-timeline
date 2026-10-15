@@ -317,4 +317,69 @@
     if (!e) throw new Error(`radar shot list: no event titled "${title}"`);
     Object.assign(e, shot);
   }
+  // ---------- Countries ----------
+  // Whose work each event is about (the codebreakers, the builders, the navy whose boat or
+  // weapon it features), for the legend, which groups countries into Allied and Axis. An event
+  // involving more than one country lists them all, the main one (which sets its colour) first.
+  const COUNTRY = {
+    "The Tizard Committee meets": 'Britain',
+    "The Daventry experiment": 'Britain',
+    "Orford Ness tracks a flying boat": 'Britain',
+    "The Kriegsmarine sees DeTe": 'Germany',
+    "Chain Home goes on watch": 'Britain',
+    "The US Navy takes radar to sea": 'United States',
+    "Würzburg is shown to Hitler": 'Germany',
+    "Redut is tested near Sevastopol": 'Soviet Union',
+    "Freya sees the Wellingtons coming": ['Germany', 'Britain'],
+    "Randall and Boot’s cavity magnetron": 'Britain',
+    "Kammhuber builds his line": 'Germany',
+    "CXAM goes to sea": 'United States',
+    "The Luftwaffe bombs the radar chain": ['Britain', 'Germany'],
+    "The magnetron is revealed in Washington": ['Britain', 'United States'],
+    "The Radiation Laboratory is approved": 'United States',
+    "Type 271 goes to sea on Orchis": 'Britain',
+    "Radar at Matapan": 'Britain',
+    "Radar night fighters beat the Blitz": 'Britain',
+    "Suffolk shadows Bismarck": 'Britain',
+    "RUS-2 warns Moscow": 'Soviet Union',
+    "Japan’s first radar": 'Japan',
+    "Opana’s warning goes unheeded": 'United States',
+    "Jamming covers the Channel Dash": ['Germany', 'Britain'],
+    "Japan captures Allied radars": ['Japan', 'Britain'],
+    "The Bruneval raid": ['Britain', 'Germany'],
+    "The bomber stream swamps Kammhuber": ['Britain', 'Germany'],
+    "The H2S prototype crashes": 'Britain',
+    "The Leigh Light finds U-502": 'Britain',
+    "The Marines find a Japanese radar": ['Japan', 'United States'],
+    "Proximity fuzes destroy the drones": 'United States',
+    "SG radar at Cape Esperance": 'United States',
+    "Radar reports that never arrive": 'United States',
+    "Washington’s radar finds Kirishima": 'United States',
+    "H2S marks Hamburg": 'Britain',
+    "The Rotterdam device": ['Germany', 'Britain'],
+    "ASV Mk III reaches Coastal Command": 'Britain',
+    "A Lichtenstein night fighter defects": ['Germany', 'Britain'],
+    "Black May: Dönitz withdraws the U-boats": ['Britain', 'Germany'],
+    "Window blinds Hamburg’s defences": ['Britain', 'Germany'],
+    "Radar destroyers ambush in Vella Gulf": 'United States',
+    "U-boats are told to switch off Metox": ['Germany', 'Britain'],
+    "Düppel over Bari": 'Germany',
+    "Radar sinks Scharnhorst": ['Britain', 'Germany'],
+    "SCR-584 at Anzio": 'United States',
+    "A phantom fleet off Cap d’Antifer": 'Britain',
+    "Radar runs the Turkey Shoot": 'United States',
+    "The Black Widow’s first kill": 'United States',
+    "Radar guns master the flying bomb": ['Britain', 'United States'],
+    "Darter’s radar finds the Center Force": 'United States',
+    "Radar fire control at Surigao Strait": 'United States',
+    "Proximity fuzes in the Ardennes": 'United States',
+    "Giman-shi before the strike on Saratoga": ['Japan', 'United States'],
+    "The radar pickets take the first blow": 'United States',
+    "Japan’s death ray dies at Shimada": 'Japan',
+    "The Radiation Laboratory closes": 'United States',
+  };
+  for (const e of events) {
+    e.country = COUNTRY[e.title];
+    if (!e.country) throw new Error(`radar: no country for "${e.title}"`);
+  }
 })();

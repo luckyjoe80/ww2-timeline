@@ -7,6 +7,12 @@
 //   default       true for the timeline shown when no deep link is given
 //   wiki          Wikipedia overrides for every event in the timeline (see data/wiki.js)
 //   colors        { theater: color } to color markers and the legend by theater instead of type
+//   legend        'country' to color and filter by each event's `country` (one, or a list for an event
+//                 involving several), grouped by side (see SIDES in app.js)
+//   stories       { id: label } lanes for the Connections view, top to bottom; events then carry
+//                 `story` and `after` (ids of earlier events they follow from)
+//   views         ['connections', 'map'] to offer the Connections view; the first is the default
+//   filter        'story' to filter by story in the legend (colours still follow `legend`)
 //   centerLng     longitude at the middle of the (single, finite) map; defaults to the middle of the events
 //   kind          'atlas' for a places-and-flows view (data in data/atlases/<id>.js) instead of a timeline
 
@@ -166,18 +172,24 @@ window.WW2 = {
           title: 'Radar',
           description: 'From the Daventry experiment, Chain Home and the cavity magnetron through the radio war over Europe, centimetric radar against the U-boats and the radar-directed night battles of the Mediterranean, Arctic and Pacific to the picket line off Okinawa, 1935–1945.',
           wiki: { Würzburg: 'Würzburg_radar', Freya: 'Freya_radar', Bismarck: 'German_battleship_Bismarck', Halifax: 'Handley_Page_Halifax', Wellington: 'Vickers_Wellington', Stirling: 'Short_Stirling', Lancaster: 'Avro_Lancaster', Blenheim: 'Bristol_Blenheim', Naxos: 'Naxos_radar_detector', Lichtenstein: 'Lichtenstein_radar', Window: 'Chaff_(countermeasure)', Düppel: 'Chaff_(countermeasure)', 'Giman-shi': 'Chaff_(countermeasure)', Bari: 'Air_raid_on_Bari', Taxable: 'D-Day_naval_deceptions', SJ: 'SJ_radar', Orchis: 'HMS_Orchis', Bowen: 'Edward_George_Bowen', Rowe: 'Albert_Rowe_(physicist)', Kazagumo: 'Japanese_destroyer_Kazagumo', Makigumo: 'Japanese_destroyer_Makigumo', Shimada: 'Shimada,_Shizuoka', 'Bomber Command': 'RAF_Bomber_Command' },
+          legend: 'country',
         },
         {
           id: 'codebreaking',
           title: 'Codes and Codebreaking',
           description: 'The secret war of codes and ciphers, from the Polish break into Enigma and Bletchley Park’s Ultra to PURPLE, JN-25, Midway, the B-Dienst, Colossus and the Navajo code talkers, 1929–1946.',
           wiki: { Knox: 'Dilly_Knox', 'Cipher Bureau': 'Biuro_Szyfrów', Navajo: 'Code_talker', Comanche: 'Code_talker', Montgomery: 'Bernard_Montgomery', Rommel: 'Erwin_Rommel', Tunny: 'Cryptanalysis_of_the_Lorenz_cipher', Lorenz: 'Lorenz_cipher', Colossus: 'Colossus_computer', Fortitude: 'Operation_Fortitude', 'Cape Matapan': 'Battle_of_Cape_Matapan', Tobruk: 'Axis_capture_of_Tobruk', Kursk: 'Battle_of_Kursk', 'Hugh Alexander': "Conel_Hugh_O'Donel_Alexander", 'Pas de Calais': 'Pas-de-Calais', '20th Division': '20th_Division_(Imperial_Japanese_Army)', '4th Infantry Division': '4th_Infantry_Division_(United_States)' },
+          legend: 'country',
+          stories: { enigma: 'Breaking Enigma', ultra: 'Ultra in action', lorenz: 'Tunny and Colossus', japan: 'Japan’s codes', axis: 'Axis codebreakers', secure: 'Codes that held', alliance: 'Alliance and secrecy' },
+          views: ['connections', 'map'],
+          filter: 'story',
         },
         {
           id: 'submarine-technology',
           title: 'Submarine Technology',
           description: 'The boats, torpedoes and counter-measures of the submarine war in every navy, from the Type VII and Gato class to the Mark 14 scandal, Hedgehog and the Type XXI Elektroboot, May 1939 – November 1946.',
           wiki: { 'U-class': 'British_U-class_submarine', Upholder: 'HMS_Upholder_(P37)', Hudson: 'Lockheed_Hudson', Chariot: 'Chariot_manned_torpedo', Peto: 'USS_Peto', Wellington: 'Vickers_Wellington', SJ: 'SJ_radar', Fido: 'Mark_24_mine', 'Leonardo da Vinci': 'Italian_submarine_Leonardo_da_Vinci_(1939)', Schnorchel: 'Submarine_snorkel', snorkel: 'Submarine_snorkel', Squid: 'Squid_(weapon)', Seiran: 'Aichi_M6A_Seiran', 'S class': 'Soviet_S-class_submarine', 'M-class': 'Soviet_M-class_submarine', Gatun: 'Panama_Canal_locks' },
+          legend: 'country',
         },
       ],
     },
