@@ -1,0 +1,287 @@
+// Timeline: Submarine Technology (Technology).
+// The boats, weapons and counter-measures of the submarine war, 1939–1946, in every navy and
+// ocean: German U-boat types from the Type VII and Type IX to the Type XXI and Type XXIII
+// "Elektroboote", the Walter boats and the snorkel (a Dutch idea); American fleet boats of the
+// Gato and Balao classes, their builders at Portsmouth, Groton and Manitowoc, the torpedo data
+// computer and the long Mark 14 torpedo scandal, the Mark 18 electric torpedo and the homing
+// Mark 24 and Mark 27; Japanese oxygen torpedoes, midget submarines, the I-400 aircraft carriers,
+// the fast I-201 and the Kaiten; British U-class boats and X-craft, Italian manned torpedoes and
+// ocean boats, and the Soviet S class; and the anti-submarine side (ASDIC, the Leigh Light,
+// Hedgehog, Squid, sonobuoys) through to the examination of captured boats after the war.
+// Operations are covered in pacific-submarines, which this timeline links to rather than repeats.
+// Checked against the English Wikipedia articles "Gato-class submarine", "Balao-class submarine",
+// "Tambor-class submarine", "USS Tambor", "USS Drum (SS-228)" (via the Gato article), "USS Balao",
+// "USS Peto", "Manitowoc Shipbuilding Company", "Portsmouth Naval Shipyard", "Electric Boat",
+// "USS Sailfish (SS-192)" (Squalus), "Momsen lung", "Torpedo Data Computer", "SJ radar",
+// "Mark 14 torpedo", "USS Tinosa (SS-283)", "Mark 18 torpedo", "Mark 24 mine", "Mark 27 torpedo",
+// "USS Sea Owl", "Type 93 torpedo", "Type 95 torpedo", "Japanese submarine I-19",
+// "Kō-hyōteki-class submarine", "Kaiten", "I-400-class submarine", "Japanese submarine I-400",
+// "Japanese submarine I-201", "Japanese submarine I-52 (1943)", "Type VII submarine",
+// "Type IX submarine", "Type XIV submarine", "Type XVII submarine", "Hellmuth Walter",
+// "Type XXI submarine", "Type XXIII submarine", "German submarine U-2501", "German submarine U-2511",
+// "German submarine U-2336", "German submarine U-2513", "German submarine U-47 (1938)",
+// "G7e torpedo", "G7es torpedo", "Submarine snorkel", "O 21-class submarine", "HMS Graph" (U-570),
+// "German submarine U-505", "German submarine U-864", "German submarine U-1206",
+// "German submarine U-333", "Operation Drumbeat", "Operation Deadlight", "Sonar", "Hedgehog (weapon)",
+// "Squid (weapon)", "Leigh Light", "Metox radar detector", "USS England (DE-635)",
+// "British U-class submarine", "HMS Upholder (P37)", "X-class submarine", "Operation Source",
+// "HMS Venturer (P68)", "Human torpedo", "Raid on Alexandria (1941)",
+// "Italian submarine Leonardo da Vinci (1939)", "Soviet S-class submarine", "Shchuka-class
+// submarine", "Soviet M-class submarine" and "Soviet submarine S-13" (October 2026).
+//
+// Times are local times as the sources give them: Hawaii time at Pearl Harbor, Solomons time for
+// USS England, GMT for the I-52 action (as the source gives it), Tokyo time in Japan. Most other
+// events, where the sources give no clock time or the zone is unclear, are date-only, with
+// sortTime used only to order events within a day. Atlantic and Mediterranean events use the
+// 'Europe' theater. Event schema: see data/timelines/attack-on-hawaii.js.
+
+(function () {
+  const P = {
+    squalus: { name: 'Off the Isles of Shoals, New Hampshire', lat: 42.883, lng: -70.617 },
+    portsmouth: { name: 'Portsmouth Navy Yard, Kittery, Maine', lat: 43.08, lng: -70.74 },
+    groton: { name: 'Electric Boat Company, Groton, Connecticut', lat: 41.35, lng: -72.08 },
+    manitowoc: { name: 'Manitowoc Shipbuilding Company, Wisconsin', lat: 44.0985, lng: -87.6674 },
+    navyDept: { name: 'Navy Department, Washington, D.C.', lat: 38.8918, lng: -77.0445 },
+    scapa: { name: 'Scapa Flow, Orkney (Royal Oak wreck)', lat: 58.931, lng: -2.983 },
+    narvik: { name: 'Approaches to Narvik, Norway (approx.)', lat: 68.4, lng: 16.6 },
+    rotterdam: { name: 'Rotterdam shipyards', lat: 51.89, lng: 4.43 },
+    kiel: { name: 'Kiel (approx.)', lat: 54.33, lng: 10.15 },
+    sicily: { name: 'Off eastern Sicily (approx.)', lat: 36.9, lng: 15.6 },
+    u570: { name: 'South of Iceland, where U-570 surrendered', lat: 62.25, lng: -18.583 },
+    pearl: { name: 'Pearl Harbor', lat: 21.355, lng: -157.94 },
+    alexandria: { name: 'Alexandria harbour, Egypt', lat: 31.179, lng: 29.862 },
+    longIsland: { name: 'Off eastern Long Island (approx.)', lat: 40.6, lng: -71.6 },
+    albany: { name: 'Frenchman Bay, Albany, Western Australia', lat: -35.08, lng: 117.95 },
+    biscay: { name: 'Bay of Biscay (approx.)', lat: 46.0, lng: -6.5 },
+    southSolomons: { name: 'South of the Solomon Islands (approx.)', lat: -12.4, lng: 164.2 },
+    northAtlantic: { name: 'North Atlantic convoy routes (approx.)', lat: 58.0, lng: -30.0 },
+    vigo: { name: '300 miles west of Vigo, Spain', lat: 42.267, lng: -15.667 },
+    berlin: { name: 'Berlin (naval high command)', lat: 52.52, lng: 13.405 },
+    truk: { name: 'Palau–Truk route, west of Truk (approx.)', lat: 7.3, lng: 148.5 },
+    biscayWest: { name: 'Bay of Biscay, off northwest Spain (approx.)', lat: 44.5, lng: -10.0 },
+    kahoolawe: { name: 'Kahoʻolawe, Hawaii', lat: 20.55, lng: -156.6 },
+    baltic: { name: 'Western Baltic Sea (approx.)', lat: 54.6, lng: 12.0 },
+    kafjord: { name: 'Kåfjord, northern Norway', lat: 69.94, lng: 23.04 },
+    kure: { name: 'Kure Naval Arsenal, Japan', lat: 34.24, lng: 132.55 },
+    deutscheWerft: { name: 'Deutsche Werft, Hamburg', lat: 53.54, lng: 9.86 },
+    blohmVoss: { name: 'Blohm & Voss, Hamburg', lat: 53.533, lng: 9.95 },
+    bougainville: { name: 'North of the Solomon Islands (approx.)', lat: -5.2, lng: 158.2 },
+    u505: { name: 'Off Río de Oro, West Africa', lat: 21.5, lng: -19.333 },
+    i52: { name: 'Mid-Atlantic, west of the Cape Verde Islands', lat: 15.267, lng: -39.917 },
+    ozushima: { name: 'Ōzushima kaiten base, Inland Sea (approx.)', lat: 33.97, lng: 131.68 },
+    scilly: { name: 'West of the Isles of Scilly', lat: 49.65, lng: -7.467 },
+    taiwanStrait: { name: 'Taiwan Strait (approx.)', lat: 25.1, lng: 119.7 },
+    stolpe: { name: 'Stolpe Bank, off the Pomeranian coast', lat: 55.07, lng: 17.41 },
+    fedje: { name: 'West of Fedje, Norway', lat: 60.78, lng: 4.6 },
+    peterhead: { name: 'Off Peterhead, Scotland', lat: 57.35, lng: -1.65 },
+    bergen: { name: 'Bergen, Norway', lat: 60.39, lng: 5.32 },
+    isleOfMay: { name: 'Off the Isle of May, Firth of Forth', lat: 56.19, lng: -2.55 },
+    nanao: { name: 'Nanao Bay, Honshu', lat: 37.1, lng: 136.95 },
+    deadlight: { name: 'Scuttling areas northwest of Ireland (approx.)', lat: 55.8, lng: -8.6 },
+    keyWest: { name: 'Off Key West, Florida (approx.)', lat: 24.4, lng: -81.9 },
+  };
+
+  const ev = (date, title, type, location, zoom, summary, extra = {}) => ({
+    id: extra.id || `${date}-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40)}`,
+    date, title, type, location, zoom, summary,
+    theater: extra.theater || 'Europe',
+    ...extra,
+  });
+  const at = (time, tz, extra = {}) => ({ time, tz, ...extra });
+  const ord = (sortTime, tz) => ({ sortTime, tz }); // order within the day only; no time shown
+  const AM = { theater: 'Americas' };
+  const PAC = { theater: 'Pacific' };
+
+  WW2.events['submarine-technology'] = [
+    // ---------- 1939–40: the prewar boats meet the war ----------
+    ev('1939-05-23', 'Squalus sinks on a test dive', 'loss', P.squalus, 10,
+      'On a trial dive off Portsmouth, New Hampshire, the main induction valve of the new submarine Squalus fails to close. The after compartments flood, drowning 26 men, and she settles on the bottom in 243 feet of water. Her sister Sculpin finds her, and divers from the rescue ship Falcon, directed by Lieutenant Commander Charles “Swede” Momsen, use the new McCann Rescue Chamber for the first time. All 33 survivors are brought up. Squalus is raised, repaired and recommissioned in 1940 as Sailfish.',
+      { ...AM, ...ord('09:00', 'EST'), facts: [['Lost', '26'], ['Rescued', '33, by the McCann Rescue Chamber'], ['Depth', '243 ft']] }),
+    ev('1939-10-14', 'U-47 in Scapa Flow', 'attack', P.scapa, 11,
+      'Günther Prien’s Type VIIB U-47 slips into the Home Fleet’s anchorage at Scapa Flow and torpedoes the battleship Royal Oak, which sinks within 15 minutes with the loss of 835 men. Her first salvos do almost nothing; only a third salvo strikes home. Fragments recovered from the wreck show the British for the first time that the Germans are using the G7e, an electric torpedo that leaves almost no wake. The Type VII, a medium boat derived from a First World War design, will be the most numerous submarine class ever built.',
+      { ...ord('01:00', 'GMT'), facts: [['Boat', 'U-47, Type VIIB'], ['Type VII boats commissioned', '709']] }),
+    ev('1940-04-19', 'The torpedo crisis off Norway', 'intelligence', P.narvik, 8,
+      'During the invasion of Norway, U-boat after U-boat fires at British warships and transports with nothing to show for it: torpedoes run too deep, explode early or strike and fail to detonate. U-47 herself fires at the battleship Warspite without result on 19 April. The magnetic pistol is upset by the high latitudes and the contact pistol is unreliable; Dönitz orders contact firing only. The depth-keeping fault is not traced until January 1942, to air pressure inside the boat leaking into the torpedo’s balance chamber.',
+      { approx: true, ...ord('12:00', 'BST'), wiki: { Warspite: 'HMS_Warspite_(03)' } }),
+    ev('1940-05-14', 'Germany captures the Dutch snorkel', 'intelligence', P.rotterdam, 11,
+      'The Netherlands falls. Four new O 21-class submarines are hurriedly launched and escape to Britain, but the unfinished O 25, O 26 and O 27 are captured in their yards and later completed as German boats. The Dutch had fitted a breathing pipe, the snuiver, designed by Jan Jacob Wichers, that lets a boat run its diesels and charge its batteries at periscope depth. The Kriegsmarine at first sees it only as a way to ventilate the boat.',
+      { approx: true, ...ord('12:00', 'CEST'), facts: [['Inventor', 'Jan Jacob Wichers'], ['Dutch name', 'snuiver (“sniffer”)']] }),
+    ev('1940-06-03', 'Tambor and the torpedo data computer', 'construction', P.groton, 11,
+      'The fleet submarine Tambor is commissioned, built by Electric Boat at Groton and the first boat designed around the Torpedo Data Computer Mark III, an electromechanical analog computer in the conning tower. Fed with the target’s bearing, range and estimated course and speed, it tracks the target continuously and sets the gyro angle of every torpedo automatically, so the boat need not point at the target to fire. It becomes the best torpedo fire-control system of the war.',
+      { ...AM, ...ord('12:00', 'EST'), facts: [['Developers', 'Arma Corporation, Ford Instruments'], ['First model', 'Mark 1, 1938']] }),
+    ev('1940-09-09', 'Submarines from the Great Lakes', 'construction', P.manitowoc, 11,
+      'Manitowoc Shipbuilding, a Lake Michigan yard that has built ferries and ore carriers but never a submarine, is awarded a contract for ten. Its boats will reach the sea by river: through the Chicago canals, down the Illinois and Mississippi in a floating dry dock, and out from New Orleans. Manitowoc delivers its first boat 228 days early and builds 28 submarines in all, under the contract price.',
+      { ...AM, ...ord('12:00', 'EST') }),
+    ev('1940-10-15', 'Walter’s V-80 reaches 28 knots', 'intelligence', P.kiel, 9,
+      'Hellmuth Walter has been working since 1933 on a turbine fed by high-test hydrogen peroxide, which needs no outside air. In trials in the autumn his small, fish-shaped experimental boat V-80 reaches 28.1 knots submerged, more than three times the top underwater speed of a Type VII. The Navy is slow to take it up: Dönitz backs the idea only in 1942, and the Walter boats that follow are troublesome and too hungry for fuel to go to war.',
+      { approx: true, ...ord('12:00', 'CEST'), facts: [['Submerged speed', '28.1 knots'], ['Fuel', 'High-test peroxide']] }),
+
+    // ---------- 1941 ----------
+    ev('1941-05-24', 'Upholder’s periscope attack on Conte Rosso', 'attack', P.sicily, 8,
+      'From Malta, the small British U-class boats of the 10th Submarine Flotilla prey on the convoys to North Africa. They were designed in the 1930s as small, simple boats for anti-submarine training. Lieutenant-Commander David Wanklyn’s Upholder sinks the 17,879-ton troopship Conte Rosso from a heavily escorted convoy, an attack that wins him the Victoria Cross. Upholder becomes the most successful British submarine of the war before she is lost in April 1942.',
+      { ...ord('20:00', 'CEST'), facts: [['Class', 'British U class (short-hull “War Emergency” boats)'], ['Builder', 'Vickers-Armstrongs, Barrow-in-Furness']] }),
+    ev('1941-08-27', 'U-570 surrenders to an aircraft', 'intelligence', P.u570, 7,
+      'On her first patrol, the Type VIIC U-570 surfaces directly beneath an RAF Hudson, which straddles her with depth charges. Her inexperienced crew, believing battery gas is poisoning the boat, hold up a white sheet. Ships tow her to Iceland and then to Barrow, where the British examine her closely, cutting her electric torpedoes free of their damaged tubes and removing their pistols for study. Recommissioned as HMS Graph, she becomes the only U-boat to see active service on both sides.',
+      { ...ord('10:50', 'GMT') }),
+    ev('1941-11-01', 'Drum, the first Gato-class boat', 'construction', P.portsmouth, 11,
+      'Drum is commissioned at the Portsmouth Navy Yard, the only boat of the new Gato class in service when the war begins. The Gatos are fleet submarines, big enough for 75-day patrols from Hawaii to Japan, with a test depth of 300 feet, four diesel generators and air conditioning that keeps the electrics dry in tropical waters. Seventy-seven are built at Groton, Portsmouth, Mare Island and Manitowoc; Gato herself commissions at Groton on 31 December.',
+      { ...AM, ...ord('12:00', 'EST'), facts: [['Range', '11,000 nautical miles'], ['Test depth', '300 ft'], ['Built', '77 (41 by Electric Boat)']], wiki: { Drum: 'USS_Drum_(SS-228)' } }),
+    ev('1941-12-07', 'Midget submarines at Pearl Harbor', 'attack', P.pearl, 11,
+      'Five Kō-hyōteki midget submarines, carried on the decks of fleet submarines, are launched off Oahu for the attack. Each has a crew of two and two 450 mm torpedoes in its bow; the name, “Target A”, was a cover story that they were practice targets. One is sunk by Ward before dawn, one is rammed inside the harbor by Monaghan, and one runs aground and is captured with Ensign Kazuo Sakamaki. None returns.',
+      { ...PAC, ...ord('08:43', 'HST'), facts: [['Crew', '2'], ['Armament', 'Two 450 mm torpedoes'], ['Built', 'About 50']],
+        link: { timeline: 'attack-on-hawaii', event: '1941-12-07-uss-monaghan-rams-a-midget-submarine', label: 'See this in Attack on Hawaii' } }),
+    ev('1941-12-19', 'Manned torpedoes cripple two battleships', 'attack', P.alexandria, 12,
+      'The Italian submarine Scirè, commanded by Junio Valerio Borghese, has released three slow-running manned torpedoes, nicknamed maiali (“pigs”), outside Alexandria. Their two-man crews of the Decima MAS follow British destroyers through the opened boom and fix charges beneath the battleships Valiant and Queen Elizabeth and a tanker. Early in the morning the charges explode. Both battleships are put out of action, the British manage to hide the extent of the damage for weeks, and they go on to build their own copy, the Chariot.',
+      { ...ord('06:05', 'CEST'), facts: [['Leader', 'Lt. Cdr. Luigi Durand de la Penne'], ['Weapon', 'Siluro a lenta corsa (“maiale”)']], wiki: { Valiant: 'HMS_Valiant_(1914)', 'Queen Elizabeth': 'HMS_Queen_Elizabeth_(1913)' } }),
+
+    // ---------- 1942 ----------
+    ev('1942-01-14', 'Type IX boats off New York', 'attack', P.longIsland, 8,
+      'Only the large Type IX, designed for long patrols far from base, has the range to reach America, and just five can be sent. In the early hours U-123 sinks the tanker Norness within sight of Long Island; ships burning their lights against the glow of the coastal cities make easy targets. Later, Type XIV supply boats, “milk cows” carrying 613 tons of spare fuel, let the smaller Type VIIs follow.',
+      { ...AM, ...ord('02:00', 'EST'), facts: [['Boats', 'Five Type IX'], ['Type IX built', '194']],
+        link: { timeline: 'codebreaking', event: '1942-02-01-shark-the-atlantic-goes-dark', label: 'See “Shark” in Codes and Codebreaking' } }),
+    ev('1942-04-30', 'Peto is launched at Manitowoc', 'construction', P.manitowoc, 12,
+      'Manitowoc launches its first submarine, Peto. Commissioned in November, she is loaded onto a barge in December and becomes the first submarine to travel down the Midwest’s rivers to New Orleans and the sea; the channels near Chicago are only 9 feet deep.',
+      { ...AM, ...ord('12:00', 'CWT') }),
+    ev('1942-05-02', 'Westinghouse copies the German electric torpedo', 'political', P.navyDept, 12,
+      'German G7e torpedoes that have run ashore spur Admiral King to demand an electric torpedo for American submarines. The Bureau of Ordnance gives the work to Westinghouse, which decides simply to copy the G7e; its design is ready by mid-April, and a contract for 2,000 of what becomes the Mark 18 is signed. The wakeless torpedo will not reach the boats until September 1943, beset by battery and production troubles.',
+      { ...AM, ...ord('12:00', 'EWT'), facts: [['Speed', '29 knots'], ['Range', '4,000 yards'], ['Warhead', '575 lb Torpex']] }),
+    ev('1942-06-20', 'Lockwood’s net test', 'intelligence', P.albany, 11,
+      'Skippers have been reporting misses since Sargo’s first patrol in December. At Albany, Western Australia, Rear Admiral Charles Lockwood has Skipjack fire a Mark 14 torpedo with an exercise head through a net. Set for 10 feet, it passes through the net at 25; further shots show the torpedoes run about 11 feet deeper than set. The Bureau of Ordnance concedes the fault on 1 August. The cause: a depth sensor placed where the flow past the moving torpedo lowers the pressure.',
+      { ...PAC, ...ord('12:00', 'PHT'), facts: [['Torpedoes fired in combat by then', 'About 800']] }),
+    ev('1942-07-05', 'The Leigh Light’s first kill', 'loss', P.biscay, 8,
+      'Airborne radar loses a surfaced U-boat in the sea clutter at close range, while it is still too far to see at night. Wing Commander Humphrey de Verd Leigh’s answer, developed on his own initiative, is a searchlight under the aircraft, switched on as the blip vanishes. Over the Bay of Biscay a Wellington of 172 Squadron sinks U-502, the first confirmed kill by a Leigh Light aircraft. The Germans reply with the Metox receiver, which hears the radar coming, and the Allies in turn move to centimetric radar, outside the band Metox covers.',
+      { ...ord('02:00', 'BST'), facts: [['Light', '24-inch carbon-arc searchlight'], ['Pilot', 'Wiley B. Howell']] }),
+    ev('1942-09-15', 'I-19’s Type 95 salvo', 'attack', P.southSolomons, 7,
+      'Japanese submarines fire the Type 95, an adaptation of the oxygen-fuelled Type 93 “Long Lance” for 21-inch submarine tubes. Its kerosene-oxygen engine gives it a speed of about 50 knots and roughly three times the range of the Mark 14, with the largest warhead of any submarine torpedo. South of the Solomons, the Type B1 boat I-19 fires a spread of six at the carrier Wasp; Wasp is lost, and the same salvo sinks a destroyer and damages a battleship. Like many large Japanese boats, I-19 also carries a small floatplane.',
+      { ...PAC, ...ord('14:45', 'SOL'), facts: [['Speed', '45–51 knots'], ['Range', '9,000 m at about 50 knots'], ['Warhead', '405–550 kg']], wiki: { 'Type 95': 'Type_95_torpedo' },
+        link: { timeline: 'pacific-submarines', event: '1942-09-15-i-19-sinks-uss-wasp-with-one-salvo', label: 'See this in Submarine Operations' } }),
+
+    // ---------- 1943 ----------
+    ev('1943-02-04', 'Balao: the thick-skinned fleet boat', 'construction', P.portsmouth, 11,
+      'Balao is commissioned at Portsmouth. Outwardly a Gato, she is built of thicker, higher-strength steel, raising the test depth from 300 to 400 feet. With 120 completed, the Balao class is the largest in the U.S. Navy. Like all the fleet boats by early 1943, the Balaos carry the SJ surface-search radar, which lets them find targets at night against an enemy that makes little use of radar.',
+      { ...AM, ...ord('12:00', 'EWT'), facts: [['Hull plating', '7⁄8 in (Gato: 9⁄16 in)'], ['Test depth', '400 ft'], ['Built', '120']], wiki: { Balao: 'USS_Balao' } }),
+    ev('1943-05-14', 'Fido, the homing “mine”', 'loss', P.northAtlantic, 6,
+      'The Mark 24, called a mine to hide what it is, is an air-dropped torpedo that circles at depth and steers toward the propeller noise of a submerged U-boat with four hydrophones. Developed by Bell Labs and Harvard’s Underwater Sound Laboratory and driven by a washing-machine motor, it enters service in March. On 14 May a U.S. Navy Catalina sinks a U-boat with one, one of the first kills by an Allied homing torpedo. Its low speed, slow enough for a surfaced U-boat to outrun, is kept secret.',
+      { approx: true, ...ord('12:00', 'GMT'), facts: [['Speed', '12 knots for 10 minutes'], ['War record', '204 fired, 37 submarines sunk']] }),
+    ev('1943-05-23', 'Leonardo da Vinci gives herself away', 'loss', P.vigo, 8,
+      'Italy’s Marconi-class Leonardo da Vinci, operating from the Italian base at Bordeaux, is the most successful non-German submarine of the war, with 17 ships sunk; in 1942 she was converted to carry a CA-class midget submarine for a planned raid on New York. Heading home after a patrol to the Indian Ocean, she signals her intentions on 22 May. Direction-finding fixes her position, and the next day the destroyer Active and frigate Ness sink her with depth charges. There are no survivors.',
+      { ...ord('12:00', 'BST'), wiki: { Active: 'HMS_Active_(H14)', Ness: 'HMS_Ness_(K219)', 'midget submarine': null } }),
+    ev('1943-06-24', 'Nimitz switches off the magnetic exploder', 'political', P.pearl, 12,
+      'With the depth fixed, the Mark 6 exploder’s magnetic feature has been detonating torpedoes early, short of their targets; in April Tunny watched seven explode prematurely against carriers. It was tested near Newport, where the Earth’s magnetic field differs from the Pacific’s, and never fired against a real ship. At Lockwood’s request, Nimitz orders all Pacific Fleet submarines to disable it. The Australian-based boats under Ralph Christie, who helped develop it, keep using it until the end of the year.',
+      { ...PAC, ...ord('12:00', 'HST') }),
+    ev('1943-07-06', 'Type XXI ordered for section building', 'construction', P.berlin, 6,
+      'Allied radar and aircraft have made boats that must surface to recharge obsolete. On 19 June the Navy asked for a new design: the hull of the Walter boats, filled with triple the battery cells of a Type VII and fitted with a snorkel, for a submerged speed of over 17 knots. Orders for 102 follow on 6 July. To speed delivery, Otto Merker, appointed by the armaments minister Albert Speer, has the hulls prefabricated in eight sections across Germany and assembled at Hamburg, Bremen and Danzig.',
+      { ...ord('12:00', 'CEST'), facts: [['Submerged speed', '17.2 knots'], ['Builders', 'Blohm & Voss, AG Weser, Schichau']] }),
+    ev('1943-07-15', 'The snorkel goes to sea', 'intelligence', P.baltic, 7,
+      'With losses mounting, the Kriegsmarine takes up the Dutch breathing pipe. U-58 tries out the Schnorchel in the Baltic during the summer, and operational use begins early in 1944; by June half the boats in the French bases have one. It lets a boat run on diesels just below the surface, but only at about six knots, and when a wave slams its valve shut the engines suck the air from the hull, leaving the crew in agony.',
+      { approx: true, ...ord('12:00', 'CEST') }),
+    ev('1943-07-24', 'Tinosa’s duds', 'intelligence', P.truk, 7,
+      'Codebreakers put Lieutenant Commander Dan Daspit’s Tinosa in the path of the huge whale-factory tanker Tonan Maru No. 3. Two torpedoes stop her dead. Daspit then manoeuvres into a textbook position square to her beam and fires nine more Mark 14s, watching each through the periscope. All hit and none explodes. He takes his last torpedo home for examination. With the magnetic feature off, it is now plain the contact pistol fails on a square hit.',
+      { ...PAC, ...ord('10:00', 'JST'), facts: [['Torpedoes fired at the target', '15, of which 2 exploded']], wiki: { Tinosa: 'USS_Tinosa_(SS-283)' } }),
+    ev('1943-07-30', 'Hunting the milk cows', 'loss', P.biscayWest, 7,
+      'Each Type XIV tanker keeps a dozen attack boats at sea, so the Allies hunt them deliberately, guided by decrypted U-boat signals and by radar-equipped aircraft. In the Bay of Biscay aircraft and Captain Frederic Walker’s 2nd Support Group destroy three U-boats travelling together, two of them milk cows. By the end of the war all ten Type XIVs have been sunk.',
+      { ...ord('12:00', 'BST'),
+        link: { timeline: 'codebreaking', event: '1942-12-13-shark-is-broken', label: 'See “Shark is broken” in Codes and Codebreaking' } }),
+    ev('1943-08-31', 'Torpedoes against the cliffs of Kahoʻolawe', 'intelligence', P.kahoolawe, 11,
+      'Lockwood’s gunnery officer Art Taylor and Swede Momsen fire live warshots into the cliffs of Kahoʻolawe, then drop sand-filled warheads from a crane 90 feet high to match the torpedo’s speed. Seven in ten pistols fail on a square impact: the firing pin binds as the torpedo decelerates. Pearl Harbor makes lighter pistol parts from aluminium, and in September the first Mark 14s with redesigned pistols reach the boats, after 21 months of war.',
+      { ...PAC, ...ord('12:00', 'HST'), facts: [['Failure rate at 90°', '70%']],
+        link: { timeline: 'pacific-submarines', event: '1943-09-15-the-mark-14-torpedo-is-finally-fixed', label: 'See the fix in Submarine Operations' } }),
+    ev('1943-09-20', 'The Gnat and the Foxer', 'attack', P.northAtlantic, 6,
+      'The U-boats return to the North Atlantic with the G7es Zaunkönig, an acoustic torpedo that homes on the propeller noise of an escort; the British call it the Gnat. Against the convoys ONS 18 and ON 202 the boats claim a dozen escorts, but in fact sink three warships and six merchant ships. Within weeks escorts are towing Foxer, a noisemaker that draws the torpedoes away. Fearing their own homing torpedoes, the boats dive deep and go silent after firing.',
+      { approx: true, ...ord('12:00', 'GMT'), facts: [['Speed', '24 knots'], ['Sunk', '3 escorts, 6 merchant ships']] }),
+    ev('1943-09-22', 'X-craft under Tirpitz', 'attack', P.kafjord, 11,
+      'Towed across the North Sea by full-size submarines, the British midget submarines X6 and X7 penetrate the nets in Kåfjord and drop two-ton charges on the seabed beneath the battleship Tirpitz. Both craft are lost and most of their crews captured, but the charges explode and Tirpitz is out of action for at least six months. Each X-craft is 51 feet long, with a crew of four, a diesel adapted from a London bus engine and a chamber to let a diver out. Donald Cameron and Godfrey Place receive the Victoria Cross.',
+      { ...ord('08:00', 'CEST'), facts: [['Length', '51 ft'], ['Charges', 'Two side-cargoes of 2 tons of amatol']], wiki: { 'midget submarine': null } }),
+
+    // ---------- 1944 ----------
+    ev('1944-04-17', 'The first Type XXIII', 'construction', P.deutscheWerft, 12,
+      'U-2321, the first Type XXIII, is launched at Hamburg. The small coastal Elektroboot is built in four sections that fit on a railway wagon, with an all-welded single hull, a 62-cell battery and a crash-dive time of nine seconds. Its two torpedoes are loaded from outside, by trimming the stern down until the bow tubes lift clear of the water.',
+      { ...ord('12:00', 'CEST'), facts: [['Crew', '14–18'], ['Submerged speed', '12.5 knots'], ['Torpedoes', '2']] }),
+    ev('1944-05-12', 'The first Type XXI is launched', 'construction', P.blohmVoss, 12,
+      'Blohm & Voss launches U-2501, the first Type XXI, five weeks after laying her down. The new boats can make a full second salvo of six torpedoes within six minutes thanks to powered reloading, and can run silently on small extra motors. But the sections arrive from inland factories out of tolerance and unfinished, bombing disrupts the work, and the boats are plagued with defects: 118 are commissioned, yet only one makes a war patrol.',
+      { ...ord('12:00', 'CEST') }),
+    ev('1944-05-19', 'England’s Hedgehog', 'loss', P.bougainville, 7,
+      'Ordinary depth charges are dropped over the stern, so an escort loses sonar contact just before it attacks. The British Hedgehog throws 24 contact-fuzed bombs ahead of the ship while the submarine is still held by ASDIC. Sent by decoded signals, the destroyer escort England sinks the supply submarine I-16 with her fifth Hedgehog attack. In twelve days she sinks six Japanese submarines, a record never matched.',
+      { ...PAC, ...ord('14:33', 'SOL'), facts: [['Hedgehog record', '268 attacks, 47 kills'], ['British depth charges', '5,174 attacks, 85.5 kills']], wiki: { England: 'USS_England_(DE-635)' } }),
+    ev('1944-06-04', 'U-505 captured at sea', 'intelligence', P.u505, 9,
+      'Captain Daniel Gallery’s hunter-killer group, led to the area by decrypts and direction-finding, catches the Type IXC U-505 with depth charges. Her crew abandons her with the engines still running. A party from Pillsbury under Lieutenant Albert David boards her, closes the scuttling valves and takes her codebooks; she is towed 1,700 miles to Bermuda in secret.',
+      { ...ord('11:09', 'GMT'), wiki: { Pillsbury: 'USS_Pillsbury_(DE-133)' },
+        link: { timeline: 'medal-of-honor', event: '1944-06-04-david-albert-l', label: 'See Albert David’s Medal of Honor' } }),
+    ev('1944-06-23', 'I-52 sunk by sound', 'loss', P.i52, 7,
+      'The Japanese cargo submarine I-52, bound for occupied France with gold, tin and rubber to pay for German technology, has just met U-530 to take on a radar detector. Her signals have been read all the way from Singapore. An Avenger from the escort carrier Bogue finds her by radar and drops flares, then sonobuoys, floating microphones that radio underwater sound to the aircraft. Hearing her propellers, the crew drops a Fido homing torpedo, and the buoys record the explosion and the sound of her hull breaking up.',
+      { ...at('23:40', 'GMT'), facts: [['Cargo outbound', 'Includes 2.2 tons of gold'], ['Waiting at Lorient', 'Acoustic torpedoes, radar, a Jumo 213 engine']], wiki: { Bogue: 'USS_Bogue' } }),
+    ev('1944-07-25', 'The first Kaiten', 'construction', P.ozushima, 10,
+      'The first prototype of the Kaiten is ready. Designed by Lieutenants Hiroshi Kuroki and Sekio Nishina, it is a Type 93 oxygen torpedo with a cockpit, a small periscope and controls added and a warhead of 1,550 kg. Carried on a submarine’s deck and entered through a tube from below, it is steered by one man to its target; later models cannot be opened from inside. An order for 100 follows by 1 August. Kuroki dies in a training run.',
+      { ...PAC, ...ord('12:00', 'JST'), facts: [['Length', '14.75 m'], ['Warhead', '1,550 kg'], ['Built', 'Over 300 Type 1']], wiki: { Nishina: null },
+        link: { timeline: 'kamikaze', event: '1944-08-01-suicide-boats-and-human-torpedoes', label: 'See this in Kamikaze' } }),
+    ev('1944-07-31', 'The first Squid kill', 'loss', P.scilly, 9,
+      'The Squid, Hedgehog’s successor, is a three-barrelled mortar fired automatically from the sonar range recorder, with the depth setting of its heavy bombs updated right up to the moment of launch. West of the Isles of Scilly the sloop Starling and frigate Loch Killin use it for the first time in action and sink U-333 with all 45 hands. Squid is credited with 17 submarines in 50 attacks.',
+      { ...ord('12:00', 'BST'), facts: [['Projectile', '390 lb, 207 lb Minol charge'], ['Record', '17 kills in 50 attacks']], wiki: { Starling: 'HMS_Starling_(U66)', 'Loch Killin': 'HMS_Loch_Killin' } }),
+    ev('1944-10-24', 'Tang’s circular run', 'loss', P.taiwanStrait, 8,
+      'Neither the Mark 14 nor the Mark 18 has any protection against a circular run. Tang’s last Mark 18 curves round in the Taiwan Strait and hits her. From the forward escape trunk some of the trapped crew make the only wartime escape using the Momsen lung, a rebreather bag; few survive the ascent. Tang, a Balao, had earlier gone deeper than her gauge could read, beyond 612 feet.',
+      { ...PAC, ...ord('02:30', 'CHN'),
+        link: { timeline: 'pacific-submarines', event: '1944-10-24-tang-sunk-by-her-own-torpedo', label: 'See this in Submarine Operations' } }),
+    ev('1944-11-19', 'Sea Owl sails with the Cutie', 'service', P.pearl, 12,
+      'The new Balao Sea Owl leaves Pearl Harbor on her first patrol carrying trial Mark 27 torpedoes. The “Cutie” is a Fido adapted for a submarine’s tubes: a small 19-inch electric torpedo that homes passively on propeller noise, meant for use against escorts. In the Yellow Sea that month Sea Owl damages a Japanese patrol vessel with one, its first success.',
+      { ...PAC, ...ord('12:00', 'HST'), wiki: { 'Sea Owl': 'USS_Sea_Owl' } }),
+    ev('1944-12-30', 'I-400, the submarine aircraft carrier', 'construction', P.kure, 11,
+      'I-400 is commissioned at Kure. Conceived by Yamamoto for air raids on American cities, she is 400 feet long, displaces 5,900 tons and can sail one and a half times round the world. A watertight hangar on deck holds three Seiran bombers with folding wings, launched by catapult. Her figure-of-eight pressure hull carries the hangar’s weight, but she takes 56 seconds to dive. Of 18 planned, three are finished.',
+      { ...PAC, ...ord('12:00', 'JST'), facts: [['Length', '122 m'], ['Aircraft', '3 Aichi M6A Seiran'], ['Completed', '3 (I-400, I-401, I-402)']] }),
+
+    // ---------- 1945 ----------
+    ev('1945-01-30', 'S-13 sinks Wilhelm Gustloff', 'loss', P.stolpe, 9,
+      'The Soviet S class was designed with help from a Dutch-based German design office whose work also led to the U-boats it would fight. Alexander Marinesko’s S-13, built at Gorky on the Volga, torpedoes the transport Wilhelm Gustloff, crowded with refugees and military personnel, off the Pomeranian coast. More than 9,000 are thought to have died, the worst loss of life in a single sinking. The Soviet Navy also built 88 Shchuka-class boats and 111 small M-class boats, shipped by rail in sections.',
+      { ...ord('21:00', 'CEST'), facts: [['S class completed', '40'], ['M class', 'Built in sections at Gorky, assembled at Leningrad']] }),
+    ev('1945-02-02', 'I-201, the fast underwater boat', 'construction', P.kure, 11,
+      'Kure commissions I-201, first of a class built for speed submerged. With a snorkel and powerful electric motors, she can make 19 knots underwater, faster than on the surface. The war ends before she makes a patrol; the U.S. Navy brings her to Pearl Harbor for study.',
+      { ...PAC, ...ord('12:00', 'JST'), facts: [['Submerged speed', '19 knots'], ['Surface speed', '15.2 knots']] }),
+    ev('1945-02-09', 'Venturer sinks U-864 underwater', 'loss', P.fedje, 10,
+      'Sent by Enigma decrypts to intercept U-864, carrying mercury and jet-engine parts to Japan, the British submarine Venturer tracks her off Fedje by hydrophone alone, not using ASDIC so as not to reveal herself. After three hours Lieutenant Jimmy Launders calculates the U-boat’s position and fires four torpedoes at staggered depths. U-864 dodges three and is hit by the fourth. It is the only time one submarine has sunk another with both submerged.',
+      { ...ord('12:12', 'CEST'), wiki: { Venturer: 'HMS_Venturer_(P68)' } }),
+    ev('1945-04-14', 'U-1206 and the deep-water toilet', 'loss', P.peterhead, 10,
+      'Late-war Type VIICs have high-pressure toilets that work at depth, but they are so complicated to flush that specialists are trained to use them. At 200 feet off Peterhead, a mistake with U-1206’s floods the boat; seawater reaches the batteries, which give off chlorine gas. She surfaces, is bombed, and is scuttled. Three men drown and 46 are captured.',
+      { ...ord('12:00', 'BST') }),
+    ev('1945-04-30', 'U-2511 sails on the only Type XXI patrol', 'service', P.bergen, 10,
+      'Adalbert Schnee takes U-2511 out of Bergen for the Caribbean, the only Type XXI to go on a war patrol. On 4 May the ceasefire order reaches him; he later says he had the cruiser Norfolk in his sights and made a practice attack before slipping away undetected.',
+      { ...ord('20:00', 'CEST'), wiki: { Norfolk: 'HMS_Norfolk_(78)' } }),
+    ev('1945-05-07', 'The last U-boat sinkings', 'loss', P.isleOfMay, 10,
+      'Off the Isle of May, the Type XXIII U-2336 torpedoes the freighters Sneland I and Avondale Park less than an hour before the German surrender takes effect, the last merchant ships sunk by a U-boat in the war. None of the six Type XXIIIs to go on patrol is sunk.',
+      { ...ord('23:03', 'BST') }),
+    ev('1945-06-05', 'Rehearsing for the Panama Canal', 'intelligence', P.nanao, 10,
+      'The four aircraft-carrying submarines, I-400, I-401, I-13 and I-14, now fitted with snorkels, gather in Nanao Bay, where a full-size wooden model of a Gatun lock gate has been floated out on a raft. The Seiran crews practise assembling, catapulting and recovering their aircraft. A week later the canal strike is cancelled in favour of an attack on the fleet at Ulithi, which the surrender overtakes.',
+      { ...PAC, ...ord('12:00', 'JST') }),
+    ev('1945-11-17', 'Operation Deadlight', 'loss', P.deadlight, 7,
+      'The Royal Navy begins towing surrendered U-boats out from ports such as Lisahally in Northern Ireland to be sunk northwest of Ireland. Of 156 surrendered, the Allies keep 30 to share, and 116 are disposed of, many foundering under tow in poor condition. The last goes down on 11 February 1946; U-2511 is sunk by gunfire on 7 January.',
+      { ...ord('12:00', 'GMT') }),
+
+    // ---------- 1946: studying the enemy's boats ----------
+    ev('1946-01-06', 'I-400 reaches Pearl Harbor for study', 'service', P.pearl, 12,
+      'With American crews aboard, I-400, I-401 and I-14 arrive at Pearl Harbor to a Navy band. On the way, the American crews have found that the giant boats ride remarkably smoothly in heavy seas. I-400 is dry-docked for evaluation in February, but in March the Navy orders all captured Japanese submarines sunk, fearing the Soviet Union will demand access to them.',
+      { ...PAC, ...ord('12:00', 'HST'),
+        link: { timeline: 'pacific-submarines', event: '1946-06-04-i-400-sunk-as-a-target-off-pearl-harbor', label: 'See the sinking in Submarine Operations' } }),
+    ev('1946-11-21', 'Truman dives in a Type XXI', 'political', P.keyWest, 9,
+      'President Truman goes to sea off Key West in the captured Type XXI U-2513, which dives to 440 feet with him aboard and demonstrates the snorkel. The U.S. Navy’s study of the Type XXI leads to the GUPPY conversions of its fleet boats, and the design influences the first postwar submarines of the Soviet Union, Britain and the United States.',
+      { ...AM, ...ord('12:00', 'EST') }),
+  ];
+
+  // ---------- Shot list ----------
+  const pt = (place) => [place.lat, place.lng];
+  const SHOTS = {
+    'Submarines from the Great Lakes': { shot: 'wide', frame: [[29.95, -90.07]] },
+    'Midget submarines at Pearl Harbor': { shot: 'tight', transition: 'fly' },
+    'Type IX boats off New York': { shot: 'wide', transition: 'pull-back', frame: [[47.75, -3.37]] },
+    'Torpedoes against the cliffs of Kahoʻolawe': { shot: 'wide', frame: [pt(P.pearl)] },
+    // The Type XXI and Type XXIII programmes in Hamburg.
+    'The first Type XXIII': { scene: 'hamburg-yards' },
+    'The first Type XXI is launched': { scene: 'hamburg-yards' },
+    'I-52 sunk by sound': { shot: 'wide', frame: [[14.9, -23.6]] },
+    'Venturer sinks U-864 underwater': { shot: 'tight' },
+    'Truman dives in a Type XXI': { shot: 'wide', transition: 'pull-back' },
+  };
+  const events = WW2.events['submarine-technology'];
+  for (const [title, shot] of Object.entries(SHOTS)) {
+    const e = events.find((x) => x.title === title);
+    if (!e) throw new Error(`submarine-technology shot list: no event titled "${title}"`);
+    Object.assign(e, shot);
+  }
+})();

@@ -99,6 +99,18 @@ WW2.intros = {
     'The life of the battleship Yamato, the largest ever built, from her secret construction at Kure to her sinking on a one-way mission to Okinawa in April 1945, with her sister Musashi alongside.',
     'Yamato serves as Yamamoto’s flagship at Midway, is torpedoed by Skate and fires on American ships off Samar, but rarely meets the enemy. The later events follow her afterlife: the discovery of the wreck, a famous anime and a museum at Kure.',
   ],
+  'codebreaking': [
+    'The hidden contest of codes and ciphers on every front, from the closing of America’s Black Chamber in 1929 to the UKUSA Agreement of 1946. Polish mathematicians break the German Enigma and, weeks before the invasion of Poland, hand their methods to Britain and France. At Bletchley Park, Turing’s bombes and later Flowers’s Colossus computers produce Ultra, used at Matapan, in the desert, against the U-boats, off the North Cape and before D-Day.',
+    'The other side is here too: the German B-Dienst reading British convoy ciphers, and Rommel’s “good source” in an American attaché’s code. Against Japan come PURPLE and MAGIC, the fourteen-part message, JN-25 and Station HYPO at Midway, the codebreakers in Australia, the merchant-shipping codes, Yamamoto’s last flight and the Navajo and Comanche code talkers, ending with the machines nobody broke, Typex and SIGABA.',
+  ],
+  'submarine-technology': [
+    'The machines of the submarine war in every navy, from the loss of Squalus in May 1939 to President Truman’s dive in a captured Type XXI in November 1946. German Type VII and Type IX U-boats, American Gato and Balao fleet boats, British U-class boats and X-craft, Italian manned torpedoes, the Soviet S class and Japan’s midget submarines, Kaiten and giant aircraft-carrying I-400s each appear where they were built or first proved themselves.',
+    'Alongside the boats run the weapons and the counter-measures against them: the German and American torpedo failures and how they were found and fixed, the electric and homing torpedoes, the snorkel and the fast Elektroboote, and on the hunters’ side ASDIC, the Leigh Light, Hedgehog, Squid and sonobuoys, ending with the captured boats studied and scuttled after the war.',
+  ],
+  'radar': [
+    'The development of radar, from British tests in 1935 showing that radio echoes could reveal an approaching aircraft to the closing of MIT’s Radiation Laboratory at the end of 1945. Britain, Germany, the United States, the Soviet Union and Japan each build detection sets in secret: Chain Home, Freya and Würzburg, the US Navy’s CXAM. Then in 1940 comes the cavity magnetron, which makes precise centimetric radar possible; the Tizard Mission takes it to America, where it leads to the Radiation Laboratory.',
+    'Radar then goes to war on every front: Chain Home and the Dowding system in the Battle of Britain, the contest of radar and countermeasure over Europe through the Bruneval raid, the Channel Dash, H2S, Window and Lichtenstein, and centimetric sets turning the Battle of the Atlantic against the U-boats. At night it decides sea battles off Cape Matapan, the North Cape, Guadalcanal and Surigao Strait. It closes with the proximity fuze, Japan’s late radar effort and the picket destroyers off Okinawa.',
+  ],
 };
 
 // A line or two of atmosphere for each timeline, shown in italics above its overview.
@@ -127,4 +139,7 @@ WW2.flavor = {
   'medal-of-honor': 'Ordinary men in extraordinary moments: a machine gun held on a ridge, a grenade smothered, a wounded friend carried through fire. Again and again the citations use the same words: “above and beyond the call of duty.”',
   'yamamoto': 'He knew America better than almost any Japanese officer, and warned against fighting it. Then he planned the attack that began the war, and became the enemy’s most wanted man.',
   'yamato': 'The largest battleship ever built, conceived in secret and launched behind screens. She rarely fires her great guns in anger, and sails on her last mission not expected to return.',
+  'codebreaking': 'Behind blackout curtains in a Buckinghamshire hut, and in a basement at Pearl Harbor, tired people bend over columns of meaningless letters while the teleprinters chatter, waiting for one guessed word that will turn the noise into an enemy admiral’s orders.',
+  'submarine-technology': 'A steel hull full of men and machinery, a few knots underwater and a battery running down. Above, the ping of an escort’s sonar grows louder, and everyone aboard is hoping the torpedoes in the tubes will run true.',
+  'radar': 'In a darkened hut on the Suffolk coast, a line of green light trembles, and a small spike rising from it is an aircraft no one can see. Years later, on a black night at sea, an operator watches a sweeping trace paint the coastline, and the enemy fleet, long before any lookout can.',
 };

@@ -161,6 +161,24 @@ window.WW2 = {
           description: 'From the discovery of nuclear fission in Berlin and the Einstein–Szilárd letter through the Manhattan Project, Chicago Pile-1 and the Trinity test to the bombings of Hiroshima and Nagasaki and Japan’s surrender, 1938–1945.',
           wiki: { Trinity: 'Trinity_(nuclear_test)', Leyte: 'Leyte', Hahn: 'Otto_Hahn', Frisch: 'Otto_Robert_Frisch', Lawrence: 'Ernest_Lawrence', Compton: 'Arthur_Compton', Sweeney: 'Charles_Sweeney', Bohr: 'Niels_Bohr' },
         },
+        {
+          id: 'radar',
+          title: 'Radar',
+          description: 'From the Daventry experiment, Chain Home and the cavity magnetron through the radio war over Europe, centimetric radar against the U-boats and the radar-directed night battles of the Mediterranean, Arctic and Pacific to the picket line off Okinawa, 1935–1945.',
+          wiki: { Würzburg: 'Würzburg_radar', Freya: 'Freya_radar', Bismarck: 'German_battleship_Bismarck', Halifax: 'Handley_Page_Halifax', Wellington: 'Vickers_Wellington', Stirling: 'Short_Stirling', Lancaster: 'Avro_Lancaster', Blenheim: 'Bristol_Blenheim', Naxos: 'Naxos_radar_detector', Lichtenstein: 'Lichtenstein_radar', Window: 'Chaff_(countermeasure)', Düppel: 'Chaff_(countermeasure)', 'Giman-shi': 'Chaff_(countermeasure)', Bari: 'Air_raid_on_Bari', Taxable: 'D-Day_naval_deceptions', SJ: 'SJ_radar', Orchis: 'HMS_Orchis', Bowen: 'Edward_George_Bowen', Rowe: 'Albert_Rowe_(physicist)', Kazagumo: 'Japanese_destroyer_Kazagumo', Makigumo: 'Japanese_destroyer_Makigumo', Shimada: 'Shimada,_Shizuoka', 'Bomber Command': 'RAF_Bomber_Command' },
+        },
+        {
+          id: 'codebreaking',
+          title: 'Codes and Codebreaking',
+          description: 'The secret war of codes and ciphers, from the Polish break into Enigma and Bletchley Park’s Ultra to PURPLE, JN-25, Midway, the B-Dienst, Colossus and the Navajo code talkers, 1929–1946.',
+          wiki: { Knox: 'Dilly_Knox', 'Cipher Bureau': 'Biuro_Szyfrów', Navajo: 'Code_talker', Comanche: 'Code_talker', Montgomery: 'Bernard_Montgomery', Rommel: 'Erwin_Rommel', Tunny: 'Cryptanalysis_of_the_Lorenz_cipher', Lorenz: 'Lorenz_cipher', Colossus: 'Colossus_computer', Fortitude: 'Operation_Fortitude', 'Cape Matapan': 'Battle_of_Cape_Matapan', Tobruk: 'Axis_capture_of_Tobruk', Kursk: 'Battle_of_Kursk', 'Hugh Alexander': "Conel_Hugh_O'Donel_Alexander", 'Pas de Calais': 'Pas-de-Calais', '20th Division': '20th_Division_(Imperial_Japanese_Army)', '4th Infantry Division': '4th_Infantry_Division_(United_States)' },
+        },
+        {
+          id: 'submarine-technology',
+          title: 'Submarine Technology',
+          description: 'The boats, torpedoes and counter-measures of the submarine war in every navy, from the Type VII and Gato class to the Mark 14 scandal, Hedgehog and the Type XXI Elektroboot, May 1939 – November 1946.',
+          wiki: { 'U-class': 'British_U-class_submarine', Upholder: 'HMS_Upholder_(P37)', Hudson: 'Lockheed_Hudson', Chariot: 'Chariot_manned_torpedo', Peto: 'USS_Peto', Wellington: 'Vickers_Wellington', SJ: 'SJ_radar', Fido: 'Mark_24_mine', 'Leonardo da Vinci': 'Italian_submarine_Leonardo_da_Vinci_(1939)', Schnorchel: 'Submarine_snorkel', snorkel: 'Submarine_snorkel', Squid: 'Squid_(weapon)', Seiran: 'Aichi_M6A_Seiran', 'S class': 'Soviet_S-class_submarine', 'M-class': 'Soviet_M-class_submarine', Gatun: 'Panama_Canal_locks' },
+        },
       ],
     },
     {

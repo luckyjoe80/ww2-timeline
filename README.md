@@ -39,6 +39,9 @@ Then visit <http://localhost:8417>. Deep links work: `#battle-of-midway/1942-06-
 |  | The Firebombing of Japan | `data/timelines/firebombing-of-japan.js` |
 |  | Okinawa | `data/timelines/okinawa.js` |
 | Technology | The Atomic Bomb | `data/timelines/atomic-bomb.js` |
+|  | Radar | `data/timelines/radar.js` |
+|  | Codes and Codebreaking | `data/timelines/codebreaking.js` |
+|  | Submarine Technology | `data/timelines/submarine-technology.js` |
 | Production | B-17 Production (atlas) | `data/atlases/b17-production.js` |
 | Medals | Medal of Honor (every World War II award) | `data/timelines/medal-of-honor.js` |
 | People | Isoroku Yamamoto | `data/timelines/yamamoto.js` |

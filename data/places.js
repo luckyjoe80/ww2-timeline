@@ -341,4 +341,28 @@ WW2.places = [
   ['Chicago', 41.8781, -87.6298, 6],
   ['Kokura', 33.8833, 130.8833, 8],
   ['Tinian', 15.0, 145.63, 7],
+  // ---- Codes and Codebreaking ----
+  ['Bletchley Park', 51.998, -0.741, 7],
+  ['Pyry', 52.137, 21.02, 9],
+  ['Arlington Hall', 38.868, -77.104, 10],
+  ['Kilindini', -4.055, 39.652, 8],
+  ['Dollis Hill', 51.564, -0.234, 10],
+  ['Fort Wingate', 35.468, -108.541, 9],
+  // ---- Submarine Technology ----
+  ['Manitowoc', 44.098, -87.667, 7],
+  ['Scapa Flow', 58.9, -3.05, 7],
+  ['Kåfjord', 69.94, 23.04, 8],
+  ['Fedje', 60.78, 4.75, 9],
+  ['Lisahally', 55.04, -7.27, 9],
+  ['Isle of May', 56.19, -2.55, 9],
+  ['Nanao Bay', 37.1, 136.95, 8],
+  ['Kahoʻolawe', 20.55, -156.6, 8],
+  // ---- Radar ----
+  ['Bawdsey', 51.993, 1.408, 9],
+  ['Orford Ness', 52.083, 1.567, 9],
+  ['Bruneval', 49.67, 0.16, 10],
+  ['Ventnor', 50.593, -1.207, 10],
+  ['Cap d’Antifer', 49.69, 0.16, 10],
+  ['Pelzerhaken', 54.09, 10.87, 10],
+  ['Katsuura', 35.152, 140.32, 9],
 ];

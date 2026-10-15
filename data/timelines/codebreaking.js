@@ -1,0 +1,304 @@
+// Timeline: Codes and Codebreaking (Technology).
+// The secret war of codes and ciphers, 1929–1946, across every theatre: the American Black
+// Chamber and Friedman's Signal Intelligence Service; the Polish Cipher Bureau's break into
+// Enigma and its gift to Britain and France at Pyry; Bletchley Park, Turing's bombe, Ultra in the
+// Mediterranean, North Africa, the Atlantic and the Arctic, Lorenz ("Tunny") and Colossus, and the
+// D-Day deception; the German B-Dienst and the leaking "Black Code"; the Soviet angle (Ultra
+// warnings, Cairncross, Venona); PURPLE and MAGIC, JN-25, Station HYPO, FRUMEL and Central Bureau,
+// Coral Sea, Midway, Yamamoto, the merchant-shipping codes and the Navajo code talkers; Allied
+// machines (Typex, SIGABA) and the Axis blind spots; ending with the Pearl Harbor hearings and the
+// UKUSA Agreement.
+// Checked against the English Wikipedia articles "Herbert Yardley", "Signal Intelligence Service",
+// "Cipher Bureau (Poland)", "Marian Rejewski", "Bomba (cryptography)", "Cryptanalysis of the
+// Enigma", "Bletchley Park", "Alan Turing", "Gordon Welchman", "Bombe", "Ultra (cryptography)", "Typex", "SIGABA",
+// "Type B Cipher Machine", "Genevieve Grotjan Feinstein", "William F. Friedman", "Frank Rowlett", "Magic (cryptography)",
+// "Japanese naval codes", "Japanese army and diplomatic codes", "Attack on Pearl Harbor", "Far East Combined Bureau", "Station CAST", "Station HYPO",
+// "Joseph Rochefort", "Fleet Radio Unit, Melbourne", "Central Bureau", "Operation Claymore",
+// "Battle of Cape Matapan", "Dilly Knox", "German submarine U-110 (1940)", "German submarine U-559",
+// "Hiroshi Ōshima", "B-Dienst", "Bonner Fellers", "Battle of Alam el Halfa", "Cryptanalysis of the
+// Lorenz cipher", "Colossus computer", "John Cairncross", "Battle of the North Cape",
+// "1943 BRUSA Agreement", "Arlington Hall", "Venona project", "Battle of the Bismarck Sea", "Operation Vengeance", "Code talker",
+// "Operation Fortitude", "Joint Committee on the Investigation of the Pearl Harbor Attack" and
+// "UKUSA Agreement" (October 2026).
+//
+// Times: Washington events use EST before 9 February 1942 and US war time after; Pearl Harbor uses
+// Hawaii time. Most European events, and others where the sources give no clock time, are
+// date-only, with sortTime used only to order events within a day. Event schema: see
+// data/timelines/attack-on-hawaii.js.
+
+(function () {
+  const P = {
+    kidbrooke: { name: 'RAF Kidbrooke, Greenwich', lat: 51.465, lng: 0.03 },
+    delhi: { name: 'Wireless Experimental Centre, Delhi', lat: 28.61, lng: 77.21 },
+    bismarckSea: { name: 'Bismarck Sea, off the Huon Gulf (approx.)', lat: -7.25, lng: 148.25 },
+    blackChamber: { name: 'New York City', lat: 40.7128, lng: -74.006 },
+    sis: { name: 'Signal Intelligence Service, Washington, D.C.', lat: 38.892, lng: -77.045 },
+    saxonPalace: { name: 'Saxon Palace (Polish General Staff), Warsaw', lat: 52.2405, lng: 21.0108 },
+    pyry: { name: 'Cipher Bureau, Kabaty Woods, Pyry', lat: 52.137, lng: 21.02 },
+    hongKong: { name: 'Hong Kong', lat: 22.302, lng: 114.177 },
+    bletchley: { name: 'Bletchley Park, Buckinghamshire', lat: 51.998, lng: -0.7411 },
+    romania: { name: 'Bucharest, Romania', lat: 44.4268, lng: 26.1025 },
+    bruno: { name: 'PC Bruno, outside Paris (approx.)', lat: 48.74, lng: 2.74 },
+    cadix: { name: 'Cadix, near Uzès, Vichy France', lat: 44.013, lng: 4.4205 },
+    tokyoGaimusho: { name: 'Foreign Ministry, Tokyo', lat: 35.674, lng: 139.75 },
+    tokyoNavy: { name: 'Navy Ministry, Tokyo', lat: 35.675, lng: 139.753 },
+    dunkirk: { name: 'Dunkirk', lat: 51.034, lng: 2.377 },
+    lofoten: { name: 'Lofoten Islands, Norway', lat: 68.1525, lng: 14.2 },
+    matapan: { name: 'Off Cape Matapan, Greece', lat: 35.35, lng: 22.0 },
+    u110: { name: 'North Atlantic, east of Cape Farewell', lat: 60.367, lng: -33.2 },
+    berlinEmbassy: { name: 'Japanese embassy, Berlin', lat: 52.509, lng: 13.352 },
+    bdienst: { name: 'B-Dienst, Tirpitzufer, Berlin', lat: 52.507, lng: 13.362 },
+    stateDept: { name: 'State Department, Washington, D.C.', lat: 38.8973, lng: -77.0393 },
+    corregidor: { name: 'Corregidor, Manila Bay', lat: 14.383, lng: 120.573 },
+    frumel: { name: 'Monterey Apartments, Queens Road, Melbourne', lat: -37.843, lng: 144.976 },
+    centralBureau: { name: 'Central Bureau, “Cranleigh”, South Yarra, Melbourne', lat: -37.835, lng: 144.983 },
+    fortWingate: { name: 'Fort Wingate, New Mexico', lat: 35.4678, lng: -108.5406 },
+    hypo: { name: 'Station HYPO, Pearl Harbor', lat: 21.355, lng: -157.96 },
+    cairo: { name: 'Cairo', lat: 30.044, lng: 31.235 },
+    tribune: { name: 'Tribune Tower, Chicago', lat: 41.8904, lng: -87.6233 },
+    alamHalfa: { name: 'Alam el Halfa Ridge, Egypt (approx.)', lat: 30.83, lng: 28.95 },
+    kilindini: { name: 'HMS Allidina, near Kilindini, Mombasa (approx.)', lat: -4.055, lng: 39.67 },
+    u559: { name: 'Eastern Mediterranean, north of the Nile Delta', lat: 32.5, lng: 33.0 },
+    arlingtonHall: { name: 'Arlington Hall, Arlington, Virginia', lat: 38.8676, lng: -77.1036 },
+    kursk: { name: 'Kursk salient', lat: 51.73, lng: 36.19 },
+    dayton: { name: 'National Cash Register, Dayton, Ohio', lat: 39.74, lng: -84.19 },
+    northCape: { name: 'Off the North Cape, Norway', lat: 72.517, lng: 28.25 },
+    sio: { name: 'Sio, Huon Peninsula, New Guinea (approx.)', lat: -6.12, lng: 147.35 },
+    brisbane: { name: 'Central Bureau, 21 Henry Street, Ascot, Brisbane', lat: -27.431, lng: 153.059 },
+    utah: { name: 'Utah Beach, Normandy', lat: 49.415, lng: -1.175 },
+    colmar: { name: 'Colmar, Alsace', lat: 48.079, lng: 7.358 },
+    iwo: { name: 'Iwo Jima', lat: 24.78, lng: 141.32 },
+    capitol: { name: 'United States Capitol, Washington, D.C.', lat: 38.8899, lng: -77.0091 },
+  };
+
+  const ev = (date, title, type, location, zoom, summary, extra = {}) => ({
+    id: extra.id || `${date}-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40)}`,
+    date, title, type, location, zoom, summary,
+    theater: extra.theater || 'Europe',
+    ...extra,
+  });
+  const at = (time, tz, extra = {}) => ({ time, tz, ...extra });
+  const ord = (sortTime, tz) => ({ sortTime, tz }); // order within the day only; no time shown
+  const AM = { theater: 'Americas' };
+  const PAC = { theater: 'Pacific' };
+  const ASIA = { theater: 'Asia' };
+
+  WW2.events['codebreaking'] = [
+    // ---------- Between the wars ----------
+    ev('1929-10-31', 'The Black Chamber is closed', 'intelligence', P.blackChamber, 10,
+      'Herbert Yardley’s “Black Chamber”, America’s first peacetime codebreaking office, has read the diplomatic codes of some 20 countries, including Japan’s during the Washington Naval Conference of 1921–22. The new Secretary of State, Henry Stimson, is appalled when shown its work and withdraws the funding, holding that gentlemen do not read each other’s mail. Left without work, Yardley tells the bureau’s story in a 1931 book, The American Black Chamber.',
+      { ...AM, ...ord('12:00', 'EST'), facts: [['Founded and led by', 'Herbert O. Yardley'], ['Codes solved', 'Those of about 20 nations']] }),
+    ev('1930-04-01', 'Friedman hires his first codebreakers', 'intelligence', P.sis, 11,
+      'William Friedman starts the Army’s new Signal Intelligence Service with three junior cryptanalysts, all former mathematics teachers with no experience of codes: Frank Rowlett, Abraham Sinkov and Solomon Kullback. On a tiny budget they compile the Army’s own codes and practise on foreign ones. In the mid-1930s they solve Japan’s first diplomatic cipher machine, which they call RED.',
+      { ...AM, ...ord('12:00', 'EST'), facts: [['Founded by', 'William F. Friedman'], ['First recruits', 'Rowlett, Sinkov, Kullback']] }),
+    ev('1932-12-10', 'Rejewski solves the Enigma wiring', 'intelligence', P.saxonPalace, 12,
+      'Marian Rejewski, one of three young mathematicians recruited by the Polish Cipher Bureau that September, has been attacking the German armed forces’ Enigma machine with the mathematics of permutations. In early December he is given Enigma keys for September and October 1932, bought by French intelligence from Hans-Thilo Schmidt, a clerk in the German cipher office. With them he works out the wiring of the rotors and reflector, and Poland begins reading Enigma messages.',
+      { ...ord('12:00', 'CEST'), approx: true, facts: [['Cryptologists', 'Marian Rejewski, Jerzy Różycki, Henryk Zygalski'], ['Source of keys', 'Hans-Thilo Schmidt (“Asché”), via Gustave Bertrand']] }),
+    ev('1935-03-15', 'Britain opens a listening post in Hong Kong', 'intelligence', P.hongKong, 10,
+      'The Government Code and Cypher School sets up the Far East Combined Bureau in Hong Kong to watch Japanese, Chinese and Soviet radio traffic. It moves to Singapore in August 1939 for fear of a Japanese attack, and will later work from Colombo and Kenya.',
+      { ...ASIA, approx: true, ...ord('12:00', 'HKT') }),
+    ev('1938-05-15', 'Sinclair buys Bletchley Park', 'intelligence', P.bletchley, 12,
+      'Admiral Sir Hugh Sinclair, head of the Secret Intelligence Service and of the Government Code and Cypher School, buys a Victorian mansion in Buckinghamshire as a wartime home for his codebreakers, paying the £6,000 himself when the government will not. The site is beside a railway junction on the line between Oxford and Cambridge, whose universities are expected to supply many of the recruits.',
+      { approx: true, ...ord('12:00', 'GMT') }),
+    ev('1938-06-15', 'Britain orders the Typex', 'service', P.kidbrooke, 11,
+      'The British government’s cipher-machine committee approves an order for 350 Typex Mark II machines. Developed for the RAF at Kidbrooke from the commercial Enigma, Typex has five rotors, each with several notches to turn its neighbour, removing a weakness of Enigma’s single fixed notches. It becomes the main British cipher machine of the war.',
+      { approx: true, ...ord('12:00', 'GMT') }),
+    ev('1938-11-15', 'The bomba', 'intelligence', P.pyry, 12,
+      'The Germans have changed their procedure so that each operator now chooses his own message settings. Rejewski answers with the bomba kryptologiczna, an electrically driven set of six Enigma replicas, and Henryk Zygalski with sheets of perforated card. By mid-November six bomby are working, and finding the daily key takes about two hours. Then, on 15 December, the Germans add two new rotors, multiplying the possible rotor orders tenfold, more than Polish resources can match.',
+      { approx: true, ...ord('12:00', 'CEST'), facts: [['Daily key found in', 'About two hours'], ['Rotor orders after 15 December', '60 instead of 6']] }),
+
+    // ---------- 1939 ----------
+    ev('1939-02-15', 'Japan’s diplomats switch to PURPLE', 'intelligence', P.tokyoGaimusho, 11,
+      'The Japanese Foreign Office begins sending its most secret traffic on a new machine, the Type B or “System 97”, replacing the RED machine. Instead of rotors it uses telephone stepping switches. The Americans, who learned of it in advance from decoded messages, call it PURPLE.',
+      { ...ASIA, approx: true, ...ord('12:00', 'JST') }),
+    ev('1939-06-01', 'The Japanese Navy introduces JN-25', 'intelligence', P.tokyoNavy, 11,
+      'The Imperial Japanese Navy brings in its new main operational system, later named JN-25 by Allied codebreakers. Each word becomes a five-figure group from a codebook, to which a second book of random “additives” is applied before transmission. New editions arrive from time to time, each demanding a fresh attack; British, Australian, Dutch and American codebreakers share the work.',
+      { ...PAC, ...ord('12:00', 'JST') }),
+    ev('1939-07-25', 'The Pyry meeting', 'intelligence', P.pyry, 12,
+      'With war weeks away, the Polish General Staff reveals six and a half years of secret success. At the Cipher Bureau’s centre in the Kabaty Woods, Gwido Langer, Maksymilian Ciężki and the three mathematicians brief Gustave Bertrand of France and, from Britain, Alastair Denniston, Dilly Knox and Humphrey Sandwith. Knox’s first question is how the keys are wired into the machine’s entry drum; told it is simply in alphabetical order, he is mortified. Each ally is promised a Polish-built Enigma replica.',
+      { ...ord('12:00', 'CEST'), facts: [['Polish', 'Langer, Ciężki, Mayer, Rejewski, Różycki, Zygalski'], ['French', 'Gustave Bertrand, Henri Braquenié'], ['British', 'Alastair Denniston, Dilly Knox, Humphrey Sandwith']] }),
+    ev('1939-08-15', 'The codebreakers move to Bletchley', 'intelligence', P.bletchley, 12,
+      'The first staff of the Government Code and Cypher School move into the mansion, with the naval, military and air sections on the ground floor. Wooden huts follow from late in the year. On 4 September, the day after Britain declares war, the Cambridge mathematicians Alan Turing and Gordon Welchman report for duty.',
+      { ...ord('12:00', 'GMT') }),
+    ev('1939-09-17', 'The Polish codebreakers escape', 'movement', P.romania, 8,
+      'As Germany overruns Poland and the Soviet Union invades from the east, the Cipher Bureau, having destroyed its equipment and papers, crosses into Romania. The three mathematicians slip away from the border, take the train to Bucharest and, brushed off at the British embassy, are helped by the French to reach Paris. Workers left behind are questioned by the Gestapo, but the secret holds.',
+      { ...ord('12:00', 'CEST') }),
+
+    // ---------- 1940 ----------
+    ev('1940-01-17', 'First wartime break at PC Bruno', 'intelligence', P.bruno, 10,
+      'Turing has brought the Poles, now working at a French intelligence station outside Paris, a full set of perforated sheets made at Bletchley from Polish designs. With them the Polish team breaks the first Enigma traffic of the war, messages from 28 October 1939. Until the fall of France the two centres share the work, about four in five keys being solved at Bletchley.',
+      { ...ord('12:00', 'CEST') }),
+    ev('1940-03-18', 'The first bombe, “Victory”', 'intelligence', P.bletchley, 12,
+      'The first British bombe, built by Harold Keen of the British Tabulating Machine Company to Turing’s design, is installed in Hut 1. It tests a guessed fragment of plain text, a “crib”, against the possible rotor settings far faster than any team of people. A second machine, fitted with Welchman’s “diagonal board”, which greatly increases its power, follows on 8 August. Run in time by hundreds of Wrens, the machines strike their operators as great metal bookcases.',
+      { ...ord('12:00', 'GMT'), facts: [['Designed by', 'Alan Turing, with Gordon Welchman’s diagonal board'], ['Built by', 'British Tabulating Machine Company, Letchworth']] }),
+    ev('1940-06-04', 'A Typex falls into German hands', 'intelligence', P.dunkirk, 11,
+      'Among the equipment abandoned in the British evacuation from Dunkirk is a Typex machine, without its rotors. The German naval codebreakers of the B-Dienst try to break it but give up after six weeks, when no more staff or time are granted. By then the Germans can read the other British military systems, but Typex remains secure.',
+      { approx: true, ...ord('12:00', 'CEST') }),
+    ev('1940-09-20', 'PURPLE is broken', 'intelligence', P.sis, 11,
+      'After eighteen months of work by Rowlett’s team under Friedman, Genevieve Grotjan spots the repeating cycles that reveal how PURPLE’s hardest part works. Two messages are read by 27 September, the day the Tripartite Pact between Germany, Italy and Japan is announced. Leo Rosen builds a working replica without ever having seen the Japanese machine. The decrypts become known as MAGIC. The strain sends Friedman to hospital early in 1941.',
+      { ...AM, ...ord('12:00', 'EST'), facts: [['Team', 'William Friedman, Frank Rowlett, Genevieve Grotjan, Leo Rosen'], ['Codename for decrypts', 'MAGIC']] }),
+
+    // ---------- 1941 ----------
+    ev('1941-01-15', 'A PURPLE machine for Britain', 'intelligence', P.bletchley, 12,
+      'Four American codebreakers, Abraham Sinkov and Leo Rosen of the Army and Prescott Currier and Robert Weeks of the Navy, bring Bletchley Park a PURPLE replica. In return they are shown how the British are breaking Enigma. A second PURPLE replica, first meant for Hawaii, later goes to Britain too.',
+      { approx: true, ...ord('12:00', 'GMT') }),
+    ev('1941-03-04', 'Enigma keys seized in the Lofotens', 'intelligence', P.lofoten, 9,
+      'A British and Norwegian commando raid on the Lofoten Islands destroys fish-oil factories and shipping, and from the armed trawler Krebs takes Enigma rotor wheels and the naval keys for February. The material lets Bletchley’s Hut 8 rebuild the German navy’s secret tables. Raids like this become a cover for “pinches” of cipher material.',
+      { ...ord('12:00', 'CEST') }),
+    ev('1941-03-28', 'Matapan: “Today’s the day minus three”', 'attack', P.matapan, 8,
+      'At Bletchley, Mavis Batey of Dilly Knox’s section reads Italian naval Enigma for the first time. A cryptic countdown is followed by a report that a battle fleet is sailing to attack British convoys to Greece. A reconnaissance plane is sent to provide an innocent explanation, and Admiral Cunningham’s fleet meets the Italians off Cape Matapan, sinking three heavy cruisers in a night action. Cunningham later visits Bletchley to thank the codebreakers.',
+      { ...ord('22:00', 'CEST'), facts: [['British commander', 'Adm. Sir Andrew Cunningham'], ['Italian losses', 'Heavy cruisers Zara, Fiume and Pola, and destroyers']] }),
+    ev('1941-05-09', 'U-110 is captured', 'intelligence', P.u110, 7,
+      'After attacking convoy OB 318, U-110 is forced to the surface by depth charges from Aubrietia and Broadway. As her crew abandons ship, a boarding party from the destroyer Bulldog under Sub-Lieutenant David Balme strips her of everything portable, including her Enigma machine and the code book for short signals. She is taken in tow, then deliberately sunk so that the capture cannot be discovered; it remains one of the war’s best-kept secrets.',
+      { ...ord('12:00', 'GMT'), facts: [['U-boat commander', 'Kptlt. Fritz-Julius Lemp (killed)'], ['Codename', 'Operation Primrose']],
+        wiki: { Bulldog: 'HMS_Bulldog_(H91)', Broadway: 'HMS_Broadway', Aubrietia: 'HMS_Aubrietia' } }),
+    ev('1941-06-03', 'Hitler confides in Ōshima', 'intelligence', P.berlinEmbassy, 12,
+      'Japan’s ambassador in Berlin, General Hiroshi Ōshima, is told by Hitler that war with Russia probably cannot be avoided, and he reports it to Tokyo in PURPLE. Ōshima’s long, meticulous reports on German thinking, nearly all read by the Allies, become what General Marshall calls the main basis of American knowledge of Hitler’s intentions. Ultra, too, reveals the preparations for the invasion of the Soviet Union; the warning is passed to Moscow, but Stalin refuses to believe it.',
+      { ...ord('12:00', 'CEST') }),
+    ev('1941-08-31', 'Tunny: one message sent twice', 'intelligence', P.bletchley, 12,
+      'A German operator sends the same long teleprinter message twice on identical machine settings, the second time with abbreviations and small changes. From the pair, John Tiltman recovers nearly 4,000 characters of key. Over the following months Bill Tutte, working only from that key, deduces the entire logical structure of the Lorenz cipher attachment, which Bletchley calls “Tunny”, without ever seeing one. It carries messages between the German High Command and its army groups.',
+      { approx: true, ...ord('12:00', 'GMT'), facts: [['Machine', 'Lorenz SZ 40/42 (“Tunny”)'], ['Diagnosed by', 'John Tiltman, Bill Tutte']] }),
+    ev('1941-10-01', 'Knox breaks the Abwehr Enigma', 'intelligence', P.bletchley, 12,
+      'Working in the Cottage beside the mansion, with no knowledge of the machine itself, Dilly Knox solves the Enigma used by the Abwehr, German military intelligence, using the hand method he calls “rodding”. A new section, Intelligence Services Knox, is formed to read it; by the end of the war it has issued 140,800 decrypts. They become vital to MI5’s Double-Cross System of turned German agents, and to the deception that will cover D-Day. Knox dies in 1943.',
+      { approx: true, ...ord('11:00', 'GMT'), facts: [['Decrypts issued by ISK', '140,800']] }),
+    ev('1941-10-15', 'The B-Dienst reads the convoy cipher', 'intelligence', P.bdienst, 12,
+      'The German navy’s codebreakers, the B-Dienst under Wilhelm Tranow, break British Naval Cypher No. 3, used for the North Atlantic convoys. Until mid-1943 it gives Admiral Dönitz’s U-boat command valuable intelligence on the convoys. Its success persuades the Germans that the Allies, for their part, cannot be reading naval Enigma.',
+      { approx: true, ...ord('12:00', 'CEST'), facts: [['Head of English section', 'Wilhelm Tranow'], ['Cipher broken', 'Naval Cypher No. 3']] }),
+    ev('1941-10-21', '“Action this day”', 'political', P.bletchley, 12,
+      'Short of typists and staff to turn their breaks into intelligence, Turing, Welchman, Hugh Alexander and Stuart Milner-Barry write directly to the Prime Minister, who visited Bletchley in September. Churchill minutes: “Action this day. Make sure they have all they want on extreme priority.” The codebreakers are never told of his reply, but their difficulties begin to vanish.',
+      { ...ord('12:00', 'GMT') }),
+    ev('1941-12-07', 'The fourteen-part message', 'intelligence', P.stateDept, 12,
+      'Tokyo has sent its embassy a 5,000-word PURPLE message in two blocks, ending the negotiations, to be handed over at 1 p.m. Washington time, 7:30 a.m. in Hawaii. American codebreakers have deciphered and translated most of it hours before the deadline. The embassy’s own staff are too slow decoding and typing their copy, and the envoys reach Cordell Hull more than an hour after the attack on Pearl Harbor has begun; Hull, who has read it already, must pretend to see it for the first time. Alarmed by the odd timing, officers in Washington try to warn Hawaii, but the warning arrives too late.',
+      { ...AM, ...ord('14:30', 'EST'), facts: [['Cipher', 'PURPLE (Type B)'], ['Due for delivery', '13:00 Washington time']],
+        link: { timeline: 'attack-on-hawaii', event: '1941-12-07-marshall-s-warning-arrives-hours-too-lat', label: 'See the late warning in The Attack on Hawaii' } }),
+
+    // ---------- 1942 ----------
+    ev('1942-01-24', 'The Axis cannot read American machines', 'intelligence', P.berlinEmbassy, 12,
+      'A Japanese naval attaché in Berlin reports to Tokyo that the joint German–Japanese codebreaking effort is going well against British naval systems but is making no headway against the Americans. The message is itself read by the Allies. The American SIGABA, devised by Friedman and Rowlett with rotors that step each other unpredictably, is never broken; in September 1944 the German army’s codebreakers formally give up on American five-letter traffic.',
+      { ...ord('12:00', 'CEST'), facts: [['Machine', 'SIGABA (Navy: ECM Mark II)'], ['Built', 'Just over 10,000']] }),
+    ev('1942-02-01', 'Shark: the Atlantic goes dark', 'intelligence', P.bletchley, 12,
+      'The German navy gives its Atlantic U-boats a four-rotor Enigma. Bletchley calls the new key “Shark”, and against it the three-rotor bombes would take fifty to a hundred times longer than usual. U-boat traffic becomes unreadable for most of the year, just as the U-boats find easy targets off the American coast, which helps to disguise from the Germans how much they had been giving away.',
+      { ...ord('12:00', 'GMT'), facts: [['Machine', 'M4 Enigma (four rotors)'], ['Blackout', 'February to December 1942']] }),
+    ev('1942-04-08', 'Station CAST escapes Corregidor', 'movement', P.corregidor, 11,
+      'With Bataan about to fall, the U.S. Navy’s codebreaking unit in the Philippines, Lieutenant Rudolph Fabian’s Station CAST, is taken off Corregidor by submarine. It joins Australian and British codebreakers in Melbourne to form the Fleet Radio Unit, Melbourne (FRUMEL), one of two Allied naval codebreaking centres in the Pacific with HYPO in Hawaii.',
+      { ...PAC, ...ord('12:00', 'PHT') }),
+    ev('1942-04-09', 'FRUMEL reads “RZP”', 'intelligence', P.frumel, 11,
+      'A decrypted message shows that the Japanese campaign against Port Moresby is to be an invasion. Fabian convinces a sceptical General MacArthur by showing him the intercept itself, and a transport bound for New Caledonia is sent to Port Moresby instead. The warning leads to the Battle of the Coral Sea.',
+      { ...PAC, ...ord('12:00', 'PNG'),
+        link: { timeline: 'coral-sea', event: '1942-04-09-code-breakers-read-rzp', label: 'See this in The Battle of the Coral Sea' } }),
+    ev('1942-04-15', 'Central Bureau is founded', 'intelligence', P.centralBureau, 12,
+      'MacArthur sets up his own joint American–Australian codebreaking organisation in a mansion in South Yarra, under his signals officer, Brigadier General Spencer Akin, to attack Japanese army and air traffic. It moves to Brisbane in September. Abraham Sinkov, one of Friedman’s first recruits, becomes one of its leaders and works on the high-level Japanese army codes.',
+      { ...PAC, ...ord('12:00', 'PNG'), facts: [['Commander', 'Brig. Gen. Spencer B. Akin'], ['Moved to Brisbane', 'September 1942']] }),
+    ev('1942-05-04', 'The first Navajo code talkers', 'service', P.fortWingate, 10,
+      'Philip Johnston, raised on the Navajo reservation, has shown the Marines that Navajo speakers can pass a three-line message in 20 seconds against half an hour by machine. Twenty-nine Navajo men are sworn in at Fort Wingate as Platoon 382. At Camp Pendleton they build a code of Navajo words for military terms, a buzzard for a bomber, an iron fish for a submarine, which no outsider can follow. It is never broken.',
+      { ...AM, ...ord('12:00', 'MWT'), facts: [['First recruits', '29 (Platoon 382)'], ['Proposed by', 'Philip Johnston']] }),
+    ev('1942-05-20', 'HYPO finds “AF”', 'intelligence', P.hypo, 12,
+      'Commander Joseph Rochefort’s Station HYPO, working long days in a basement at Pearl Harbor, is sure that the next Japanese target, “AF”, is Midway; Washington doubts it. At Jasper Holmes’s suggestion Midway radios in clear that its fresh-water plant has failed, and the Japanese duly report that AF is short of water. HYPO then works out the date of the attack, letting Nimitz set his carrier ambush.',
+      { ...PAC, approx: true, ...ord('12:00', 'HST'),
+        link: { timeline: 'battle-of-midway', event: '1942-05-20-af-is-short-on-water', label: 'See the ruse in The Battle of Midway' } }),
+    ev('1942-06-07', 'The Chicago Tribune lets it slip', 'home-front', P.tribune, 12,
+      'Days after Midway, the Chicago Tribune runs a story by its correspondent Stanley Johnston implying that the Navy knew the Japanese plans in advance, with details of the Japanese fleet, drawn from a secret dispatch shown to him by an officer of the Lexington. The government considers prosecution, then drops it to avoid drawing attention. The Japanese never notice. When they change codebooks and call signs in August, they assume the Allies have used traffic analysis or a captured codebook, not that the code has been broken.',
+      { ...AM, ...ord('12:00', 'CWT'),
+        link: { timeline: 'pearl-harbor-to-guadalcanal', event: '1942-06-04-four-japanese-carriers-sunk-at-midway', label: 'See Midway in From Pearl Harbor to Guadalcanal' } }),
+    ev('1942-06-29', 'Rommel loses “the good source”', 'intelligence', P.cairo, 11,
+      'For more than six months the American military attaché in Cairo, Colonel Bonner Fellers, has radioed detailed reports of British strength and plans to Washington in the State Department’s “Black Code”, which the Italians have stolen and the Germans have broken. Rommel calls him “the good source”; the leaks help the Axis to its victories at Gazala and Tobruk and against the June convoys to Malta. Ultra tips off the British, and Fellers changes codes.',
+      { ...ord('12:00', 'CEST'), facts: [['Leaking code', 'State Department “Black Code”'], ['Read by', 'Italian SIM and German codebreakers']] }),
+    ev('1942-08-30', 'Ultra at Alam el Halfa', 'attack', P.alamHalfa, 10,
+      'Montgomery, newly in command of the Eighth Army, knows from Ultra where and how Rommel means to attack, and waits for him with tanks dug in on Alam el Halfa Ridge. Short of fuel, since more than half his supply ships from Italy have been sunk, many of them found with the help of decrypts, Rommel withdraws within a week. He blames British air power, never suspecting his signals.',
+      { ...ord('22:00', 'CEST') }),
+    ev('1942-09-15', 'Kilindini breaks the merchant-ship code', 'intelligence', P.kilindini, 11,
+      'At the British naval codebreaking station near Mombasa, John MacInnes and Brian Townend exploit a Japanese mistake, a message sent twice, to break JN-40, the merchant-shipping cipher. By November they are reading it as it arrives, and soon two more shipping systems besides. Japanese convoys can now be tracked and intercepted. In April 1943 Sergeant Joe Richard at Central Bureau breaks the Japanese army’s “2468” water-transport code too. By August 1945 Japan’s merchant fleet has lost 90 per cent of its ships.',
+      { ...ASIA, approx: true, ...ord('12:00', 'GMT'),
+        link: { timeline: 'pacific-submarines', event: '1943-01-15-u-s-code-breakers-break-the-maru-code', label: 'See the “maru code” in Submarine Operations' } }),
+    ev('1942-10-30', 'U-559: two men drown for the weather code', 'loss', P.u559, 8,
+      'After 16 hours of depth-charging, U-559 surfaces near the destroyer Petard north of the Nile Delta, and her crew abandon her. Lieutenant Anthony Fasson, Able Seaman Colin Grazier and the 16-year-old canteen assistant Tommy Brown board her and pass out her secret papers, including the Enigma settings and the new weather short-signal book. Fasson and Grazier are still inside when she sinks. The books give Bletchley the cribs it needs for Shark.',
+      { ...ord('22:00', 'CEST'), facts: [['Awards', 'George Cross (Fasson, Grazier, posthumous); George Medal (Brown)']], wiki: { Petard: 'HMS_Petard' } }),
+    ev('1942-11-09', 'The Poles flee Cadix', 'movement', P.cadix, 10,
+      'Since 1940 the Polish team has worked secretly in unoccupied southern France, decrypting thousands of German and Soviet messages. Hearing of the Allied landings in North Africa, Gustave Bertrand evacuates the station; the Germans occupy it on the 12th. Rejewski and Zygalski escape through Spain, where they are imprisoned, and Portugal to Britain, where they are put to work on low-grade German ciphers.',
+      { ...ord('12:00', 'CEST') }),
+    ev('1942-12-13', 'Shark is broken', 'intelligence', P.bletchley, 12,
+      'With the U-559 weather book, Hut 8 finds that the four-rotor machine can be attacked as a three-rotor one when the extra rotor is in its neutral position. Regular reading of U-boat traffic resumes in December, and from now to the end of the war convoys are steered around the wolf packs and hunters sent after the U-boats.',
+      { approx: true, ...ord('12:00', 'GMT') }),
+
+    // ---------- 1943 ----------
+    ev('1943-02-01', 'Venona begins', 'intelligence', P.arlingtonHall, 12,
+      'At Arlington Hall, the Army codebreakers’ new home, Gene Grabeel is set to work on stacks of intercepted Soviet diplomatic cables, ordered by an officer who fears Stalin may make a separate peace. The Soviets use one-time pads, unbreakable if used properly, but wartime pressure has led them to print duplicate pages. The first break comes only in December 1946; the messages will expose Soviet spies in the Manhattan Project.',
+      { ...AM, ...ord('12:00', 'EWT'), facts: [['Started by', 'Gene Grabeel'], ['First break', 'Meredith Gardner, 20 December 1946']] }),
+    ev('1943-03-03', 'Ultra over the Bismarck Sea', 'attack', P.bismarckSea, 8,
+      'In February naval codebreakers in Melbourne and Washington decrypt messages revealing a Japanese plan to land troops at Lae, and the approximate arrival date. General Kenney’s airmen are waiting. In two days of attacks, using new techniques such as skip bombing, all eight transports and four destroyers are sunk, and only about 1,200 of 6,900 troops reach Lae. Japan never again tries to reinforce Lae by sea.',
+      { ...PAC, ...ord('10:00', 'PNG'), facts: [['Japanese losses', '8 transports, 4 destroyers'], ['Troops reaching Lae', 'About 1,200 of 6,900']],
+        link: { timeline: 'road-to-tokyo-bay', event: '1943-03-03-battle-of-the-bismarck-sea', label: 'See this in The Road to Tokyo Bay' } }),
+    ev('1943-04-14', 'Yamamoto’s itinerary', 'intelligence', P.hypo, 12,
+      'A message in a new edition of JN-25, picked up by three Allied stations, gives the exact times of Admiral Yamamoto’s inspection flight to bases near Bougainville. Nimitz approves an attempt to intercept him. To protect the source, the pilots are told the tip-off came from Australian coastwatchers.',
+      { ...PAC, approx: true, ...ord('12:00', 'HST'),
+        link: { timeline: 'yamamoto', event: '1943-04-14-u-s-code-breakers-read-his-itinerary', label: 'See this in Yamamoto' } }),
+    ev('1943-04-25', 'Tunny warns of Kursk', 'intelligence', P.kursk, 7,
+      'A Tunny decrypt of a report from Army Group South lets British analysts work out the northern and southern thrusts of Operation Citadel, the coming German offensive at Kursk, and a disguised summary is passed to Moscow. John Cairncross, a Soviet agent in Bletchley’s Hut 3, smuggles out the raw decrypts as well, proving to the Soviets that the British are reading German ciphers. Britain never tells its ally about Bletchley officially.',
+      { ...ord('12:00', 'CEST'), facts: [['Soviet agent', 'John Cairncross (“Liszt”)']] }),
+    ev('1943-05-03', 'American bombes', 'intelligence', P.dayton, 11,
+      'The first of the U.S. Navy’s bombes, engineered by Joseph Desch at National Cash Register, is tested in Dayton. Turing, visiting in December, had shown that 96 machines would be enough rather than 336. Faster than the British machines, about 121 are built, and they take over much of the Enigma work.',
+      { ...AM, ...ord('12:00', 'EWT') }),
+    ev('1943-05-17', 'The BRUSA Agreement', 'political', P.bletchley, 12,
+      'After a visit by Friedman and two Army intelligence officers, Britain and the United States sign a formal agreement to share codebreaking work and intelligence. American cryptanalysts join Bletchley’s Hut 3.',
+      { ...ord('12:00', 'GMT') }),
+    ev('1943-06-10', 'The B-Dienst loses the convoys', 'intelligence', P.bdienst, 12,
+      'The Admiralty replaces the compromised convoy cipher with Naval Cypher No. 5, and the B-Dienst’s flow of convoy intelligence dries up. In November an air raid on Berlin destroys many of its records.',
+      { ...ord('12:00', 'CEST') }),
+    ev('1943-12-26', 'The North Cape', 'attack', P.northCape, 7,
+      'Decrypted German naval signals tell Admiral Sir Bruce Fraser that the battleship Scharnhorst has sailed to attack an Arctic convoy bound for Russia. In a winter storm and darkness off northern Norway, Duke of York and her escorts trap and sink her. Only 36 of her nearly 2,000 crew are saved.',
+      { ...ord('19:45', 'CEST'), facts: [['Scharnhorst’s crew', '1,968; 36 rescued']], wiki: { 'Duke of York': 'HMS_Duke_of_York_(17)' } }),
+
+    // ---------- 1944 ----------
+    ev('1944-01-20', 'The trunk at Sio', 'intelligence', P.sio, 10,
+      'A buried trunk left behind by the retreating Japanese 20th Division is found, containing the codebooks of a main Japanese army code. At Central Bureau in Brisbane the soaked pages are dried, and so many messages are read, about 2,000 a day, that navy translators have to be borrowed. Believing the books destroyed, the Japanese do not change the code.',
+      { ...PAC, approx: true, ...ord('12:00', 'PNG') }),
+    ev('1944-02-05', 'Colossus goes to work', 'intelligence', P.bletchley, 12,
+      'Tommy Flowers, a Post Office engineer at Dollis Hill, has built an electronic machine with 1,600 valves to run Max Newman’s statistical attack on Tunny, despite doubts that so many valves could work reliably. Delivered on 18 January, Colossus attacks its first message. It is regarded as the first programmable electronic digital computer.',
+      { ...ord('12:00', 'GMT'), facts: [['Designer', 'Tommy Flowers'], ['Valves', '1,600 (Mark 1); 2,400 (Mark 2)']] }),
+    ev('1944-06-01', 'Colossus Mark 2, just in time', 'intelligence', P.bletchley, 12,
+      'The first Mark 2 Colossus, five times faster, begins work at eight in the morning, days before the invasion of Normandy. Decrypts from Tunny and Enigma, including Rommel’s long report on the Atlantic Wall, show that the Germans have swallowed the deception plan Fortitude, with its phantom armies, and expect the main landing in the Pas de Calais.',
+      { ...ord('08:00', 'CEST'), facts: [['Deception plans', 'Operation Bodyguard, Operation Fortitude']] }),
+    ev('1944-06-06', 'Comanche code talkers land at Utah Beach', 'service', P.utah, 11,
+      'Fourteen Comanche soldiers of the U.S. 4th Infantry Division’s signal company come ashore on D-Day, using a vocabulary of about 250 code terms in their language: a tank is a turtle, a bomber a pregnant bird. Even after the landings, decrypts show the Germans still believe Normandy to be a feint.',
+      { ...ord('12:00', 'CEST') }),
+    ev('1944-11-15', 'Delhi reads the Burma air raids', 'intelligence', P.delhi, 10,
+      'The Japanese army’s air-to-ground code, which the British call BULBUL, was first broken at Bletchley; the work has moved to the Wireless Experimental Centre in Delhi, helped by a codebook and additive sheets from a Japanese aircraft shot down over India. By November many messages announcing air raids from the airfields of Burma are being intercepted, read and passed to the defences within ninety minutes.',
+      { ...ASIA, approx: true, ...ord('12:00', 'IND') }),
+
+    // ---------- 1945 ----------
+    ev('1945-02-03', 'A SIGABA goes missing', 'service', P.colmar, 12,
+      'In newly liberated Colmar, a truck carrying a SIGABA in three safes is stolen while its guards are elsewhere. Eisenhower orders an all-out search; the safes are found in a nearby river six weeks later.',
+      { ...ord('12:00', 'CEST') }),
+    ev('1945-02-19', 'Navajo voices on Iwo Jima', 'service', P.iwo, 11,
+      'In the first two days ashore, six Navajo code talkers of the 5th Marine Division, working round the clock, send and receive more than 800 messages without an error. The division’s signal officer, Major Howard Connor, later says: “Were it not for the Navajos, the Marines would never have taken Iwo Jima.”',
+      { ...PAC, ...ord('12:00', 'ChST'),
+        link: { timeline: 'iwo-jima', event: '1945-02-19-the-first-wave-lands', label: 'See the landing in Iwo Jima' } }),
+    ev('1945-08-14', 'Japan’s acceptance is decrypted', 'intelligence', P.arlingtonHall, 12,
+      'At Arlington Hall, Virginia Dare Aderholdt, working under Frank Rowlett, decrypts the Japanese government’s message accepting the Allied terms. Rowlett, who led the attack on PURPLE in 1940, now heads the Army codebreakers’ Intelligence Division.',
+      { ...AM, ...ord('12:00', 'EWT'),
+        link: { timeline: 'road-to-tokyo-bay', event: '1945-08-15-the-emperor-s-broadcast', label: 'See the surrender in The Road to Tokyo Bay' } }),
+    ev('1945-11-15', 'The secret comes out', 'political', P.capitol, 12,
+      'Congress’s Pearl Harbor Committee begins hearing witnesses. Its inquiries into who knew what before the attack make public that PURPLE had been read, and the Japanese, who have gone on using the system under the American occupation, learn for the first time that it was broken. The far larger secrets of Ultra and Bletchley Park will be kept for nearly thirty years.',
+      { ...AM, approx: true, ...ord('12:00', 'EST') }),
+    ev('1946-03-05', 'The UKUSA Agreement', 'political', P.bletchley, 10,
+      'Britain and the United States formalise their wartime partnership in signals intelligence in a secret agreement, later extended to Canada, Australia and New Zealand. The codebreakers, now the Government Communications Headquarters, leave Bletchley Park for Eastcote. Turing is made an OBE, but his work, like that of all Bletchley’s staff, stays secret until the 1970s.',
+      { ...ord('12:00', 'GMT') }),
+  ];
+
+  // ---------- Shot list ----------
+  const pt = (place) => [place.lat, place.lng];
+  const SHOTS = {
+    'The Pyry meeting': { shot: 'tight' },
+    'Matapan: “Today’s the day minus three”': { shot: 'wide', frame: [pt(P.bletchley)] },
+    'U-110 is captured': { shot: 'wide', transition: 'pull-back' },
+    'The fourteen-part message': { shot: 'wide', frame: [pt(P.hypo)] },
+    'Ultra over the Bismarck Sea': { shot: 'wide', frame: [pt(P.frumel)] },
+    'The North Cape': { shot: 'wide', transition: 'pull-back', frame: [pt(P.bletchley)] },
+  };
+  const events = WW2.events['codebreaking'];
+  for (const [title, shot] of Object.entries(SHOTS)) {
+    const e = events.find((x) => x.title === title);
+    if (!e) throw new Error(`codebreaking shot list: no event titled "${title}"`);
+    Object.assign(e, shot);
+  }
+})();
