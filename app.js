@@ -2458,13 +2458,14 @@
         lastLabel = x;
       }
     });
+    // Arrows only between neighbouring events of one story, straight along its lane; the other
+    // connections are listed in the panel ("Because of", "Led to") and still light up the chain.
     for (const e of evs) {
       for (const id of e.after || []) {
         const from = tl.byId.get(id);
-        const x1 = gx(from.index), y1 = gy(from), x2 = gx(e.index), y2 = gy(e);
-        // Gentle curves: the bend spreads over the whole distance, at least two steps wide.
-        const dx = Math.max(step * 2, (x2 - x1) * 0.55);
-        content += `<path class="edge" data-from="${esc(from.id)}" data-to="${esc(e.id)}" d="M${x1 + r},${y1} C${x1 + dx},${y1} ${x2 - dx},${y2} ${x2 - r - 3},${y2}" marker-end="url(#arrow)"/>`;
+        if (from.story !== e.story || evs.some((m) => m.story === e.story && m.index > from.index && m.index < e.index)) continue;
+        const x1 = gx(from.index), x2 = gx(e.index), y = gy(e);
+        content += `<path class="edge" data-from="${esc(from.id)}" data-to="${esc(e.id)}" d="M${x1 + r},${y} L${x2 - r - 3},${y}" marker-end="url(#arrow)"/>`;
       }
     }
     for (const e of evs) {
